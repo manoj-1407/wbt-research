@@ -11,6 +11,9 @@ on:
     paths:
       - ".github/workflows/qemu-wbt-smoke-test.yml"
 
+permissions:
+  contents: write
+
 jobs:
   qemu-smoke-test:
     name: "QEMU Smoke Test: Boot, WBT sysfs, and Tracepoints"
@@ -207,6 +210,39 @@ jobs:
           grep "Target disk detected" patched_qemu.log || true
           grep "wbt_lat_usec" patched_qemu.log || true
           grep -E 'wbt_timer|wbt_step|wbt_stat' patched_qemu.log || echo "Notice: No WBT trace events emitted yet"
+
+      - name: Display and record smoke test results
+        run: |
+          mkdir -p benchmarks/smoke_test
+          cp baseline_qemu.log benchmarks/smoke_test/
+          cp patched_qemu.log benchmarks/smoke_test/
+
+          echo "## Baseline Kernel QEMU Smoke Test Log" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          cat baseline_qemu.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## Patched Kernel QEMU Smoke Test Log" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          cat patched_qemu.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "=================== BASELINE LOG ==================="
+          cat baseline_qemu.log
+          echo "=================== PATCHED LOG ==================="
+          cat patched_qemu.log
+
+      - name: Commit smoke test logs to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add benchmarks/smoke_test/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(ci): record smoke test boot logs from QEMU [skip ci]"
+            git push origin main
+          fi
 
       - name: Upload QEMU smoke test logs
         uses: actions/upload-artifact@v4
