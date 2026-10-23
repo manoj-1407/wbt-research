@@ -6,10 +6,7 @@ on:
       build_run_id:
         description: "Run ID of build-wbt-kernels to fetch artifacts from"
         required: true
-        default: "39960651595"
-  push:
-    paths:
-      - ".github/workflows/qemu-wbt-smoke-test.yml"
+        default: "39987714631"
 
 permissions:
   contents: write
@@ -49,7 +46,7 @@ jobs:
         with:
           name: wbt-baseline-a07f9ea8a
           path: baseline_artifact
-          run-id: ${{ github.event.inputs.build_run_id || '39960651595' }}
+          run-id: ${{ github.event.inputs.build_run_id || '39987714631' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
 
@@ -58,7 +55,7 @@ jobs:
         with:
           name: wbt-patched-a07f9ea8a
           path: patched_artifact
-          run-id: ${{ github.event.inputs.build_run_id || '39960651595' }}
+          run-id: ${{ github.event.inputs.build_run_id || '39987714631' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
 
