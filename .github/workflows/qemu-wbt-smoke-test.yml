@@ -18,6 +18,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Check out research repo
+        uses: actions/checkout@v4
+
       - name: Check runner capabilities & virtualization
         run: |
           echo "=== CPU Info ==="
@@ -37,15 +40,24 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             qemu-system-x86 busybox-static cpio
 
-      - name: Download compiled kernel artifacts
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUN_ID: ${{ github.event.inputs.build_run_id || '39960651595' }}
+      - name: Download Baseline Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wbt-baseline-a07f9ea8a
+          path: baseline_artifact
+          run-id: ${{ github.event.inputs.build_run_id || '39960651595' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Patched Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wbt-patched-a07f9ea8a
+          path: patched_artifact
+          run-id: ${{ github.event.inputs.build_run_id || '39960651595' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Inspect downloaded kernel binaries
         run: |
-          echo "Downloading artifacts from run $RUN_ID..."
-          gh run download "$RUN_ID" -n wbt-baseline-a07f9ea8a -D baseline_artifact
-          gh run download "$RUN_ID" -n wbt-patched-a07f9ea8a -D patched_artifact
-          
           echo "Baseline bzImage:"
           ls -lh baseline_artifact/kernel-src/arch/x86/boot/bzImage
           echo "Patched bzImage:"
