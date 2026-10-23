@@ -168,7 +168,7 @@ jobs:
 
       - name: Create virtual test disk
         run: |
-          qemu-img create -f raw test_disk.img 128M
+          dd if=/dev/zero of=test_disk.img bs=1M count=128 status=progress
 
       - name: Run Smoke Test — Baseline Kernel
         run: |
