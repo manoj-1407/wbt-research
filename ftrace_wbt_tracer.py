@@ -54,6 +54,17 @@ guard_pat = re.compile(
     r"(?:.*?(\d+\.\d+):)?.*?wbt_guard:\s+(.+?):\s+step=(-?\d+),\s+r_samples=(\d+),\s+r_min=(\d+)us,\s+target=(\d+)us,\s+guard_fired=(\d+),\s+action=(\w+)"
 )
 
+# Workload-validity evidence emitted by the guest harness (not tracepoints).
+# These lines exist so that a "no WBT events" result can be distinguished from
+# "the workload never reached the block layer" without guessing.
+writer_open_pat = re.compile(r"\[WRITER\]\s+dev=(\S+)\s+mode=(\S+)\s+chunk=(\S+).*?sleep=(\S+)")
+writer_res_pat = re.compile(
+    r"\[WRITER_RESULT\]\s+OPS=(\d+)\s+BYTES=(\d+)\s+ITERS=(\d+)\s+ERR=(\d+)\s+FSYNC_ERR=(\d+)"
+)
+probe_open_pat = re.compile(r"\[PROBE\]\s+dev=(\S+)\s+open_mode=(\S+)")
+blkdelta_pat = re.compile(r"\[BLKSTAT-DELTA\]\s+read_sectors=(\d+)\s+write_sectors=(\d+)")
+warn_pat = re.compile(r"\[!\]\s+WARNING:.*")
+
 
 def write_trace_node(path_rel: str, val: str):
     p = os.path.join(TRACE_BASE, path_rel)
@@ -99,6 +110,11 @@ def analyze_wbt_trace(trace_file: str):
     lat_events = []
     guard_events = []
     status_counts = Counter()
+    writer_opens = []
+    writer_results = []
+    probe_opens = []
+    blk_deltas = []
+    warnings = []
 
     with open(trace_file, "r", errors="ignore") as f:
         for line in f:
@@ -167,6 +183,81 @@ def analyze_wbt_trace(trace_file: str):
                         "dev": dev.strip(),
                         "lat_us": int(lat_us),
                     })
+            elif "[WRITER_RESULT]" in line:
+                m = writer_res_pat.search(line)
+                if m:
+                    ops, nbytes, iters, errs, sync_errs = m.groups()
+                    writer_results.append({
+                        "ops": int(ops), "bytes": int(nbytes), "iters": int(iters),
+                        "errs": int(errs), "sync_errs": int(sync_errs),
+                    })
+            elif "[WRITER]" in line:
+                m = writer_open_pat.search(line)
+                if m:
+                    dev, mode, chunk, sleep_ms = m.groups()
+                    writer_opens.append({"dev": dev, "mode": mode, "chunk": chunk, "sleep": sleep_ms})
+            elif "[PROBE]" in line:
+                m = probe_open_pat.search(line)
+                if m:
+                    dev, mode = m.groups()
+                    probe_opens.append({"dev": dev, "mode": mode})
+            elif "[BLKSTAT-DELTA]" in line:
+                m = blkdelta_pat.search(line)
+                if m:
+                    rd, wr = m.groups()
+                    blk_deltas.append({"read_sectors": int(rd), "write_sectors": int(wr)})
+            elif "[!]" in line and "WARNING" in line:
+                m = warn_pat.search(line)
+                if m:
+                    warnings.append(m.group(0).strip())
+
+    # ------------------------------------------------------------------
+    # Workload validity: prove the workload actually reached the block
+    # layer, so that an empty WBT trace can be attributed correctly.
+    # ------------------------------------------------------------------
+    print("\n--- Workload Validity (block-layer evidence) ---")
+    if writer_opens:
+        for wo in writer_opens:
+            print(f"  writer open : dev={wo['dev']} mode={wo['mode']} chunk={wo['chunk']} sleep={wo['sleep']}")
+        if not all("BUFFERED" in wo["mode"].upper() for wo in writer_opens):
+            print("  [!] at least one writer is NOT buffered - WBT would not track it")
+        else:
+            print("  [+] all writers report mode=BUFFERED (WBT-trackable) - as required")
+    else:
+        print("  [!] no [WRITER] open lines found - the writer binary did not run")
+
+    if writer_results:
+        tot_ops = sum(r["ops"] for r in writer_results)
+        tot_bytes = sum(r["bytes"] for r in writer_results)
+        tot_err = sum(r["errs"] for r in writer_results)
+        tot_syncerr = sum(r["sync_errs"] for r in writer_results)
+        print(f"  writers ran : {len(writer_results)} process(es), "
+              f"OPS={tot_ops} BYTES={tot_bytes} ERR={tot_err} FSYNC_ERR={tot_syncerr}")
+        if tot_err or tot_syncerr:
+            print("  [!] writer reported errors - writeback pressure may be under-delivered")
+    else:
+        print("  [!] no [WRITER_RESULT] lines found - writers produced no measurable work")
+
+    if probe_opens:
+        modes = sorted({p["mode"] for p in probe_opens})
+        print(f"  readers ran : {len(probe_opens)} process(es), open_mode={modes}")
+        if any("BUFFERED" in m.upper() for m in modes):
+            print("  [!] at least one reader fell back to BUFFERED reads (page cache)")
+    else:
+        print("  [!] no [PROBE] open lines found - the read probe did not run")
+
+    if blk_deltas:
+        for d in blk_deltas:
+            print(f"  blk delta   : read_sectors={d['read_sectors']} write_sectors={d['write_sectors']}")
+        if all(d["write_sectors"] == 0 for d in blk_deltas):
+            print("  [!] zero write sectors reached the block layer - INVALID RUN")
+        if all(d["read_sectors"] == 0 for d in blk_deltas):
+            print("  [!] zero read sectors reached the block layer - INVALID RUN")
+    else:
+        print("  [!] no [BLKSTAT-DELTA] line found - cannot confirm block-layer traffic")
+
+    for w in warnings:
+        print(f"  {w}")
 
     total_windows = len(timer_events)
     print(f"Total WBT Timer Windows: {total_windows}")

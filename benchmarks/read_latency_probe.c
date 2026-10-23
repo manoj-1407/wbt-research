@@ -52,7 +52,7 @@ static inline uint64_t time_diff_us(struct timespec *start, struct timespec *end
 
 int main(int argc, char *argv[]) {
     if (argc < 4) {
-        fprintf(stderr, "Usage: %s <device> <duration_sec> <region_start_mb> <region_size_mb>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <device> <duration_sec> <region_start_mb> <region_size_mb> [pace_us]\n", argv[0]);
         fprintf(stderr, "Example: %s /dev/sda 15 64 64\n", argv[0]);
         return 1;
     }
@@ -61,20 +61,39 @@ int main(int argc, char *argv[]) {
     int duration_sec = atoi(argv[2]);
     uint64_t start_offset = (uint64_t)atoi(argv[3]) * 1024ULL * 1024ULL;
     uint64_t region_size = (uint64_t)atoi(argv[4]) * 1024ULL * 1024ULL;
+    int pace_us = (argc >= 6) ? atoi(argv[5]) : 1000;
 
     int open_flags = O_RDONLY;
+    bool direct_ok = false;
+    int direct_errno = 0;
 #ifdef __linux__
     open_flags |= O_DIRECT;
 #endif
 
     int fd = open(dev_path, open_flags);
-    if (fd < 0) {
+    if (fd >= 0) {
+        direct_ok = true;
+    } else {
+        direct_errno = errno;
         fd = open(dev_path, O_RDONLY);
         if (fd < 0) {
             perror("Failed to open device");
             return 1;
         }
     }
+
+    /*
+     * Report the real open mode. A silent fallback to buffered reads would
+     * serve the probes out of the page cache, so the block layer would never
+     * see them, cb->stat[READ] would stay empty, and the guard's input would
+     * be absent rather than measured.
+     */
+    if (direct_ok)
+        printf("[PROBE] dev=%s open_mode=O_DIRECT pace_us=%d\n", dev_path, pace_us);
+    else
+        printf("[PROBE] dev=%s open_mode=BUFFERED (O_DIRECT failed: %s) pace_us=%d\n",
+               dev_path, strerror(direct_errno), pace_us);
+    fflush(stdout);
 
     void *buf = malloc(BLOCK_SIZE * 2);
     if (!buf) {
@@ -94,7 +113,12 @@ int main(int argc, char *argv[]) {
     uint64_t num_blocks = (region_size - BLOCK_SIZE) / BLOCK_SIZE;
     if (num_blocks == 0) num_blocks = 1;
 
-    unsigned int seed = 12345;
+    /*
+     * Seed per process. rand() without srand() behaves exactly like
+     * srand(1), so every concurrent reader would walk an identical block
+     * sequence in lockstep instead of issuing independent random reads.
+     */
+    srand((unsigned int)(getpid() ^ (unsigned int)time(NULL)));
 
     while (sample_count < MAX_SAMPLES) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
@@ -117,8 +141,9 @@ int main(int argc, char *argv[]) {
             sum_us += lat_us;
         }
 
-        /* 1ms throttle between probes to simulate realistic latency-sensitive requests */
-        usleep(1000);
+        /* Pacing between probes; 0 = unpaced (saturating read load). */
+        if (pace_us > 0)
+            usleep((useconds_t)pace_us);
     }
 
     close(fd);

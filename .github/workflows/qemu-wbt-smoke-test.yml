@@ -1,36 +1,55 @@
 name: "QEMU WBT Matched Benchmark — Guard Audit (IDE QD=1 vs virtio-scsi deep queue)"
 
 # ---------------------------------------------------------------------------
-# Design notes (v2)
+# Design notes (v3)
 # ---------------------------------------------------------------------------
-# Defects fixed relative to the first harness revision:
-#   (a) /tmp was never created, so `touch /tmp/stop_writer` failed and the
-#       background writer looped forever until the QEMU timeout killed the VM
-#       (log ended with "terminating on signal 15 ... (timeout)").
-#   (b) The disk was attached with `if=ide` (QEMU PIIX). blk_queue_depth() on
-#       that device is 1, and rq_depth_calc_max_depth() collapses to
-#       max_depth=2 for both step>=0 and step<0. scale_up() therefore changes
-#       nothing and the guard under test has no lever at all.
-#   (c) The trace buffer was left at its default size, and the reader used a
-#       probe whose timing arithmetic overflowed (~1.8e16 us MAX/MEAN).
-#   (d) Artifacts were selected by hardcoded artifact name with no content
-#       verification, which allowed a stale pre-guard kernel to be measured.
+# ROOT CAUSE FIXED IN THIS REVISION — zero trace events in run 39996857389
+# -------------------------------------------------------------------------
+# v2 issued every write as `dd ... oflag=direct` (O_DIRECT). In the pinned
+# kernel (block/blk-wbt.c @ a07f9ea8a99139913acbcc1c160b132cb2a49c81):
 #
-# This revision therefore:
-#   * runs the identical kernel under BOTH device models (matched pairs):
-#       - ide     : QD==1 control  (proves/denies inertness)
-#       - virtio  : deep queue     (gives the guard a real depth lever)
-#   * and under BOTH workload profiles, from one template initramfs:
-#       - heavy   : 4 writers + 1 reader  -> mainstream LAT_OK / LAT_EXCEEDED
-#       - sparse  : 1 slow writer + 4 readers -> reaches LAT_UNKNOWN_WRITES
-#                   with read samples present, the guard's only reachable
-#                   activation window (stat_sample_valid() must be false,
-#                   i.e. < RWB_MIN_WRITE_SAMPLES write completions/window)
-#   * creates /tmp and /run, and stops writers via a sentinel + kill
-#   * enlarges the tracefs ring buffer and pins the trace clock
-#   * verifies guard presence by grepping 'wbt_guard' out of vmlinux and fails
-#     the job if the patched kernel lacks it
-#   * records the build run's head_sha for provenance
+#   wbt_should_throttle():  case REQ_OP_WRITE:
+#       if ((bio->bi_opf & (REQ_SYNC | REQ_IDLE)) == (REQ_SYNC | REQ_IDLE))
+#               return false;      /* "Don't throttle WRITE_ODIRECT" */
+#
+#   bio_to_wbt_flags():     WBT_TRACKED is only set when wbt_should_throttle()
+#   wbt_wait():             rwb_arm_timer() is called HERE AND NOWHERE ELSE
+#                           (wbt_done() does not arm it; wbt_init() does not
+#                            arm it), and only for WBT_TRACKED bios.
+#
+# O_DIRECT writes carry REQ_SYNC|REQ_IDLE, so they are exempt -> never
+# WBT_TRACKED -> wbt_wait() is never called -> the WBT window timer is never
+# armed -> blk_stat_is_active() stays false -> latency_exceeded() never runs
+# -> wbt_timer = wbt_step = wbt_stat = wbt_lat = wbt_guard = 0. That is
+# exactly the null result observed in all six v2 configurations, on baseline
+# and patched kernels alike.
+#
+# v3 therefore splits the two roles by what each one must actually do:
+#   * WRITES must be BUFFERED (page-cache + fsync) so REQ_OP_WRITE bios without
+#     REQ_IDLE are submitted and WBT tracks/throttles them. Implemented as a
+#     purpose-built static binary (benchmarks/wbt_writer.c) because BusyBox
+#     dd's direct-I/O semantics are both irrelevant and untestable here.
+#   * READS stay O_DIRECT (reads are never throttled by WBT, but they are
+#     *accounted* into cb->stat[READ], which is the guard's input; buffered
+#     reads would be served from page cache and never reach the block layer).
+#
+# Earlier defects retained from v2:
+#   (a) /tmp was never created (writer looped until the QEMU timeout).
+#   (b) `if=ide` gives QD==1 and rq_depth collapses, so the guard has no depth
+#       lever -> kept deliberately as the inertness control.
+#   (c) trace buffer enlarged; probe timing overflow fixed.
+#   (d) artifact provenance + wbt_guard symbol gate before benchmarking.
+#
+# This revision runs the SAME kernel binaries under a 2x2x2 matrix:
+#   device: ide (QD==1, no lever) | virtio-scsi num_queues=1 (deep queue)
+#   build : baseline               | patched (guard + wbt_guard tracepoint)
+#   load  : heavy (4 buffered writers, 2 readers, target 1ms)
+#           sparse (1 slow buffered writer, 6 readers, target 150us)
+#           -- only the sparse profile can reach LAT_UNKNOWN_WRITES, i.e. the
+#              single branch the patch modifies (stat_sample_valid() false,
+#              which needs < 3 write completions per 100ms window).
+# Every configuration also reports /sys/block/<dev>/stat before/after so the
+# run proves by itself that writes actually reached the block layer.
 # ---------------------------------------------------------------------------
 
 on:
@@ -40,10 +59,14 @@ on:
         description: "Run ID of build-wbt-kernels to fetch kernel artifacts from"
         required: true
         default: "39987714631"
-      wbt_lat_usec:
-        description: "WBT target latency written to wbt_lat_usec (microseconds)"
+      wbt_lat_usec_heavy:
+        description: "WBT target latency for the heavy mixed profile (microseconds)"
         required: true
         default: "1000"
+      wbt_lat_usec_sparse:
+        description: "WBT target latency for the read-dominated sparse-writer profile (microseconds)"
+        required: true
+        default: "150"
       reader_seconds:
         description: "Duration of the foreground read probe (seconds)"
         required: true
@@ -60,7 +83,8 @@ jobs:
     timeout-minutes: 40
 
     env:
-      WBT_LAT_USEC: ${{ inputs.wbt_lat_usec }}
+      WBT_LAT_HEAVY: ${{ inputs.wbt_lat_usec_heavy }}
+      WBT_LAT_SPARSE: ${{ inputs.wbt_lat_usec_sparse }}
       READER_SECONDS: ${{ inputs.reader_seconds }}
 
     steps:
@@ -150,9 +174,10 @@ jobs:
           mkdir -p initramfs/{bin,sbin,dev,proc,sys,mnt,etc,tmp,run}
           cp /bin/busybox initramfs/bin/busybox
 
-          # Compile native static read latency probe
+          # Compile native static helpers
           gcc -static -O2 -Wall benchmarks/read_latency_probe.c -o initramfs/bin/read_latency_probe
-          chmod +x initramfs/bin/read_latency_probe
+          gcc -static -O2 -Wall benchmarks/wbt_writer.c         -o initramfs/bin/wbt_writer
+          chmod +x initramfs/bin/read_latency_probe initramfs/bin/wbt_writer
 
           # Populate essential BusyBox symlinks
           for cmd in sh ls cat echo mkdir mount umount dmesg sleep dd grep basename \
@@ -181,8 +206,7 @@ jobs:
           [ ! -e /dev/zero ] && mknod /dev/zero c 1 5
           [ ! -e /dev/null ] && mknod /dev/null c 1 3
 
-          # Writable scratch space (the previous revision omitted this, which
-          # made `touch /tmp/stop_writer` fail and the writer loop forever).
+          # Writable scratch space
           mkdir -p /tmp /run
           mount -t tmpfs none /tmp 2>/dev/null || true
           mount -t tmpfs none /run 2>/dev/null || true
@@ -194,7 +218,8 @@ jobs:
           echo "=========================================="
           echo "=== [QEMU-WBT] KERNEL BOOT SUCCESSFUL ==="
           echo "=== PROFILE: __PROFILE__  writers=__WRITERS__  readprocs=__READER_PROCS__ ==="
-          echo "=========================================="
+          echo "=== PARAMS: wchunk=__WCHUNK_KB__KB wwindow=__WWINDOW_MB__MB wstride=__WSTRIDE_MB__MB wsleep=__WSLEEP_MS__ms rpace=__PACE_US__us target=__WBT_LAT_USEC__us ==="
+          echo "##########################################"
           uname -a
 
           echo "--- BLK_WBT config from /proc/config.gz ---"
@@ -250,36 +275,30 @@ jobs:
             echo "[+] WBT tracepoints armed (buffer=$TARGET_DEV)."
           fi
 
+          # Block-layer counters: independent proof that the workload really
+          # reached the device (field 3 = read sectors, field 7 = write sectors).
+          BLKSTAT_BEFORE=$(cat /sys/block/$TARGET_DEV/stat 2>/dev/null)
+          echo "[BLKSTAT] before: $BLKSTAT_BEFORE"
+
           echo "--- Matched I/O workload on /dev/$TARGET_DEV ---"
 
-          # Background direct writers. The written region differs per profile:
-          #   heavy  : 4 writers, 4MB each, over the first 32MB, 50ms gap
-          #   sparse : 1 writer, 64KB, first 64KB, 200ms gap
-          # A sparse writer is required because LAT_UNKNOWN_WRITES is only
-          # reached when stat_sample_valid() is false, i.e. when fewer than
-          # RWB_MIN_WRITE_SAMPLES (3) write completions land in the window.
-          # The read-probe region (64MB..128MB) is never written by either.
+          # Buffered writers, one per __WSTRIDE_MB__MB slice. These are what
+          # arm and drive the WBT window timer.
           w=0
           while [ $w -lt __WRITERS__ ]; do
-            (
-              while [ ! -f /run/stop_writer ]; do
-                dd if=/dev/zero of="/dev/$TARGET_DEV" bs=__WBS__ count=__WCOUNT__ \
-                   seek=$((w * __WSEEK__)) oflag=direct conv=fsync 2>/dev/null || true
-                sleep __WSLEEP__ 2>/dev/null || true
-              done
-            ) &
+            woff=$((w * __WSTRIDE_MB__))
+            /bin/wbt_writer "/dev/$TARGET_DEV" __READER_SECONDS__ "$woff" __WCHUNK_KB__ __WWINDOW_MB__ __WSLEEP_MS__ &
             w=$((w + 1))
           done
 
-          # Concurrent foreground random 4KB O_DIRECT readers, one per 16MB
-          # sub-region of 64MB..128MB. Read concurrency is what can push the
-          # per-window minimum read latency above rwb->min_lat_nsec, which is
-          # the guard's precondition.
+          # Concurrent O_DIRECT random 4KB readers, 8MB region each, starting at
+          # 64MB. O_DIRECT is required so the probes are not answered from page
+          # cache and do reach the block layer where stat[READ] is filled.
           RPIDS=""
           p=0
           while [ $p -lt __READER_PROCS__ ]; do
-            start=$((64 + p * 16))
-            /bin/read_latency_probe "/dev/$TARGET_DEV" "__READER_SECONDS__" "$start" 16 &
+            start=$((64 + p * 8))
+            /bin/read_latency_probe "/dev/$TARGET_DEV" "__READER_SECONDS__" "$start" 8 "__PACE_US__" &
             RPIDS="$RPIDS $!"
             p=$((p + 1))
           done
@@ -295,6 +314,19 @@ jobs:
           sleep 1
 
           echo 0 > /sys/kernel/tracing/tracing_on
+
+          BLKSTAT_AFTER=$(cat /sys/block/$TARGET_DEV/stat 2>/dev/null)
+          echo "[BLKSTAT] after : $BLKSTAT_AFTER"
+
+          set -- $BLKSTAT_BEFORE; RD_BEFORE=$3; WR_BEFORE=$7
+          set -- $BLKSTAT_AFTER;  RD_AFTER=$3;  WR_AFTER=$7
+          echo "[BLKSTAT-DELTA] read_sectors=$((RD_AFTER - RD_BEFORE)) write_sectors=$((WR_AFTER - WR_BEFORE))"
+          if [ "$((WR_AFTER - WR_BEFORE))" -eq 0 ]; then
+            echo "[!] WARNING: no write sectors reached the block layer - results are not usable."
+          fi
+          if [ "$((RD_AFTER - RD_BEFORE))" -eq 0 ]; then
+            echo "[!] WARNING: no read sectors reached the block layer - results are not usable."
+          fi
 
           echo "=== [QEMU-WBT] EVENT COUNTS ==="
           echo "wbt_timer : $(grep -c wbt_timer /sys/kernel/tracing/trace 2>/dev/null || echo 0)"
@@ -319,19 +351,20 @@ jobs:
           # The guest does not inherit the workflow environment, so every
           # tunable and every workload parameter is substituted at build time.
           build_initramfs() {
-            name="$1"; writers="$2"; wbs="$3"; wcount="$4"; wseek="$5"; wsleep="$6"; rprocs="$7"
+            name="$1"; writers="$2"; wchunk="$3"; wwindow="$4"; wstride="$5"; wsleep="$6"; rprocs="$7"; pace="$8"; lat="$9"
             rm -rf "rootfs_$name"
             cp -a initramfs "rootfs_$name"
             sed -i \
               -e "s|__PROFILE__|${name}|g" \
-              -e "s|__WBT_LAT_USEC__|${WBT_LAT_USEC}|g" \
+              -e "s|__WBT_LAT_USEC__|${lat}|g" \
               -e "s|__READER_SECONDS__|${READER_SECONDS}|g" \
               -e "s|__WRITERS__|${writers}|g" \
-              -e "s|__WBS__|${wbs}|g" \
-              -e "s|__WCOUNT__|${wcount}|g" \
-              -e "s|__WSEEK__|${wseek}|g" \
-              -e "s|__WSLEEP__|${wsleep}|g" \
+              -e "s|__WCHUNK_KB__|${wchunk}|g" \
+              -e "s|__WWINDOW_MB__|${wwindow}|g" \
+              -e "s|__WSTRIDE_MB__|${wstride}|g" \
+              -e "s|__WSLEEP_MS__|${wsleep}|g" \
               -e "s|__READER_PROCS__|${rprocs}|g" \
+              -e "s|__PACE_US__|${pace}|g" \
               "rootfs_$name/init.template"
             mv "rootfs_$name/init.template" "rootfs_$name/init"
             chmod +x "rootfs_$name/init"
@@ -339,14 +372,14 @@ jobs:
             ls -lh "initramfs_$name.cpio.gz"
           }
 
-          #                     name    writers wbs  count seek sleep rprocs
-          build_initramfs heavy    4       "64k" 64   128  "0.05" 1
-          build_initramfs sparse   1       "64k" 1    1    "0.2"  4
+          #                       name   writers chunk win stride sleep rprocs pace  lat
+          build_initramfs heavy     4       64    8   8      0     2      1000  "${WBT_LAT_HEAVY}"
+          build_initramfs sparse    1       4     4   4      80    6      1000  "${WBT_LAT_SPARSE}"
 
           echo "=== heavy profile workload lines ==="
-          grep -n -E 'WORKLOAD PROFILE|PROFILE:|read_latency_probe|dd if=/dev/zero' rootfs_heavy/init || true
+          grep -n -E 'PROFILE:|PARAMS:|wbt_writer|read_latency_probe|wbt_lat_usec' rootfs_heavy/init || true
           echo "=== sparse profile workload lines ==="
-          grep -n -E 'WORKLOAD PROFILE|PROFILE:|read_latency_probe|dd if=/dev/zero' rootfs_sparse/init || true
+          grep -n -E 'PROFILE:|PARAMS:|wbt_writer|read_latency_probe|wbt_lat_usec' rootfs_sparse/init || true
 
       - name: Create fresh disposable virtual disks
         run: |
@@ -361,7 +394,7 @@ jobs:
 
           sha256sum baseline_disk.img patched_disk.img
 
-      - name: Run matched benchmark — 6 configurations
+      - name: Run matched benchmark — 8 configurations
         run: |
           run_bench() {
             label="$1"; kern="$2"; img="$3"; initrd="$4"; driveargs="$5"; ctrl="$6"
@@ -390,6 +423,8 @@ jobs:
           # ---- Profile B: read-dominated + sparse writer ------------------
           # The only regime that can reach LAT_UNKNOWN_WRITES with read samples
           # present, i.e. the only regime where the guard can fire at all.
+          run_bench baseline_ide_s "$BASELINE_BZIMAGE" baseline_disk.img initramfs_sparse.cpio.gz "if=ide"  ""
+          run_bench patched_ide_s  "$PATCHED_BZIMAGE"  patched_disk.img  initramfs_sparse.cpio.gz "if=ide"  ""
           run_bench baseline_vio_s "$BASELINE_BZIMAGE" baseline_disk.img initramfs_sparse.cpio.gz "${VIOARGS}" "${VIOCTRL}"
           run_bench patched_vio_s  "$PATCHED_BZIMAGE"  patched_disk.img  initramfs_sparse.cpio.gz "${VIOARGS}" "${VIOCTRL}"
 
@@ -398,7 +433,8 @@ jobs:
           mkdir -p benchmarks/smoke_test
           cp *_qemu.log benchmarks/smoke_test/
 
-          for label in baseline_ide_h patched_ide_h baseline_vio_h patched_vio_h baseline_vio_s patched_vio_s; do
+          for label in baseline_ide_h patched_ide_h baseline_vio_h patched_vio_h \
+                       baseline_ide_s patched_ide_s baseline_vio_s patched_vio_s; do
             echo "## Ftrace WBT Evaluation: ${label}" >> $GITHUB_STEP_SUMMARY
             echo '```text' >> $GITHUB_STEP_SUMMARY
             python3 ftrace_wbt_tracer.py analyze "${label}_qemu.log" \
