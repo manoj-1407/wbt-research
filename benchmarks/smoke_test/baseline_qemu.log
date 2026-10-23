@@ -14,34 +14,34 @@ CONFIG_BLK_WBT=y
 CONFIG_BLK_WBT_MQ=y
 --- Block devices in /sys/block ---
 total 0
-drwxr-xr-x    2 0        0                0 Oct 23 15:20 .
-dr-xr-xr-x   13 0        0                0 Oct 23 15:20 ..
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop0 -> ../devices/virtual/block/loop0
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop1 -> ../devices/virtual/block/loop1
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop2 -> ../devices/virtual/block/loop2
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop3 -> ../devices/virtual/block/loop3
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop4 -> ../devices/virtual/block/loop4
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop5 -> ../devices/virtual/block/loop5
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop6 -> ../devices/virtual/block/loop6
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 loop7 -> ../devices/virtual/block/loop7
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram0 -> ../devices/virtual/block/ram0
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram1 -> ../devices/virtual/block/ram1
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram10 -> ../devices/virtual/block/ram10
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram11 -> ../devices/virtual/block/ram11
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram12 -> ../devices/virtual/block/ram12
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram13 -> ../devices/virtual/block/ram13
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram14 -> ../devices/virtual/block/ram14
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram15 -> ../devices/virtual/block/ram15
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram2 -> ../devices/virtual/block/ram2
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram3 -> ../devices/virtual/block/ram3
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram4 -> ../devices/virtual/block/ram4
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram5 -> ../devices/virtual/block/ram5
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram6 -> ../devices/virtual/block/ram6
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram7 -> ../devices/virtual/block/ram7
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram8 -> ../devices/virtual/block/ram8
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 ram9 -> ../devices/virtual/block/ram9
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 sda -> ../devices/pci0000:00/0000:00:01.1/ata1/host0/target0:0:0/0:0:0:0/block/sda
-lrwxrwxrwx    1 0        0                0 Oct 23 15:20 sr0 -> ../devices/pci0000:00/0000:00:01.1/ata2/host1/target1:0:0/1:0:0:0/block/sr0
+drwxr-xr-x    2 0        0                0 Oct 23 15:26 .
+dr-xr-xr-x   13 0        0                0 Oct 23 15:26 ..
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop0 -> ../devices/virtual/block/loop0
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop1 -> ../devices/virtual/block/loop1
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop2 -> ../devices/virtual/block/loop2
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop3 -> ../devices/virtual/block/loop3
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop4 -> ../devices/virtual/block/loop4
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop5 -> ../devices/virtual/block/loop5
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop6 -> ../devices/virtual/block/loop6
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 loop7 -> ../devices/virtual/block/loop7
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram0 -> ../devices/virtual/block/ram0
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram1 -> ../devices/virtual/block/ram1
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram10 -> ../devices/virtual/block/ram10
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram11 -> ../devices/virtual/block/ram11
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram12 -> ../devices/virtual/block/ram12
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram13 -> ../devices/virtual/block/ram13
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram14 -> ../devices/virtual/block/ram14
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram15 -> ../devices/virtual/block/ram15
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram2 -> ../devices/virtual/block/ram2
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram3 -> ../devices/virtual/block/ram3
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram4 -> ../devices/virtual/block/ram4
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram5 -> ../devices/virtual/block/ram5
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram6 -> ../devices/virtual/block/ram6
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram7 -> ../devices/virtual/block/ram7
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram8 -> ../devices/virtual/block/ram8
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 ram9 -> ../devices/virtual/block/ram9
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 sda -> ../devices/pci0000:00/0000:00:01.1/ata1/host0/target0:0:0/0:0:0:0/block/sda
+lrwxrwxrwx    1 0        0                0 Oct 23 15:26 sr0 -> ../devices/pci0000:00/0000:00:01.1/ata2/host1/target1:0:0/1:0:0:0/block/sr0
 [+] Target disk detected: /dev/sda
 [+] WBT sysfs node found: /sys/block/sda/queue/wbt_lat_usec (current value: 75000)
 --- Checking WBT Tracepoint directory ---
@@ -49,14 +49,16 @@ lrwxrwxrwx    1 0        0                0 Oct 23 15:20 sr0 -> ../devices/pci00
 enable     filter     wbt_lat    wbt_stat   wbt_step   wbt_timer
 [+] WBT tracepoints armed.
 --- Generating I/O Activity on /dev/sda ---
-dd: can't open '/dev/zero': No such file or directory
-dd: can't open '/dev/sda': No such file or directory
+20+0 records in
+20+0 records out
+200+0 records in
+200+0 records out
 ==========================================
 === [QEMU-WBT] CAPTURED TRACE BUFFER ===
 ==========================================
 # tracer: nop
 #
-# entries-in-buffer/entries-written: 0/0   #P:1
+# entries-in-buffer/entries-written: 8/8   #P:1
 #
 #                                _-----=> irqs-off/BH-disabled
 #                               / _----=> need-resched
@@ -66,7 +68,15 @@ dd: can't open '/dev/sda': No such file or directory
 #                              |||| /     delay
 #           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
 #              | |         |   |||||     |         |
+              dd-160     [000] ..s1.     2.763941: wbt_timer: 8:0: status=3, step=0, inflight=0
+              dd-160     [000] ..s1.     2.764571: wbt_step: 8:0: scale up: step=-1, window=100000us, background=1, normal=2, max=2
+          <idle>-0       [000] ..s1.     2.867866: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     2.971652: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     3.075733: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     3.179771: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     3.283707: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     3.283866: wbt_step: 8:0: scale down: step=0, window=100000us, background=1, normal=2, max=2
 ==========================================
 === [QEMU-WBT] SMOKE TEST COMPLETE ===
 ==========================================
-[    4.406276] reboot: Power down
+[    4.820021] reboot: Power down
