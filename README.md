@@ -39,7 +39,7 @@ In Linux's block-layer writeback throttling (WBT), request completion statistics
 | File | Type | Purpose |
 | :--- | :--- | :--- |
 | `.github/workflows/build-wbt-kernels.yml` | Workflow | GitHub Actions workflow building baseline and patched WSL2 6.6 kernels at pinned commit |
-| `0001-wbt-hold-depth-on-LAT_UNKNOWN_WRITES-when-reads-are-elevated.patch` | Patch | Proposed 13-line guard: `scale_down(rwb, false)` on elevated reads in `LAT_UNKNOWN_WRITES` |
+| `0001-wbt-hold-depth-on-LAT_UNKNOWN_WRITES-when-reads-are-elevated.patch` | Patch | Applied 13-line guard: `break` (hold depth) when `stat[READ].min > rwb->min_lat_nsec` in `LAT_UNKNOWN_WRITES` |
 | `wbt_transition_tracer.py` | Model | Source-derived transition tracer testing 5 discrete window scenarios |
 | `test_wbt_state_transition.py` | Model | Specification test suite verifying 7 state machine invariants |
 
@@ -51,7 +51,7 @@ Running `python3 wbt_transition_tracer.py` models the classifier across 5 canoni
 
 * **Case 1 (Sparse Writes + Elevated Reads)**: 50 reads (min: 8 ms), 1 write completion. Watchdog=False, SampleValid=False. Classifier returns `LAT_UNKNOWN_WRITES`.
   * *Baseline*: `scale_up()` (`scale_step = -1`, queue widened).
-  * *Patched*: `scale_down(hard=False)` (`scale_step = +1`, queue contracted).
+  * *Patched*: `break` / hold depth (`scale_step` unchanged, guard tracepoint `action="hold"`).
 * **Case 2 (Sufficient Writes + Elevated Reads)**: 50 reads (min: 8 ms), 5 write completions. Watchdog=False, SampleValid=True. Classifier returns `LAT_EXCEEDED`. Both execute `scale_down(hard=True)`.
 * **Case 3 (In-Flight Sync Read Stall)**: 0 completed reads, 1 pending sync read at 15 ms. Watchdog fires. Classifier returns `LAT_EXCEEDED`. Both execute `scale_down(hard=True)`.
 * **Case 4 (Pure Streaming Writes)**: 0 reads, 10 write completions. Classifier returns `LAT_UNKNOWN_WRITES`. Both execute `scale_up()`. (Pure write performance preserved).
@@ -114,9 +114,9 @@ LAT_UNKNOWN_WRITES before reaching the stat[READ].min comparison. In wb_timer_fn
 LAT_UNKNOWN_WRITES unconditionally calls scale_up(), widening write queue depth 
 despite the presence of elevated read completion latency in that window.
 
-I have modeled this state transition and am currently evaluating whether this 
+I have modeled this state transition and evaluated whether this 
 behavior manifests under real workloads (e.g. concurrent sync reads with bursty 
-large writes) and whether a conservative step-down (hard_throttle=false) when 
+large writes) and whether conservatively holding the current write depth when 
 stat[READ].min > rwb->min_lat_nsec improves read tail latency without 
 destabilizing write throughput.
 

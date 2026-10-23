@@ -9,11 +9,11 @@ and asserts that:
 
   1. Original behavior is preserved for pure-write windows (no reads).
   2. The patch guard fires correctly: when reads are present AND
-     stat[READ].min > min_lat_nsec, the window produces scale_down()
-     instead of scale_up().
+     stat[READ].min > min_lat_nsec, the window holds the current depth
+     (break;) instead of calling scale_up().
   3. The patch does NOT fire when reads are present but latency is below target.
-  4. The guard uses hard_throttle=False (soft scale_down), matching the
-     LAT_UNKNOWN fallback path, not the LAT_EXCEEDED hard throttle.
+  4. The guard performs a hold, not a scale change: it neither scale_up()s
+     (the unpatched behaviour) nor scale_down()s (the LAT_EXCEEDED behaviour).
 
 This is NOT a proof that the kernel is correct or that the patch fixes
 the real hardware problem. It is a specification test that verifies the
