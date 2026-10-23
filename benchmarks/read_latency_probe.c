@@ -30,10 +30,24 @@ static int cmp_uint64(const void *a, const void *b) {
     return 0;
 }
 
+/*
+ * Compute elapsed time in microseconds.
+ *
+ * The previous implementation cast each field difference to uint64_t
+ * independently, so a negative tv_nsec delta (when the nanosecond field
+ * wraps) was reinterpreted as a value near 2^64, producing absurd
+ * MAX/MEAN results (~1.84e16 us). Accumulate in signed nanoseconds and
+ * only then convert.
+ */
 static inline uint64_t time_diff_us(struct timespec *start, struct timespec *end) {
-    uint64_t s = (uint64_t)(end->tv_sec - start->tv_sec);
-    uint64_t ns = (uint64_t)(end->tv_nsec - start->tv_nsec);
-    return (s * 1000000ULL) + (ns / 1000ULL);
+    int64_t secs = (int64_t)(end->tv_sec - start->tv_sec);
+    int64_t nsecs = (int64_t)(end->tv_nsec - start->tv_nsec);
+    int64_t total_ns = secs * 1000000000LL + nsecs;
+
+    if (total_ns < 0)
+        total_ns = 0;
+
+    return (uint64_t)(total_ns / 1000LL);
 }
 
 int main(int argc, char *argv[]) {

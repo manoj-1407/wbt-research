@@ -1,22 +1,61 @@
-name: "QEMU WBT Concurrent Benchmark — Matched Workload & Guard Audit"
+name: "QEMU WBT Matched Benchmark — Guard Audit (IDE QD=1 vs virtio-scsi deep queue)"
+
+# ---------------------------------------------------------------------------
+# Design notes (v2)
+# ---------------------------------------------------------------------------
+# Defects fixed relative to the first harness revision:
+#   (a) /tmp was never created, so `touch /tmp/stop_writer` failed and the
+#       background writer looped forever until the QEMU timeout killed the VM
+#       (log ended with "terminating on signal 15 ... (timeout)").
+#   (b) The disk was attached with `if=ide` (QEMU PIIX). blk_queue_depth() on
+#       that device is 1, and rq_depth_calc_max_depth() collapses to
+#       max_depth=2 for both step>=0 and step<0. scale_up() therefore changes
+#       nothing and the guard under test has no lever at all.
+#   (c) The trace buffer was left at its default size, and the reader used a
+#       probe whose timing arithmetic overflowed (~1.8e16 us MAX/MEAN).
+#   (d) Artifacts were selected by hardcoded artifact name with no content
+#       verification, which allowed a stale pre-guard kernel to be measured.
+#
+# This revision therefore:
+#   * runs the identical workload under BOTH device models (matched pairs):
+#       - ide     : QD==1 control  (proves/denies inertness)
+#       - virtio  : deep queue     (gives the guard a real depth lever)
+#   * creates /tmp and /run, and stops writers via a sentinel + kill
+#   * enlarges the tracefs ring buffer and pins the trace clock
+#   * verifies guard presence by grepping 'wbt_guard' out of vmlinux and fails
+#     the job if the patched kernel lacks it
+#   * records the build run's head_sha for provenance
+# ---------------------------------------------------------------------------
 
 on:
   workflow_dispatch:
     inputs:
       build_run_id:
-        description: "Run ID of build-wbt-kernels to fetch artifacts from"
+        description: "Run ID of build-wbt-kernels to fetch kernel artifacts from"
         required: true
         default: "39987714631"
+      wbt_lat_usec:
+        description: "WBT target latency written to wbt_lat_usec (microseconds)"
+        required: true
+        default: "2000"
+      reader_seconds:
+        description: "Duration of the foreground read probe (seconds)"
+        required: true
+        default: "30"
 
 permissions:
   contents: write
   actions: read
 
 jobs:
-  qemu-concurrent-benchmark:
+  qemu-benchmark:
     name: "QEMU Benchmark: Matched Concurrent Read/Write & Guard Audit"
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 40
+
+    env:
+      WBT_LAT_USEC: ${{ inputs.wbt_lat_usec }}
+      READER_SECONDS: ${{ inputs.reader_seconds }}
 
     steps:
       - name: Check out research repo
@@ -40,43 +79,79 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             qemu-system-x86 busybox-static cpio build-essential
+          qemu-system-x86_64 --version | head -1
 
       - name: Download Baseline Artifact
         uses: actions/download-artifact@v4
         with:
-          name: wbt-baseline-a07f9ea8a
+          pattern: wbt-baseline-*
           path: baseline_artifact
-          run-id: ${{ github.event.inputs.build_run_id || '39987714631' }}
+          run-id: ${{ inputs.build_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
 
       - name: Download Patched Artifact
         uses: actions/download-artifact@v4
         with:
-          name: wbt-patched-a07f9ea8a
+          pattern: wbt-patched-*
           path: patched_artifact
-          run-id: ${{ github.event.inputs.build_run_id || '39987714631' }}
+          run-id: ${{ inputs.build_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
 
-      - name: Inspect downloaded kernel binaries
+      - name: Verify artifact provenance and guard presence
         run: |
-          echo "Baseline bzImage:"
-          ls -lh baseline_artifact/kernel-src/arch/x86/boot/bzImage
-          echo "Patched bzImage:"
-          ls -lh patched_artifact/kernel-src/arch/x86/boot/bzImage
+          set -e
+          BASELINE_BZIMAGE=$(find baseline_artifact -name bzImage | head -1)
+          PATCHED_BZIMAGE=$(find patched_artifact -name bzImage | head -1)
+          BASELINE_VMLINUX=$(find baseline_artifact -name vmlinux | head -1)
+          PATCHED_VMLINUX=$(find patched_artifact -name vmlinux | head -1)
+
+          echo "BASELINE_BZIMAGE=$BASELINE_BZIMAGE" >> $GITHUB_ENV
+          echo "PATCHED_BZIMAGE=$PATCHED_BZIMAGE"   >> $GITHUB_ENV
+
+          echo "=== Resolved artifact paths ==="
+          ls -lh "$BASELINE_BZIMAGE" "$PATCHED_BZIMAGE" "$BASELINE_VMLINUX" "$PATCHED_VMLINUX"
+
+          echo "=== Build run provenance ==="
+          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ inputs.build_run_id }}" \
+            | tr ',' '\n' | grep -E '"(head_sha|head_branch|status|conclusion)"' || true
+
+          echo "=== Guard symbol gate (wbt_guard string in vmlinux) ==="
+          B_CNT=$(grep -a -c 'wbt_guard' "$BASELINE_VMLINUX" || true)
+          P_CNT=$(grep -a -c 'wbt_guard' "$PATCHED_VMLINUX" || true)
+          echo "baseline vmlinux  wbt_guard occurrences: ${B_CNT:-0}"
+          echo "patched  vmlinux  wbt_guard occurrences: ${P_CNT:-0}"
+          if [ "${P_CNT:-0}" -eq 0 ]; then
+            echo "FATAL: patched kernel does not contain the wbt_guard tracepoint."
+            echo "       The artifact is stale/pre-guard; refusing to benchmark it."
+            exit 1
+          fi
+          if [ "${B_CNT:-0}" -ne 0 ]; then
+            echo "WARNING: baseline kernel unexpectedly contains 'wbt_guard'."
+          fi
+
+          echo "=== Applied patch diff (from patched artifact) ==="
+          find patched_artifact -name 'wbt-patch-applied.diff' -exec cat {} \; | head -120 || true
+
+          echo "=== bzImage checksums ==="
+          sha256sum "$BASELINE_BZIMAGE" "$PATCHED_BZIMAGE"
 
       - name: Build micro-initramfs for WBT concurrent benchmark
         run: |
-          mkdir -p initramfs/{bin,sbin,dev,proc,sys,mnt,etc}
+          rm -rf initramfs
+          mkdir -p initramfs/{bin,sbin,dev,proc,sys,mnt,etc,tmp,run}
           cp /bin/busybox initramfs/bin/busybox
-          
+
           # Compile native static read latency probe
-          gcc -static -O2 benchmarks/read_latency_probe.c -o initramfs/bin/read_latency_probe
+          gcc -static -O2 -Wall benchmarks/read_latency_probe.c -o initramfs/bin/read_latency_probe
           chmod +x initramfs/bin/read_latency_probe
 
           # Populate essential BusyBox symlinks
-          for cmd in sh ls cat echo mkdir mount umount dmesg sleep dd grep basename poweroff reboot kill; do
+          for cmd in sh ls cat echo mkdir mount umount dmesg sleep dd grep basename \
+                     poweroff reboot kill sync ps head wc cut true false find \
+                     sort uniq tr printf date chmod mknod zcat gzip; do
             ln -sf busybox "initramfs/bin/$cmd"
           done
 
@@ -96,6 +171,13 @@ jobs:
           [ ! -e /dev/zero ] && mknod /dev/zero c 1 5
           [ ! -e /dev/null ] && mknod /dev/null c 1 3
 
+          # Writable scratch space (the previous revision omitted this, which
+          # made `touch /tmp/stop_writer` fail and the writer loop forever).
+          mkdir -p /tmp /run
+          mount -t tmpfs none /tmp 2>/dev/null || true
+          mount -t tmpfs none /run 2>/dev/null || true
+          rm -f /run/stop_writer /tmp/stop_writer
+
           mount -t tracefs none /sys/kernel/tracing 2>/dev/null || \
           mount -t debugfs none /sys/kernel/debug 2>/dev/null || true
 
@@ -104,53 +186,92 @@ jobs:
           echo "=========================================="
           uname -a
 
+          echo "--- BLK_WBT config from /proc/config.gz ---"
+          zcat /proc/config.gz 2>/dev/null | grep -E 'CONFIG_BLK_WBT' || echo "(config.gz unavailable)"
+
+          echo "--- Block devices in /sys/block ---"
+          ls /sys/block
+
           TARGET_DEV=""
           for b in /sys/block/*; do
             bname=$(basename "$b")
             case "$bname" in
-              loop*|ram*) continue ;;
+              loop*|ram*|sr*|dm-*|zram*) continue ;;
               *) TARGET_DEV="$bname"; break ;;
             esac
           done
 
-          if [ -n "$TARGET_DEV" ]; then
-            echo "[+] Target disk detected: /dev/$TARGET_DEV"
-            WBT_LAT_NODE="/sys/block/$TARGET_DEV/queue/wbt_lat_usec"
-            if [ -f "$WBT_LAT_NODE" ]; then
-              # Set WBT target latency to 20,000 us (20ms) for controlled evaluation
-              echo "20000" > "$WBT_LAT_NODE" 2>/dev/null || true
-              echo "[+] Active wbt_lat_usec: $(cat $WBT_LAT_NODE)"
-            fi
+          if [ -z "$TARGET_DEV" ]; then
+            echo "FATAL: no usable block device found"
+            poweroff -f
+          fi
+
+          echo "[+] Target disk detected: /dev/$TARGET_DEV"
+          echo "[i] queue/nr_requests : $(cat /sys/block/$TARGET_DEV/queue/nr_requests 2>/dev/null)"
+          echo "[i] queue/rotational  : $(cat /sys/block/$TARGET_DEV/queue/rotational 2>/dev/null)"
+          echo "[i] queue/scheduler   : $(cat /sys/block/$TARGET_DEV/queue/scheduler 2>/dev/null)"
+          echo "[i] queue_depth (blk) : $(cat /sys/block/$TARGET_DEV/queue/queue_depth 2>/dev/null || echo 'not exposed')"
+
+          WBT_LAT_NODE="/sys/block/$TARGET_DEV/queue/wbt_lat_usec"
+          if [ -f "$WBT_LAT_NODE" ]; then
+            echo "__WBT_LAT_USEC__" > "$WBT_LAT_NODE" 2>/dev/null || true
+            echo "[+] Active wbt_lat_usec: $(cat $WBT_LAT_NODE)"
+          else
+            echo "WARNING: $WBT_LAT_NODE not present (WBT not enabled on this device)"
+          fi
+
+          echo "--- Checking WBT tracepoint directory ---"
+          if [ -d /sys/kernel/tracing/events/wbt ]; then
+            echo "[+] /sys/kernel/tracing/events/wbt exists!"
+            ls /sys/kernel/tracing/events/wbt
+          else
+            echo "FATAL: /sys/kernel/tracing/events/wbt missing"
           fi
 
           if [ -d /sys/kernel/tracing/events/wbt ]; then
             echo 0 > /sys/kernel/tracing/tracing_on
+            echo "nop" > /sys/kernel/tracing/current_tracer 2>/dev/null || true
+            echo "mono" > /sys/kernel/tracing/trace_clock 2>/dev/null || true
             echo "" > /sys/kernel/tracing/trace
+            echo 8192 > /sys/kernel/tracing/buffer_size_kb 2>/dev/null || true
             echo 1 > /sys/kernel/tracing/events/wbt/enable
             echo 1 > /sys/kernel/tracing/tracing_on
-            echo "[+] WBT tracepoints armed."
+            echo "[+] WBT tracepoints armed (buffer=$TARGET_DEV)."
           fi
 
-          if [ -n "$TARGET_DEV" ]; then
-            echo "--- Starting Matched Concurrent Workload on /dev/$TARGET_DEV ---"
-            
-            # 1. Background streaming direct writer to first 64MB of disk
+          echo "--- Generating Matched Concurrent I/O Workload on /dev/$TARGET_DEV ---"
+
+          # Background direct writers, confined to the first 32MB so the
+          # read-probe region (64MB..128MB) is never overwritten.
+          w=0
+          while [ $w -lt 4 ]; do
             (
-              while [ ! -f /tmp/stop_writer ]; do
-                dd if=/dev/zero of="/dev/$TARGET_DEV" bs=64k count=50 seek=0 oflag=direct conv=fsync 2>/dev/null || true
+              while [ ! -f /run/stop_writer ]; do
+                dd if=/dev/zero of="/dev/$TARGET_DEV" bs=64k count=64 seek=$((w * 128)) \
+                   oflag=direct conv=fsync 2>/dev/null || true
                 sleep 0.05 2>/dev/null || true
               done
             ) &
-            WRITER_PID=$!
+            w=$((w + 1))
+          done
 
-            # 2. Foreground random 4KB read prober targeting 64MB..128MB region for 15 seconds
-            /bin/read_latency_probe "/dev/$TARGET_DEV" 15 64 64
+          # Foreground random 4KB O_DIRECT reads over 64MB..128MB
+          /bin/read_latency_probe "/dev/$TARGET_DEV" "__READER_SECONDS__" 64 64
 
-            # 3. Stop background writer
-            touch /tmp/stop_writer
-            wait $WRITER_PID 2>/dev/null || true
-            sleep 1
-          fi
+          touch /run/stop_writer
+          sleep 1
+          for p in $(jobs -p); do kill "$p" 2>/dev/null || true; done
+          wait 2>/dev/null || true
+          sleep 1
+
+          echo 0 > /sys/kernel/tracing/tracing_on
+
+          echo "=== [QEMU-WBT] EVENT COUNTS ==="
+          echo "wbt_timer : $(grep -c wbt_timer /sys/kernel/tracing/trace 2>/dev/null || echo 0)"
+          echo "wbt_step  : $(grep -c wbt_step  /sys/kernel/tracing/trace 2>/dev/null || echo 0)"
+          echo "wbt_stat  : $(grep -c wbt_stat  /sys/kernel/tracing/trace 2>/dev/null || echo 0)"
+          echo "wbt_lat   : $(grep -c wbt_lat   /sys/kernel/tracing/trace 2>/dev/null || echo 0)"
+          echo "wbt_guard : $(grep -c wbt_guard /sys/kernel/tracing/trace 2>/dev/null || echo 0)"
 
           echo "=========================================="
           echo "=== [QEMU-WBT] CAPTURED TRACE BUFFER ==="
@@ -165,6 +286,12 @@ jobs:
           poweroff -f
           EOF
 
+          # The guest does not inherit the workflow environment, so the two
+          # tunables are substituted into init at build time.
+          sed -i "s|__WBT_LAT_USEC__|${WBT_LAT_USEC}|g; s|__READER_SECONDS__|${READER_SECONDS}|g" initramfs/init
+          echo "=== substituted tunables ==="
+          grep -n -E 'wbt_lat_usec|read_latency_probe' initramfs/init
+
           chmod +x initramfs/init
 
           # Package initramfs
@@ -175,60 +302,68 @@ jobs:
 
       - name: Create fresh disposable virtual disks
         run: |
-          # 128MB baseline disk: prefill upper 64MB with random data for read probe
+          # 128MB disk: upper 64MB prefilled with random data for the read probe.
+          # Writers are confined to the first 32MB, so the read region stays
+          # byte-identical between the baseline and patched runs.
           dd if=/dev/zero of=baseline_disk.img bs=1M count=128
           dd if=/dev/urandom of=baseline_disk.img bs=1M seek=64 count=64 conv=notrunc
 
-          # 128MB patched disk: identical initial structure
           dd if=/dev/zero of=patched_disk.img bs=1M count=128
           dd if=/dev/urandom of=patched_disk.img bs=1M seek=64 count=64 conv=notrunc
 
-      - name: Run Concurrent Benchmark — Baseline Kernel
-        run: |
-          echo "Booting baseline kernel with baseline_disk.img..."
-          timeout 120s qemu-system-x86_64 \
-            $ACCEL \
-            -m 1024 \
-            -kernel baseline_artifact/kernel-src/arch/x86/boot/bzImage \
-            -initrd initramfs.cpio.gz \
-            -drive file=baseline_disk.img,format=raw,if=ide \
-            -append "console=ttyS0 panic=1 quiet loglevel=3" \
-            -nographic \
-            -no-reboot 2>&1 | tee baseline_qemu.log || true
+          sha256sum baseline_disk.img patched_disk.img
 
-      - name: Run Concurrent Benchmark — Patched Kernel
+      - name: Run matched benchmark — 4 configurations
         run: |
-          echo "Booting patched kernel with patched_disk.img..."
-          timeout 120s qemu-system-x86_64 \
-            $ACCEL \
-            -m 1024 \
-            -kernel patched_artifact/kernel-src/arch/x86/boot/bzImage \
-            -initrd initramfs.cpio.gz \
-            -drive file=patched_disk.img,format=raw,if=ide \
-            -append "console=ttyS0 panic=1 quiet loglevel=3" \
-            -nographic \
-            -no-reboot 2>&1 | tee patched_qemu.log || true
+          run_bench() {
+            label="$1"; kern="$2"; img="$3"; shift 3
+            echo "::group::QEMU $label"
+            timeout 300s qemu-system-x86_64 ${ACCEL} -m 1024 \
+              -kernel "$kern" -initrd initramfs.cpio.gz \
+              -drive "file=$img,format=raw,$1" \
+              -append "console=ttyS0 panic=1 quiet loglevel=3" \
+              -nographic -no-reboot 2>&1 | tee "${label}_qemu.log" || true
+            echo "::endgroup::"
+          }
 
-      - name: Display and analyze benchmark results
+          # Control pair: QEMU PIIX IDE -> blk_queue_depth()==1, no depth lever
+          run_bench baseline_ide "$BASELINE_BZIMAGE" baseline_disk.img "if=ide"
+          run_bench patched_ide  "$PATCHED_BZIMAGE"  patched_disk.img  "if=ide"
+
+          # Deep-queue pair: virtio-scsi -> blk_queue_depth() ~= 250, real lever
+          VIOARGS="if=none,id=hd0,cache=none,aio=threads"
+          VIOCTRL="-device virtio-scsi-pci,id=scsi0 -device scsi-hd,bus=scsi0.0,drive=hd0"
+
+          echo "::group::QEMU baseline_vio"
+          timeout 300s qemu-system-x86_64 ${ACCEL} -m 1024 \
+            -kernel "$BASELINE_BZIMAGE" -initrd initramfs.cpio.gz \
+            -drive "file=baseline_disk.img,format=raw,${VIOARGS}" ${VIOCTRL} \
+            -append "console=ttyS0 panic=1 quiet loglevel=3" \
+            -nographic -no-reboot 2>&1 | tee baseline_vio_qemu.log || true
+          echo "::endgroup::"
+
+          echo "::group::QEMU patched_vio"
+          timeout 300s qemu-system-x86_64 ${ACCEL} -m 1024 \
+            -kernel "$PATCHED_BZIMAGE" -initrd initramfs.cpio.gz \
+            -drive "file=patched_disk.img,format=raw,${VIOARGS}" ${VIOCTRL} \
+            -append "console=ttyS0 panic=1 quiet loglevel=3" \
+            -nographic -no-reboot 2>&1 | tee patched_vio_qemu.log || true
+          echo "::endgroup::"
+
+      - name: Analyze benchmark results
         run: |
           mkdir -p benchmarks/smoke_test
-          cp baseline_qemu.log benchmarks/smoke_test/
-          cp patched_qemu.log benchmarks/smoke_test/
+          cp *_qemu.log benchmarks/smoke_test/
 
-          echo "## Ftrace WBT Evaluation: Baseline" >> $GITHUB_STEP_SUMMARY
-          echo '```text' >> $GITHUB_STEP_SUMMARY
-          python3 ftrace_wbt_tracer.py analyze baseline_qemu.log | tee baseline_analysis.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-          echo "## Ftrace WBT Evaluation: Patched (Hold-Depth)" >> $GITHUB_STEP_SUMMARY
-          echo '```text' >> $GITHUB_STEP_SUMMARY
-          python3 ftrace_wbt_tracer.py analyze patched_qemu.log | tee patched_analysis.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-          echo "=================== BASELINE ANALYSIS ==================="
-          cat baseline_analysis.txt
-          echo "=================== PATCHED ANALYSIS ==================="
-          cat patched_analysis.txt
+          for label in baseline_ide patched_ide baseline_vio patched_vio; do
+            echo "## Ftrace WBT Evaluation: ${label}" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            python3 ftrace_wbt_tracer.py analyze "${label}_qemu.log" \
+              | tee "${label}_analysis.txt" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "=================== ${label} ANALYSIS ==================="
+            cat "${label}_analysis.txt"
+          done
 
       - name: Commit benchmark logs to repository
         run: |
@@ -238,7 +373,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore(ci): record concurrent benchmark logs from QEMU [skip ci]"
+            git commit -m "chore(ci): record matched QEMU benchmark logs (ide + virtio-scsi) [skip ci]"
             git push origin HEAD || true
           fi
 
@@ -246,10 +381,11 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: qemu-concurrent-benchmark-logs
+          name: qemu-matched-benchmark-logs
           retention-days: 14
           path: |
-            baseline_qemu.log
-            patched_qemu.log
-            baseline_analysis.txt
-            patched_analysis.txt
+            baseline_ide_qemu.log
+            patched_ide_qemu.log
+            baseline_vio_qemu.log
+            patched_vio_qemu.log
+            *_analysis.txt
