@@ -142,10 +142,13 @@ jobs:
 
           if [ -n "$TARGET_DEV" ]; then
             echo "--- Generating I/O Activity on /dev/$TARGET_DEV ---"
-            # Direct writes followed by reads
-            dd if=/dev/zero of="/dev/$TARGET_DEV" bs=1M count=15 oflag=direct 2>&1
-            dd if="/dev/$TARGET_DEV" of=/dev/null bs=4k count=50 iflag=direct 2>&1
-            sleep 1
+            # Write 20MB with fsync to force writeback through block layer
+            dd if=/dev/zero of="/dev/$TARGET_DEV" bs=1M count=20 conv=fsync 2>&1
+            sync
+            # Read back blocks
+            dd if="/dev/$TARGET_DEV" of=/dev/null bs=4k count=200 2>&1
+            # Allow timer windows to expire (100ms window)
+            sleep 2
           fi
 
           echo "=========================================="
