@@ -1,127 +1,129 @@
-# WBT Kernel Build — Deployment Guide
+# Linux Block Layer WBT Research: Sparse-Write Classification Investigation
 
-## What this directory contains
-
-| File | Purpose |
-|------|---------|
-| `.github/workflows/build-wbt-kernels.yml` | GitHub Actions workflow |
-| `0001-wbt-hold-depth-on-LAT_UNKNOWN_WRITES-when-reads-are-elevated.patch` | Human-readable patch for review/submission |
-| `test_wbt_state_transition.py` | Specification test for WBT state transitions |
-
----
-
-## Step 1 — Fork the Microsoft WSL2 kernel repository
-
-You must own a GitHub repository that hosts the workflow YAML.
-The workflow itself clones Microsoft's repo; it does not need to be a fork.
-
-```
-# Create a new empty repository on GitHub (e.g. manoj-1407/wbt-research)
-# Then push this directory to it:
-
-cd D:\io_investigation\wbt_patch
-git init
-git add .
-git commit -m "Add WBT research build workflow"
-git remote add origin https://github.com/manoj-1407/wbt-research.git
-git push -u origin main
-```
+**Subsystem:** Linux Block Layer / Writeback Throttling (`block/blk-wbt.c`)  
+**Target Mailing List:** `linux-block@vger.kernel.org`  
+**Subsystem Maintainer:** Jens Axboe  
+**Reference Sources:**
+* Microsoft WSL2 Linux 6.6.y (Pinned Commit: `a07f9ea8a99139913acbcc1c160b132cb2a49c81`)
+* Linux Mainline (`git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git`, verified identical in `block/blk-wbt.c:304–471`)
 
 ---
 
-## Step 2 — Trigger the workflow
+## 1. Investigation Overview & Narrow Hypothesis
 
-1. Go to your repository on GitHub.
-2. Click **Actions** → **WBT Kernel Build — Baseline vs Patched**.
-3. Click **Run workflow** → **Run workflow** (branch: main).
+In Linux's block-layer writeback throttling (WBT), request completion statistics are accumulated over discrete time windows (default: 100 ms) via `blk-stat`. At window expiration, `wb_timer_fn()` calls `latency_exceeded()` to evaluate queue state and scale write depth up or down.
 
-The workflow runs entirely on GitHub's Ubuntu 22.04 runners.
-Your laptop does **not** compile anything.
-
-Expected wall-clock time: ~60–80 minutes for each build job (GitHub free tier).
-
----
-
-## Step 3 — Download the artifacts
-
-After both jobs complete, download from the Actions run page:
-
-| Artifact | Contents |
-|----------|---------|
-| `wbt-baseline-<sha>` | vmlinux, bzImage, .config, build.log |
-| `wbt-patched-<sha>` | vmlinux, bzImage, .config, build.log, wbt-patch-applied.diff |
-| `build-comparison-report` | Diff + both build logs |
+### The Specific Classifier Observation
+1. **Sample Validity Requirement (`stat_sample_valid`)**:
+   Requires `stat[READ].nr_samples >= 1` and `stat[WRITE].nr_samples >= RWB_MIN_WRITE_SAMPLES` (3 write completions).
+2. **Watchdog Check**:
+   If an in-flight synchronous read exceeds target latency and zero reads completed (`!stat[READ].nr_samples`), the watchdog returns `LAT_EXCEEDED`. However, if any reads completed (`stat[READ].nr_samples >= 1`), the watchdog yields to completion statistics.
+3. **Sparse-Write Branch (`LAT_UNKNOWN_WRITES`)**:
+   When completed reads exist but write completions are sparse (1 or 2 completions, `< 3`), `stat_sample_valid()` evaluates to `false`. If writes are in-flight or recently waited, the classifier assumes *"we're only doing writes"* and returns `LAT_UNKNOWN_WRITES`.
+4. **Disputed Decision**:
+   The ordinary comparison (`stat[READ].min > rwb->min_lat_nsec`) is bypassed. In `wb_timer_fn()`, `LAT_UNKNOWN_WRITES` executes `scale_up(rwb)`, widening write queue depth even though completed reads in that same window may have experienced latency far exceeding the configured target.
 
 ---
 
-## Step 4 — Verify the diff (before installing anything)
+## 2. Methodology & Validation Hierarchy
 
-```powershell
-# In PowerShell, inspect the diff from the downloaded artifact:
-cat wbt-patch-applied.diff
-```
-
-Confirm it shows exactly the LAT_UNKNOWN_WRITES guard and nothing else.
+> [!IMPORTANT]
+> **Distinction Between Model Tests and In-Kernel Execution:**
+> * **Source-Derived Transition Models** (`wbt_transition_tracer.py`, `test_wbt_state_transition.py`): Implement the exact decision logic and predicates in Python. They confirm that under the specified inputs, the model diverges as expected (Case 1). They do **not** constitute execution of the C functions or proof of hardware-level latency improvement.
+> * **Empirical Kernel Validation (Pending)**: Uses native Linux tracepoints (`/sys/kernel/tracing/events/wbt/`) on a kernel compiled with `CONFIG_BLK_WBT=y` to observe whether real block completions enter `LAT_UNKNOWN_WRITES` and whether the patched controller improves tail latency.
 
 ---
 
-## Step 5 — Install the patched kernel (OPTIONAL — read warnings first)
+## 3. Repository Contents
 
-> [!CAUTION]
-> Installing a custom kernel changes your WSL2 boot configuration.
-> If the kernel fails to boot, WSL will not start.
-> **Do NOT do this until you have verified the build succeeds and
-> reviewed the diff.**
+| File | Type | Purpose |
+| :--- | :--- | :--- |
+| `.github/workflows/build-wbt-kernels.yml` | Workflow | GitHub Actions workflow building baseline and patched WSL2 6.6 kernels at pinned commit |
+| `0001-wbt-hold-depth-on-LAT_UNKNOWN_WRITES-when-reads-are-elevated.patch` | Patch | Proposed 13-line guard: `scale_down(rwb, false)` on elevated reads in `LAT_UNKNOWN_WRITES` |
+| `wbt_transition_tracer.py` | Model | Source-derived transition tracer testing 5 discrete window scenarios |
+| `test_wbt_state_transition.py` | Model | Specification test suite verifying 7 state machine invariants |
 
-If you decide to proceed:
+---
 
-1. Copy `bzImage` from the **patched** artifact to `D:\WSL_Kernels\bzImage-wbt-patched`.
-2. Edit `C:\Users\vharr\.wslconfig` — add (do NOT remove the existing `[wsl2]` block):
+## 4. Source-Derived Model Trace (5 Cases)
 
-```ini
-[wsl2]
-memory=3GB
-processors=2
-swap=1GB
-kernel=D:\\WSL_Kernels\\bzImage-wbt-patched
-```
+Running `python3 wbt_transition_tracer.py` models the classifier across 5 canonical scenarios:
 
-3. Shut down WSL:
-```powershell
-wsl --shutdown
-```
+* **Case 1 (Sparse Writes + Elevated Reads)**: 50 reads (min: 8 ms), 1 write completion. Watchdog=False, SampleValid=False. Classifier returns `LAT_UNKNOWN_WRITES`.
+  * *Baseline*: `scale_up()` (`scale_step = -1`, queue widened).
+  * *Patched*: `scale_down(hard=False)` (`scale_step = +1`, queue contracted).
+* **Case 2 (Sufficient Writes + Elevated Reads)**: 50 reads (min: 8 ms), 5 write completions. Watchdog=False, SampleValid=True. Classifier returns `LAT_EXCEEDED`. Both execute `scale_down(hard=True)`.
+* **Case 3 (In-Flight Sync Read Stall)**: 0 completed reads, 1 pending sync read at 15 ms. Watchdog fires. Classifier returns `LAT_EXCEEDED`. Both execute `scale_down(hard=True)`.
+* **Case 4 (Pure Streaming Writes)**: 0 reads, 10 write completions. Classifier returns `LAT_UNKNOWN_WRITES`. Both execute `scale_up()`. (Pure write performance preserved).
+* **Case 5 (Device Idle / Solitary Read)**: 10 reads (1 ms), 0 writes. Classifier returns `LAT_UNKNOWN`. Both execute `noop`. (Device power-state wakeup safety preserved).
 
-4. Restart Ubuntu and verify:
+---
+
+## 5. Remote Build & In-Kernel Trace Plan
+
+### Remote Build via GitHub Actions
+To protect local laptop resources and disk space, compilation is handled remotely:
+1. Workflow: `.github/workflows/build-wbt-kernels.yml`
+2. Run via GitHub web UI or CLI:
+   ```bash
+   gh workflow run build-wbt-kernels.yml --ref main
+   ```
+3. Artifacts generated:
+   * `wbt-baseline-<sha>`: Baseline `bzImage` with `CONFIG_BLK_WBT=y`.
+   * `wbt-patched-<sha>`: Patched `bzImage` with guard applied.
+
+### In-Kernel Ftrace Capture Plan
+Once the test kernels are built, we observe the actual C controller via native tracepoints:
 ```bash
-uname -r
-# Should show your custom build version string
+# Enable WBT tracepoints
+echo 1 > /sys/kernel/tracing/events/wbt/enable
 
-# Verify WBT is built-in:
-cat /sys/block/sdb/queue/wbt_lat_usec 2>/dev/null || echo "WBT not active on this device"
+# Capture timer decisions during mixed read/write workload
+cat /sys/kernel/tracing/trace_pipe | grep -E 'wbt_timer|wbt_step'
 ```
-
-5. **Reverting**: Remove the `kernel=` line from `.wslconfig` and run `wsl --shutdown` again.
-
----
-
-## What the patch does NOT do
-
-- It does not change WBT behaviour for pure write-only workloads (no read samples → original `scale_up()` path unchanged).
-- It does not introduce a new state or timer.
-- It does not touch `RWB_MIN_WRITE_SAMPLES`, window sizes, or any other parameter.
+* Trace log logs `status` (`1=OK, 2=UNKNOWN, 3=UNKNOWN_WRITES, 4=EXCEEDED`) and `scale_step`.
+* Metrics compared:
+  * Frequency of `status == 3` events.
+  * Read P99 and P99.9 latencies (`fio` direct sync reader).
+  * Total write throughput (MB/s).
 
 ---
 
-## Next steps after a successful build
+## 6. Upstream Inquiry Draft (`linux-block@vger.kernel.org`)
 
-1. **Source-faithful state transition test** — write a Python test that
-   replays the exact `wb_timer_fn` switch logic from the patched source
-   and verifies the guard fires when expected.
+*Note: To be submitted only after empirical kernel tracing confirms that real mixed workloads trigger this state.*
 
-2. **Native WBT measurement** — boot the baseline kernel, reproduce the
-   6–8 ms read P99 scenario, then boot the patched kernel and compare.
-   Only this experiment can validate or refute the hypothesis.
+```text
+To: linux-block@vger.kernel.org
+Cc: Jens Axboe <axboe@kernel.dk>
+Subject: [RFC/Inquiry] blk-wbt: LAT_UNKNOWN_WRITES handling when completed reads are elevated
 
-3. **Kernel mailing list submission** — if the experiment confirms benefit,
-   prepare a proper patch for `linux-block@vger.kernel.org` following
-   the Linux kernel patch submission checklist.
+Hello,
+
+I have been investigating the writeback throttling (WBT) classifier in 
+block/blk-wbt.c (verified against both Linux 6.6.y and current mainline master).
+
+In latency_exceeded(), stat_sample_valid() requires both completed reads and 
+at least RWB_MIN_WRITE_SAMPLES (3). When a monitoring window contains completed 
+reads whose observed minimum latency exceeds rwb->min_lat_nsec, but write 
+completions are sparse (1 or 2 completions), stat_sample_valid() evaluates to 
+false. 
+
+If writes are in-flight or a wait occurred, latency_exceeded() returns 
+LAT_UNKNOWN_WRITES before reaching the stat[READ].min comparison. In wb_timer_fn(), 
+LAT_UNKNOWN_WRITES unconditionally calls scale_up(), widening write queue depth 
+despite the presence of elevated read completion latency in that window.
+
+I have modeled this state transition and am currently evaluating whether this 
+behavior manifests under real workloads (e.g. concurrent sync reads with bursty 
+large writes) and whether a conservative step-down (hard_throttle=false) when 
+stat[READ].min > rwb->min_lat_nsec improves read tail latency without 
+destabilizing write throughput.
+
+Is the unconditional scale_up() in LAT_UNKNOWN_WRITES intentional for sparse 
+completions, or are there known constraints around relying on stat[READ].min 
+in that branch that I should consider?
+
+Thank you,
+G Manoj Kumar
+```
