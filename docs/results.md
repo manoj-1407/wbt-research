@@ -191,8 +191,30 @@ intermittently collapse into the empty-trace failure mode.
 **Content-level comparison across repetitions is not available.** GitHub
 requires authentication to download Actions artifacts; this environment has
 no GitHub credential, and the token used earlier in the project was exposed
-and must be rotated. A `401` is returned for
-`.../actions/artifacts/<id>/zip` and `403` for the run-logs endpoint.
+and must be rotated.
+
+The three artifact payloads are provably distinct — the run pages expose
+their digests, so the runs are independent executions rather than repeated
+uploads of one file:
+
+| run | artifact sha256 |
+| :--- | :--- |
+| 40004718895 | `d27aaed10c9d0cef512c67fadc9f06d7fedd804b1209809862e9e0115a407587` |
+| 40004771234 | `575bbfab4cf3aea16681abb5bd88317b3e80543b21603bcc696bd0109d25dd0e` |
+
+Four retrieval routes were attempted and all are closed to an unauthenticated
+reader:
+
+| route | result |
+| :--- | :--- |
+| `GET /actions/artifacts/<id>/zip` | `401` |
+| `GET /actions/runs/<id>/logs` | `403` |
+| run page HTML (anonymous) | run metadata only; the `$GITHUB_STEP_SUMMARY` body, which holds the full per-config analysis, is not served |
+| job page HTML (anonymous) | step names and conclusions only, no step output |
+
+Reopening this requires either a rotated token carrying `actions:read`, which
+would allow the artifacts to be fetched, or re-running the harness on a
+KVM-capable host where the repetitions can be produced locally.
 
 The workflow's own `Commit benchmark logs to repository` step does not close
 the gap either: `.gitignore` contains `*.log`, so
