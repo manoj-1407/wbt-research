@@ -1,0 +1,308 @@
+name: WBT Kernel Build — Baseline vs Patched
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_branch:
+        description: "Microsoft WSL2 kernel branch"
+        required: false
+        default: "linux-msft-wsl-6.6.y"
+
+# ---------------------------------------------------------------------------
+# Design notes
+# ---------------------------------------------------------------------------
+# All compilation happens on GitHub Actions runners. Nothing touches the
+# user's local machine. The workflow is workflow_dispatch only.
+#
+# Jobs:
+#   pin-sha      — resolves HEAD SHA of the branch before any clone
+#   build-baseline — compiles Microsoft WSL2 6.6 kernel with BLK_WBT=y
+#   build-patched  — same source/config + proposed LAT_UNKNOWN_WRITES guard
+#   build-summary  — downloads and compares both artifacts
+#
+# SHA pinning: both build jobs consume the SHA output from pin-sha and
+# abort if the cloned HEAD differs. This ensures the two kernels are
+# compiled from byte-identical source trees even if the branch advances
+# between job starts.
+#
+# Python embedding: the patch script is stored as a base64 literal and
+# decoded at runtime. This avoids two separate failure modes:
+#   (a) python3 << HEREDOC with 8-space YAML indent → IndentationError
+#   (b) cat > file << HEREDOC with unindented body → YAML parse error
+#       (lines at column 0 break YAML block scalars)
+# ---------------------------------------------------------------------------
+
+env:
+  KERNEL_REPO:   "https://github.com/microsoft/WSL2-Linux-Kernel.git"
+  KERNEL_BRANCH: ${{ github.event.inputs.kernel_branch || 'linux-msft-wsl-6.6.y' }}
+
+jobs:
+
+  # -------------------------------------------------------------------------
+  # Job 0: Pin the exact commit SHA before any clone
+  # -------------------------------------------------------------------------
+  pin-sha:
+    name: "Pin kernel source SHA"
+    runs-on: ubuntu-22.04
+    outputs:
+      sha: ${{ steps.get-sha.outputs.sha }}
+    steps:
+      - name: Resolve HEAD SHA of kernel branch
+        id: get-sha
+        run: |
+          SHA=$(git ls-remote "${{ env.KERNEL_REPO }}" \
+                  "refs/heads/${{ env.KERNEL_BRANCH }}" | awk '{print $1}')
+          if [ -z "$SHA" ]; then
+            echo "ERROR: Could not resolve SHA for branch ${{ env.KERNEL_BRANCH }}"
+            exit 1
+          fi
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "Pinned SHA: $SHA"
+
+  # -------------------------------------------------------------------------
+  # Job 1: Baseline — WSL2 6.6 kernel with WBT enabled, no patch
+  # -------------------------------------------------------------------------
+  build-baseline:
+    name: "Baseline: WSL2 6.6 + WBT enabled"
+    needs: [pin-sha]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential bc bison flex libssl-dev libelf-dev \
+            libncurses-dev dwarves pahole cpio kmod rsync \
+            git ca-certificates curl
+
+      - name: Clone kernel at pinned SHA
+        run: |
+          git clone --depth=1 --branch "${{ env.KERNEL_BRANCH }}" \
+            "${{ env.KERNEL_REPO }}" kernel-src
+          CLONED=$(git -C kernel-src rev-parse HEAD)
+          PINNED="${{ needs.pin-sha.outputs.sha }}"
+          if [ "$CLONED" != "$PINNED" ]; then
+            echo "ERROR: cloned SHA ($CLONED) != pinned SHA ($PINNED)"
+            echo "Branch was updated between pin-sha and this job."
+            exit 1
+          fi
+          echo "KERNEL_SHA=$(git -C kernel-src rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "Confirmed SHA: $CLONED"
+
+      - name: Configure — Microsoft config-wsl + BLK_WBT=y
+        working-directory: kernel-src
+        run: |
+          cp Microsoft/config-wsl .config
+          echo "WBT config before additions:"
+          grep -E 'CONFIG_BLK_WBT' .config || echo "  (absent — expected for 6.6.y)"
+          sed -i '/CONFIG_BLK_WBT/d' .config
+          printf 'CONFIG_BLK_WBT=y\nCONFIG_BLK_WBT_MQ=y\n' >> .config
+          make ARCH=x86_64 olddefconfig 2>&1 | tee config-resolve.log
+          echo "WBT config after olddefconfig:"
+          grep -E 'CONFIG_BLK_WBT' .config
+
+      - name: Compile
+        working-directory: kernel-src
+        run: |
+          make ARCH=x86_64 -j$(nproc) 2>&1 | tee ../build-baseline.log
+          BUILD_RC=${PIPESTATUS[0]}
+          echo "Build exit: $BUILD_RC"
+          exit $BUILD_RC
+
+      - name: Verify WBT symbols
+        working-directory: kernel-src
+        run: |
+          nm vmlinux | grep -i wbt | head -30 || echo "No WBT symbols in vmlinux"
+          find . -name 'blk-wbt.ko' || echo "No blk-wbt.ko (built-in expected)"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: wbt-baseline-${{ env.KERNEL_SHA }}
+          retention-days: 30
+          path: |
+            kernel-src/vmlinux
+            kernel-src/arch/x86/boot/bzImage
+            kernel-src/.config
+            build-baseline.log
+            kernel-src/config-resolve.log
+
+  # -------------------------------------------------------------------------
+  # Job 2: Patched — same source/config + LAT_UNKNOWN_WRITES guard
+  # -------------------------------------------------------------------------
+  build-patched:
+    name: "Patched: WSL2 6.6 + WBT + LAT_UNKNOWN_WRITES guard"
+    needs: [pin-sha]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential bc bison flex libssl-dev libelf-dev \
+            libncurses-dev dwarves pahole cpio kmod rsync \
+            git ca-certificates curl python3
+
+      - name: Clone kernel at pinned SHA
+        run: |
+          git clone --depth=1 --branch "${{ env.KERNEL_BRANCH }}" \
+            "${{ env.KERNEL_REPO }}" kernel-src
+          CLONED=$(git -C kernel-src rev-parse HEAD)
+          PINNED="${{ needs.pin-sha.outputs.sha }}"
+          if [ "$CLONED" != "$PINNED" ]; then
+            echo "ERROR: cloned SHA ($CLONED) != pinned SHA ($PINNED)"
+            exit 1
+          fi
+          echo "KERNEL_SHA=$(git -C kernel-src rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "Confirmed SHA: $CLONED"
+
+      - name: Apply patch
+        working-directory: kernel-src
+        run: |
+          # The patch script is base64-encoded to safely embed inside a YAML
+          # block scalar. Direct heredocs fail: unindented body breaks YAML;
+          # indented body causes Python IndentationError. Base64 avoids both.
+          #
+          # To regenerate this blob:
+          #   python3 -c "import base64; print(base64.b64encode(open('patch.py','rb').read()).decode())"
+          #
+          # Patch summary:
+          #   In wb_timer_fn() LAT_UNKNOWN_WRITES case, before the unconditional
+          #   scale_up(), add:
+          #     if (stat[READ].nr_samples && stat[READ].min > rwb->min_lat_nsec)
+          #         scale_down(rwb, false); break;
+          #   This prevents write depth from increasing when reads are already
+          #   exceeding the latency target despite sparse write completions.
+          #
+          # ORIGINAL text confirmed via:
+          #   curl .../blk-wbt.c | sed -n '448,456p'  (2026-10-23)
+          python3 -c "
+          import base64, sys
+          script = base64.b64decode('aW1wb3J0IHN5cwoKU1JDID0gJ2Jsb2NrL2Jsay13YnQuYycKd2l0aCBvcGVuKFNSQywgJ3InKSBhcyBmOgogICAgY29udGVudCA9IGYucmVhZCgpCgpPUklHSU5BTCA9ICgKICAgICdcdGNhc2UgTEFUX1VOS05PV05fV1JJVEVTOlxuJwogICAgJ1x0XHQvKlxuJwogICAgJ1x0XHQgKiBXZSBzdGFydGVkIGEgdGhlIGNlbnRlciBzdGVwLCBidXQgZG9uXCd0IGhhdmUgYSB2YWxpZFxuJwogICAgJ1x0XHQgKiByZWFkL3dyaXRlIHNhbXBsZSwgYnV0IHdlIGRvIGhhdmUgd3JpdGVzIGdvaW5nIG9uLlxuJwogICAgJ1x0XHQgKiBBbGxvdyBzdGVwIHRvIGdvIG5lZ2F0aXZlLCB0byBpbmNyZWFzZSB3cml0ZSBwZXJmLlxuJwogICAgJ1x0XHQgKi9cbicKICAgICdcdFx0c2NhbGVfdXAocndiKTtcbicKICAgICdcdFx0YnJlYWs7JwopCgpSRVBMQUNFTUVOVCA9ICgKICAgICdcdGNhc2UgTEFUX1VOS05PV05fV1JJVEVTOlxuJwogICAgJ1x0XHQvKlxuJwogICAgJ1x0XHQgKiBXZSBzdGFydGVkIGEgdGhlIGNlbnRlciBzdGVwLCBidXQgZG9uXCd0IGhhdmUgYSB2YWxpZFxuJwogICAgJ1x0XHQgKiByZWFkL3dyaXRlIHNhbXBsZSwgYnV0IHdlIGRvIGhhdmUgd3JpdGVzIGdvaW5nIG9uLlxuJwogICAgJ1x0XHQgKiBBbGxvdyBzdGVwIHRvIGdvIG5lZ2F0aXZlLCB0byBpbmNyZWFzZSB3cml0ZSBwZXJmLlxuJwogICAgJ1x0XHQgKlxuJwogICAgJ1x0XHQgKiBFeGNlcHRpb246IGlmIHJlYWRzIGFyZSBiZWluZyBzYW1wbGVkIGluIHRoaXMgd2luZG93XG4nCiAgICAnXHRcdCAqIGFuZCB0aGVpciBtaW5pbXVtIG9ic2VydmVkIGxhdGVuY3kgYWxyZWFkeSBleGNlZWRzIHRoZVxuJwogICAgJ1x0XHQgKiBjb25maWd1cmVkIHRhcmdldCAocndiLT5taW5fbGF0X25zZWMpLCBzY2FsaW5nIHdyaXRlXG4nCiAgICAnXHRcdCAqIGRlcHRoIHVwd2FyZCB3b3JzZW5zIGxhdGVuY3kgd2UgY2FuIGFscmVhZHkgb2JzZXJ2ZS5cbicKICAgICdcdFx0ICogSW4gdGhhdCBjYXNlLCBzY2FsZSBkb3duIGluc3RlYWQgb2YgdXAuXG4nCiAgICAnXHRcdCAqL1xuJwogICAgJ1x0XHRpZiAoc3RhdFtSRUFEXS5ucl9zYW1wbGVzICYmXG4nCiAgICAnXHRcdCAgICBzdGF0W1JFQURdLm1pbiA+IHJ3Yi0+bWluX2xhdF9uc2VjKSB7XG4nCiAgICAnXHRcdFx0c2NhbGVfZG93bihyd2IsIGZhbHNlKTtcbicKICAgICdcdFx0XHRicmVhaztcbicKICAgICdcdFx0fVxuJwogICAgJ1x0XHRzY2FsZV91cChyd2IpO1xuJwogICAgJ1x0XHRicmVhazsnCikKCmlmIE9SSUdJTkFMIG5vdCBpbiBjb250ZW50OgogICAgcHJpbnQoJ0VSUk9SOiBUYXJnZXQgYmxvY2sgbm90IGZvdW5kIGluIGJsay13YnQuYy4nKQogICAgaWR4ID0gY29udGVudC5maW5kKCdMQVRfVU5LTk9XTl9XUklURVMnKQogICAgaWYgaWR4ID09IC0xOgogICAgICAgIHByaW50KCdGQVRBTDogTEFUX1VOS05PV05fV1JJVEVTCm5vdCBwcmVzZW50LicpCiAgICAgICAgc3lzLmV4aXQoMSkKICAgIHN0YXJ0ID0gbWF4KDAsIGlkeCAtIDEwMCkKICAgIGVuZCA9IG1pbihsZW4oY29udGVudCksIGlkeCArIDUwMCkKICAgIHByaW50KHJlcHIoY29udGVudFtzdGFydDplbmRdKSkKICAgIHN5cy5leGl0KDEpCgpwYXRjaGVkID0gY29udGVudC5yZXBsYWNlKE9SSUdJTkFMLCBSRVBMQUNFTUVOVCwgMSkKaWYgcGF0Y2hlZCA9PSBjb250ZW50OgogICAgcHJpbnQoJ0VSUk9SOiByZXBsYWNlKCkgbm8gY2hhbmdlLicpCiAgICBzeXMuZXhpdCgxKQoKd2l0aCBvcGVuKFNSQywgJ3cnKSBhcyBmOgogICAgZi53cml0ZShwYXRjaGVkKQoKcHJpbnQoJ1NVQ0NFU1M6IFBhdGNoIGFwcGxpZWQgdG8gYmxvY2svYmxrLXdidC5jJykK').decode()
+          exec(script)
+          "
+
+      - name: Verify patch
+        working-directory: kernel-src
+        run: |
+          echo "=== Patched LAT_UNKNOWN_WRITES section ==="
+          python3 -c "
+          with open('block/blk-wbt.c') as f:
+              c = f.read()
+          idx = c.find('LAT_UNKNOWN_WRITES')
+          print(c[idx:idx+600]) if idx != -1 else print('NOT FOUND')
+          "
+          echo "==="
+          echo ""
+          echo "=== git diff block/blk-wbt.c ==="
+          git diff block/blk-wbt.c
+
+      - name: Configure — Microsoft config-wsl + BLK_WBT=y
+        working-directory: kernel-src
+        run: |
+          cp Microsoft/config-wsl .config
+          sed -i '/CONFIG_BLK_WBT/d' .config
+          printf 'CONFIG_BLK_WBT=y\nCONFIG_BLK_WBT_MQ=y\n' >> .config
+          make ARCH=x86_64 olddefconfig 2>&1 | tee config-resolve.log
+          grep -E 'CONFIG_BLK_WBT' .config
+
+      - name: Compile
+        working-directory: kernel-src
+        run: |
+          make ARCH=x86_64 -j$(nproc) 2>&1 | tee ../build-patched.log
+          BUILD_RC=${PIPESTATUS[0]}
+          echo "Build exit: $BUILD_RC"
+          exit $BUILD_RC
+
+      - name: Capture diff
+        working-directory: kernel-src
+        run: |
+          git diff block/blk-wbt.c > ../wbt-patch-applied.diff
+          cat ../wbt-patch-applied.diff
+
+      - name: Verify WBT symbols
+        working-directory: kernel-src
+        run: |
+          nm vmlinux | grep -i wbt | head -30 || true
+          find . -name 'blk-wbt.ko' || echo "No blk-wbt.ko (built-in expected)"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: wbt-patched-${{ env.KERNEL_SHA }}
+          retention-days: 30
+          path: |
+            kernel-src/vmlinux
+            kernel-src/arch/x86/boot/bzImage
+            kernel-src/.config
+            build-patched.log
+            kernel-src/config-resolve.log
+            wbt-patch-applied.diff
+
+  # -------------------------------------------------------------------------
+  # Job 3: Summary
+  # -------------------------------------------------------------------------
+  build-summary:
+    name: "Build summary"
+    needs: [pin-sha, build-baseline, build-patched]
+    runs-on: ubuntu-22.04
+    if: always()
+
+    steps:
+      - name: Download baseline artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wbt-baseline-*
+          path: baseline-out
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Download patched artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wbt-patched-*
+          path: patched-out
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Report
+        run: |
+          echo "======================================================"
+          echo "  WBT Kernel Build Summary"
+          echo "  Pinned SHA: ${{ needs.pin-sha.outputs.sha }}"
+          echo "======================================================"
+          echo ""
+          echo "BASELINE:"
+          if [ -f baseline-out/bzImage ]; then
+            echo "  bzImage: $(ls -lh baseline-out/bzImage | awk '{print $5}')"
+            echo "  BUILD:   SUCCESS"
+          else
+            echo "  BUILD:   FAILED or artifact not available"
+          fi
+          echo ""
+          echo "PATCHED:"
+          if [ -f patched-out/bzImage ]; then
+            echo "  bzImage: $(ls -lh patched-out/bzImage | awk '{print $5}')"
+            echo "  BUILD:   SUCCESS"
+          else
+            echo "  BUILD:   FAILED or artifact not available"
+          fi
+          echo ""
+          echo "======================================================"
+          echo "  Patch diff"
+          echo "======================================================"
+          cat patched-out/wbt-patch-applied.diff 2>/dev/null || echo "  (not available)"
+
+      - name: Upload comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-comparison-report
+          retention-days: 30
+          path: |
+            baseline-out/build-baseline.log
+            patched-out/build-patched.log
+            patched-out/wbt-patch-applied.diff

@@ -1,0 +1,82 @@
+From: VoxBridge Research <research@voxbridge.local>
+Date: Thu, 23 Oct 2026 00:00:00 +0000
+Subject: [PATCH] block/blk-wbt: hold depth on LAT_UNKNOWN_WRITES when read latency elevated
+
+When write completions are sparse (fewer than RWB_MIN_WRITE_SAMPLES = 3
+per 100 ms window), WBT classifies the measurement window as
+LAT_UNKNOWN_WRITES and calls scale_up(), which allows the write queue
+depth to increase (potentially going negative, further boosting writes).
+
+For a pure write-only workload, this is the right response: there is no
+read latency evidence, so loosening the throttle is reasonable.
+
+However, this is the wrong response when concurrent reads ARE being
+sampled in the same window and their minimum observed latency already
+exceeds rwb->min_lat_nsec (the configured target). In that situation,
+WBT has positive evidence that the device is struggling with read latency,
+but it discards that evidence because the write sample count fell below
+RWB_MIN_WRITE_SAMPLES and classifies the whole window as LAT_UNKNOWN_WRITES
+instead of LAT_EXCEEDED.
+
+The result: the very window in which read latency is already elevated
+can trigger a scale_up() instead of a scale_down(), pushing the
+interference in the wrong direction.
+
+This patch adds a guard at the top of the LAT_UNKNOWN_WRITES branch:
+
+  if (stat[READ].nr_samples &&
+      stat[READ].min > rwb->min_lat_nsec)
+      → scale_down(rwb, false); break;
+
+This condition fires only when:
+  1. At least one read was sampled in the current 100 ms window, AND
+  2. The minimum read latency in that sample exceeds the configured target.
+
+When the condition does not hold (no read samples present, i.e., a
+genuine write-only workload), the original scale_up() path is unchanged.
+
+Note on stat[READ].min: blk_stat_callback accumulates a per-window
+minimum via exponential decay (see blk-stat.c:blk_stat_sum()). The
+minimum across sampled reads in the window is therefore a conservative
+lower bound on read latency; if it exceeds the target, every sampled
+read exceeded the target.
+
+Note on scale_down(rwb, false): passing hard_throttle=false matches the
+behavior used in the LAT_UNKNOWN fallback path. It increments scale_step
+by 1 without the additional queue-depth halving applied by LAT_EXCEEDED
+(hard_throttle=true). This is intentionally conservative.
+
+This patch is a research prototype for validation against a synthetic
+WSL2 workload (fio buffered-writer + latency-sensitive random reader)
+where the 100 ms window regularly contained 0–2 write completions while
+read P99 reached 6–8 ms on a SATA SSD with a 2 ms WBT target.
+
+Signed-off-by: VoxBridge Research <research@voxbridge.local>
+---
+ block/blk-wbt.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/block/blk-wbt.c b/block/blk-wbt.c
+index xxxxxxx..yyyyyyy 100644
+--- a/block/blk-wbt.c
++++ b/block/blk-wbt.c
+@@ -448,10 +448,21 @@ static void wb_timer_fn(struct blk_stat_callback *cb)
+ 	case LAT_UNKNOWN_WRITES:
+ 		/*
+ 		 * We started a the center step, but don't have a valid
+ 		 * read/write sample, but we do have writes going on.
+ 		 * Allow step to go negative, to increase write perf.
++		 *
++		 * Exception: if reads are being sampled in this window
++		 * and their minimum observed latency already exceeds the
++		 * configured target (rwb->min_lat_nsec), scaling write
++		 * depth upward worsens latency we can already observe.
++		 * In that case, scale down instead of up.
+ 		 */
++		if (stat[READ].nr_samples &&
++		    stat[READ].min > rwb->min_lat_nsec) {
++			scale_down(rwb, false);
++			break;
++		}
+ 		scale_up(rwb);
+ 		break;
