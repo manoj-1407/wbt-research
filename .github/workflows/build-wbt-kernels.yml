@@ -167,18 +167,20 @@ jobs:
 
       - name: Apply patch
         working-directory: kernel-src
+      - name: Apply WBT hold-depth guard and wbt_guard tracepoint
+        working-directory: kernel-src
         run: |
-          python3 ../wbt-research/patch_wbt.py block/blk-wbt.c
-
-
+          python3 ../wbt-research/patch_wbt.py .
 
       - name: Verify patch
         working-directory: kernel-src
         run: |
           echo "=== git diff block/blk-wbt.c ==="
           git diff block/blk-wbt.c
-          if git diff --quiet block/blk-wbt.c; then
-            echo "ERROR: Patch was not applied (git diff is empty)"
+          echo "=== git diff include/trace/events/wbt.h ==="
+          git diff include/trace/events/wbt.h
+          if git diff --quiet block/blk-wbt.c || git diff --quiet include/trace/events/wbt.h; then
+            echo "ERROR: Patch was not applied completely"
             exit 1
           fi
 
@@ -202,7 +204,7 @@ jobs:
       - name: Capture diff
         working-directory: kernel-src
         run: |
-          git diff block/blk-wbt.c > ../wbt-patch-applied.diff
+          git diff block/blk-wbt.c include/trace/events/wbt.h > ../wbt-patch-applied.diff
           cat ../wbt-patch-applied.diff
 
       - name: Verify WBT symbols

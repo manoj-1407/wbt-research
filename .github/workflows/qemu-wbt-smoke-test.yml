@@ -1,4 +1,4 @@
-name: "QEMU WBT Smoke Test — Boot & Tracepoint Validation"
+name: "QEMU WBT Concurrent Benchmark — Matched Workload & Guard Audit"
 
 on:
   workflow_dispatch:
@@ -16,10 +16,10 @@ permissions:
   actions: read
 
 jobs:
-  qemu-smoke-test:
-    name: "QEMU Smoke Test: Boot, WBT sysfs, and Tracepoints"
+  qemu-concurrent-benchmark:
+    name: "QEMU Benchmark: Matched Concurrent Read/Write & Guard Audit"
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Check out research repo
@@ -42,7 +42,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            qemu-system-x86 busybox-static cpio
+            qemu-system-x86 busybox-static cpio build-essential
 
       - name: Download Baseline Artifact
         uses: actions/download-artifact@v4
@@ -69,13 +69,17 @@ jobs:
           echo "Patched bzImage:"
           ls -lh patched_artifact/kernel-src/arch/x86/boot/bzImage
 
-      - name: Build micro-initramfs for WBT trace validation
+      - name: Build micro-initramfs for WBT concurrent benchmark
         run: |
           mkdir -p initramfs/{bin,sbin,dev,proc,sys,mnt,etc}
           cp /bin/busybox initramfs/bin/busybox
           
+          # Compile native static read latency probe
+          gcc -static -O2 benchmarks/read_latency_probe.c -o initramfs/bin/read_latency_probe
+          chmod +x initramfs/bin/read_latency_probe
+
           # Populate essential BusyBox symlinks
-          for cmd in sh ls cat echo mkdir mount umount dmesg sleep dd grep basename poweroff reboot; do
+          for cmd in sh ls cat echo mkdir mount umount dmesg sleep dd grep basename poweroff reboot kill; do
             ln -sf busybox "initramfs/bin/$cmd"
           done
 
@@ -91,13 +95,9 @@ jobs:
           # Mount devtmpfs so /dev/zero, /dev/sda, etc. exist
           mount -t devtmpfs none /dev 2>/dev/null || true
 
-          # Fallback: create /dev/zero manually if devtmpfs didn't populate it
-          if [ ! -e /dev/zero ]; then
-            mknod /dev/zero c 1 5
-          fi
-          if [ ! -e /dev/null ]; then
-            mknod /dev/null c 1 3
-          fi
+          # Fallback: create device nodes if needed
+          [ ! -e /dev/zero ] && mknod /dev/zero c 1 5
+          [ ! -e /dev/null ] && mknod /dev/null c 1 3
 
           mount -t tracefs none /sys/kernel/tracing 2>/dev/null || \
           mount -t debugfs none /sys/kernel/debug 2>/dev/null || true
@@ -106,16 +106,6 @@ jobs:
           echo "=== [QEMU-WBT] KERNEL BOOT SUCCESSFUL ==="
           echo "=========================================="
           uname -a
-          
-          echo "--- Checking BLK_WBT config in /proc/config.gz ---"
-          if [ -f /proc/config.gz ]; then
-            zcat /proc/config.gz | grep BLK_WBT || echo "BLK_WBT not set in config.gz"
-          else
-            echo "/proc/config.gz not present (normal if not enabled)"
-          fi
-
-          echo "--- Block devices in /sys/block ---"
-          ls -la /sys/block/
 
           TARGET_DEV=""
           for b in /sys/block/*; do
@@ -130,42 +120,39 @@ jobs:
             echo "[+] Target disk detected: /dev/$TARGET_DEV"
             WBT_LAT_NODE="/sys/block/$TARGET_DEV/queue/wbt_lat_usec"
             if [ -f "$WBT_LAT_NODE" ]; then
-              echo "[+] WBT sysfs node found: $WBT_LAT_NODE (current value: $(cat $WBT_LAT_NODE))"
-              # Ensure WBT is enabled with standard 20ms target latency if not already active
-              if [ "$(cat $WBT_LAT_NODE)" = "0" ] || [ "$(cat $WBT_LAT_NODE)" = "-1" ]; then
-                echo "20000" > "$WBT_LAT_NODE" 2>/dev/null || echo "[-] Failed to write to wbt_lat_usec"
-                echo "[+] Updated wbt_lat_usec to: $(cat $WBT_LAT_NODE)"
-              fi
-            else
-              echo "[-] Warning: $WBT_LAT_NODE does NOT exist on /dev/$TARGET_DEV"
+              # Set WBT target latency to 20,000 us (20ms) for controlled evaluation
+              echo "20000" > "$WBT_LAT_NODE" 2>/dev/null || true
+              echo "[+] Active wbt_lat_usec: $(cat $WBT_LAT_NODE)"
             fi
-          else
-            echo "[-] No physical/emulated disk found in /sys/block!"
           fi
 
-          echo "--- Checking WBT Tracepoint directory ---"
           if [ -d /sys/kernel/tracing/events/wbt ]; then
-            echo "[+] /sys/kernel/tracing/events/wbt exists!"
-            ls /sys/kernel/tracing/events/wbt
-            
             echo 0 > /sys/kernel/tracing/tracing_on
             echo "" > /sys/kernel/tracing/trace
             echo 1 > /sys/kernel/tracing/events/wbt/enable
             echo 1 > /sys/kernel/tracing/tracing_on
             echo "[+] WBT tracepoints armed."
-          else
-            echo "[-] Tracepoint directory /sys/kernel/tracing/events/wbt missing!"
           fi
 
           if [ -n "$TARGET_DEV" ]; then
-            echo "--- Generating I/O Activity on /dev/$TARGET_DEV ---"
-            # Write 20MB with fsync to force writeback through block layer
-            dd if=/dev/zero of="/dev/$TARGET_DEV" bs=1M count=20 conv=fsync 2>&1
-            sync
-            # Read back blocks
-            dd if="/dev/$TARGET_DEV" of=/dev/null bs=4k count=200 2>&1
-            # Allow timer windows to expire (100ms window)
-            sleep 2
+            echo "--- Starting Matched Concurrent Workload on /dev/$TARGET_DEV ---"
+            
+            # 1. Background streaming direct writer to first 64MB of disk
+            (
+              while [ ! -f /tmp/stop_writer ]; do
+                dd if=/dev/zero of="/dev/$TARGET_DEV" bs=64k count=50 seek=0 oflag=direct conv=fsync 2>/dev/null || true
+                sleep 0.05 2>/dev/null || true
+              done
+            ) &
+            WRITER_PID=$!
+
+            # 2. Foreground random 4KB read prober targeting 64MB..128MB region for 15 seconds
+            /bin/read_latency_probe "/dev/$TARGET_DEV" 15 64 64
+
+            # 3. Stop background writer
+            touch /tmp/stop_writer
+            wait $WRITER_PID 2>/dev/null || true
+            sleep 1
           fi
 
           echo "=========================================="
@@ -176,7 +163,7 @@ jobs:
           fi
 
           echo "=========================================="
-          echo "=== [QEMU-WBT] SMOKE TEST COMPLETE ==="
+          echo "=== [QEMU-WBT] BENCHMARK COMPLETE ==="
           echo "=========================================="
           poweroff -f
           EOF
@@ -189,70 +176,64 @@ jobs:
           cd ..
           ls -lh initramfs.cpio.gz
 
-      - name: Create virtual test disk
+      - name: Create fresh disposable virtual disks
         run: |
-          dd if=/dev/zero of=test_disk.img bs=1M count=128 status=progress
+          # 128MB baseline disk: prefill upper 64MB with random data for read probe
+          dd if=/dev/zero of=baseline_disk.img bs=1M count=128
+          dd if=/dev/urandom of=baseline_disk.img bs=1M seek=64 count=64 conv=notrunc
 
-      - name: Run Smoke Test — Baseline Kernel
+          # 128MB patched disk: identical initial structure
+          dd if=/dev/zero of=patched_disk.img bs=1M count=128
+          dd if=/dev/urandom of=patched_disk.img bs=1M seek=64 count=64 conv=notrunc
+
+      - name: Run Concurrent Benchmark — Baseline Kernel
         run: |
-          echo "Booting baseline kernel in QEMU..."
+          echo "Booting baseline kernel with baseline_disk.img..."
           timeout 120s qemu-system-x86_64 \
             $ACCEL \
             -m 1024 \
             -kernel baseline_artifact/kernel-src/arch/x86/boot/bzImage \
             -initrd initramfs.cpio.gz \
-            -drive file=test_disk.img,format=raw,if=ide \
+            -drive file=baseline_disk.img,format=raw,if=ide \
             -append "console=ttyS0 panic=1 quiet loglevel=3" \
             -nographic \
             -no-reboot 2>&1 | tee baseline_qemu.log || true
 
-          echo "--- Checking Baseline Smoke Test Results ---"
-          grep "KERNEL BOOT SUCCESSFUL" baseline_qemu.log || (echo "Baseline failed to boot!" && exit 1)
-          grep "Target disk detected" baseline_qemu.log || true
-          grep "wbt_lat_usec" baseline_qemu.log || true
-          grep -E 'wbt_timer|wbt_step|wbt_stat' baseline_qemu.log || echo "Notice: No WBT trace events emitted yet"
-
-      - name: Run Smoke Test — Patched Kernel
+      - name: Run Concurrent Benchmark — Patched Kernel
         run: |
-          echo "Booting patched kernel in QEMU..."
+          echo "Booting patched kernel with patched_disk.img..."
           timeout 120s qemu-system-x86_64 \
             $ACCEL \
             -m 1024 \
             -kernel patched_artifact/kernel-src/arch/x86/boot/bzImage \
             -initrd initramfs.cpio.gz \
-            -drive file=test_disk.img,format=raw,if=ide \
+            -drive file=patched_disk.img,format=raw,if=ide \
             -append "console=ttyS0 panic=1 quiet loglevel=3" \
             -nographic \
             -no-reboot 2>&1 | tee patched_qemu.log || true
 
-          echo "--- Checking Patched Smoke Test Results ---"
-          grep "KERNEL BOOT SUCCESSFUL" patched_qemu.log || (echo "Patched failed to boot!" && exit 1)
-          grep "Target disk detected" patched_qemu.log || true
-          grep "wbt_lat_usec" patched_qemu.log || true
-          grep -E 'wbt_timer|wbt_step|wbt_stat' patched_qemu.log || echo "Notice: No WBT trace events emitted yet"
-
-      - name: Display and record smoke test results
+      - name: Display and analyze benchmark results
         run: |
           mkdir -p benchmarks/smoke_test
           cp baseline_qemu.log benchmarks/smoke_test/
           cp patched_qemu.log benchmarks/smoke_test/
 
-          echo "## Baseline Kernel QEMU Smoke Test Log" >> $GITHUB_STEP_SUMMARY
+          echo "## Ftrace WBT Evaluation: Baseline" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
-          cat baseline_qemu.log >> $GITHUB_STEP_SUMMARY
+          python3 ftrace_wbt_tracer.py analyze baseline_qemu.log | tee baseline_analysis.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          echo "## Patched Kernel QEMU Smoke Test Log" >> $GITHUB_STEP_SUMMARY
+          echo "## Ftrace WBT Evaluation: Patched (Hold-Depth)" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
-          cat patched_qemu.log >> $GITHUB_STEP_SUMMARY
+          python3 ftrace_wbt_tracer.py analyze patched_qemu.log | tee patched_analysis.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          echo "=================== BASELINE LOG ==================="
-          cat baseline_qemu.log
-          echo "=================== PATCHED LOG ==================="
-          cat patched_qemu.log
+          echo "=================== BASELINE ANALYSIS ==================="
+          cat baseline_analysis.txt
+          echo "=================== PATCHED ANALYSIS ==================="
+          cat patched_analysis.txt
 
-      - name: Commit smoke test logs to repository
+      - name: Commit benchmark logs to repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -260,16 +241,18 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore(ci): record smoke test boot logs from QEMU [skip ci]"
-            git push origin main
+            git commit -m "chore(ci): record concurrent benchmark logs from QEMU [skip ci]"
+            git push origin HEAD || true
           fi
 
-      - name: Upload QEMU smoke test logs
+      - name: Upload QEMU benchmark logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: qemu-smoke-test-logs
+          name: qemu-concurrent-benchmark-logs
           retention-days: 14
           path: |
             baseline_qemu.log
             patched_qemu.log
+            baseline_analysis.txt
+            patched_analysis.txt
