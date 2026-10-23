@@ -24,8 +24,8 @@ interference in the wrong direction.
 
 This patch adds a guard at the top of the LAT_UNKNOWN_WRITES branch:
 
-  if (stat[READ].nr_samples &&
-      stat[READ].min > rwb->min_lat_nsec)
+  if (cb->stat[READ].nr_samples &&
+      cb->stat[READ].min > rwb->min_lat_nsec)
       → scale_down(rwb, false); break;
 
 This condition fires only when:
@@ -35,11 +35,10 @@ This condition fires only when:
 When the condition does not hold (no read samples present, i.e., a
 genuine write-only workload), the original scale_up() path is unchanged.
 
-Note on stat[READ].min: blk_stat_callback accumulates a per-window
-minimum via exponential decay (see blk-stat.c:blk_stat_sum()). The
-minimum across sampled reads in the window is therefore a conservative
-lower bound on read latency; if it exceeds the target, every sampled
-read exceeded the target.
+Note on cb->stat[READ].min: blk_stat_timer_fn resets cb->stat per window
+and aggregates per-CPU completion minimums for that window. The minimum
+across sampled reads is therefore strictly a current-window measurement;
+if it exceeds the target, every sampled read in this window exceeded the target.
 
 Note on scale_down(rwb, false): passing hard_throttle=false matches the
 behavior used in the LAT_UNKNOWN fallback path. It increments scale_step
@@ -70,11 +69,11 @@ index xxxxxxx..yyyyyyy 100644
 +		 * Exception: if reads are being sampled in this window
 +		 * and their minimum observed latency already exceeds the
 +		 * configured target (rwb->min_lat_nsec), scaling write
-+		 * depth upward worsens latency we can already observe.
-+		 * In that case, scale down instead of up.
- 		 */
-+		if (stat[READ].nr_samples &&
-+		    stat[READ].min > rwb->min_lat_nsec) {
++		 * depth upward is hypothesized to worsen read latency.
++		 * In that case, scale down conservatively instead of up.
++		 */
++		if (cb->stat[READ].nr_samples &&
++		    cb->stat[READ].min > rwb->min_lat_nsec) {
 +			scale_down(rwb, false);
 +			break;
 +		}
