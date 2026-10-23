@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
-"""Consolidate the 8 matched QEMU benchmark logs into one matrix."""
+"""Consolidate the 8 matched QEMU benchmark logs into one matrix.
+
+Usage:  python3 scripts/summarize_bench.py [bench_dir]
+
+bench_dir defaults to <repo>/results, which is where the raw *_qemu.log
+traces are archived, so the matrix can be regenerated from a clean
+checkout with no arguments.
+"""
 import re, os, sys
 
-BENCH = sys.argv[1] if len(sys.argv) > 1 else r"D:\io_investigation\_evidence\bench_40002470957"
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BENCH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "results")
+OUTDIR = os.path.join(REPO, "results", "comparison")
 CFGS = ["baseline_ide_h", "patched_ide_h", "baseline_vio_h", "patched_vio_h",
         "baseline_ide_s", "patched_ide_s", "baseline_vio_s", "patched_vio_s"]
 
@@ -10,14 +19,20 @@ probe_re = re.compile(r"\[PROBE_RESULT\] SAMPLES=(\d+) MIN_US=(\d+) P50_US=(\d+)
 writ_re  = re.compile(r"\[WRITER_RESULT\] OPS=(\d+) BYTES=(\d+) ITERS=(\d+) ERR=(\d+) FSYNC_ERR=(\d+)")
 blk_re   = re.compile(r"\[BLKSTAT-DELTA\] read_sectors=(\d+) write_sectors=(\d+)")
 cnt_re   = re.compile(r"^(wbt_timer|wbt_step|wbt_stat|wbt_lat|wbt_guard)\s*:\s*(\d+)")
-step_re  = re.compile(r"wbt_step: 8:0: status=(\d+), step=(-?\d+)")
+step_re  = re.compile(r"wbt_step: 8:0: (?:scale up|scale down): step=(-?\d+), window=(\d+)us, background=(\d+), normal=(\d+), max=(\d+)")
 guard_re = re.compile(r"wbt_guard: 8:0: step=(-?\d+), r_samples=(\d+), r_min=(\d+)us, target=(\d+)us, guard_fired=(\d+), action=(\S+)")
 nrq_re   = re.compile(r"NR_requests=(\d+)", re.I)
 
 rows = []
 for cfg in CFGS:
-    path = os.path.join(BENCH, cfg + "_qemu.log")
-    if not os.path.exists(path):
+    path = None
+    for sub in ("", "baseline", "patched"):
+        cand = os.path.join(BENCH, sub, cfg + "_qemu.log") if sub else os.path.join(BENCH, cfg + "_qemu.log")
+        if os.path.exists(cand):
+            path = cand
+            break
+    if path is None:
+        print(f"[missing] {cfg}_qemu.log not found under {os.path.abspath(BENCH)}", file=sys.stderr)
         continue
     txt = open(path, "r", errors="replace").read()
     probes = [tuple(map(float, m.groups())) for m in probe_re.finditer(txt)]
@@ -28,7 +43,7 @@ for cfg in CFGS:
         m = cnt_re.match(line.strip())
         if m:
             cnts[m.group(1)] = int(m.group(2))
-    steps = [int(m.group(2)) for m in step_re.finditer(txt)]
+    steps = [int(m.group(1)) for m in step_re.finditer(txt)]
     guards = [(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), m.group(6)) for m in guard_re.finditer(txt)]
     nrq = nrq_re.search(txt)
     rows.append(dict(cfg=cfg, probes=probes, writs=writs, blk=blk.groups() if blk else None,
@@ -40,6 +55,7 @@ def p(s=""):
 
 p("=" * 96)
 p("MATCHED BENCHMARK MATRIX - run 40002470957")
+p(f"source: {os.path.abspath(BENCH)}")
 p("=" * 96)
 for r in rows:
     p(f"\n### {r['cfg']}")
@@ -90,5 +106,8 @@ for dev in ("ide", "vio"):
         p(f"   finstep : base={b['steps'][-1] if b['steps'] else None} patched={q['steps'][-1] if q['steps'] else None}")
 
 txt = "\n".join(out)
-open(r"C:\Users\vharr\AppData\Local\Temp\wbt_validate\bench_matrix.txt", "w", encoding="utf-8").write(txt)
+os.makedirs(OUTDIR, exist_ok=True)
+dest = os.path.join(OUTDIR, "bench_matrix.txt")
+open(dest, "w", encoding="utf-8", newline="\n").write(txt)
+print(f"[written] {dest}\n")
 print(txt)

@@ -1,0 +1,385 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+3FF8B2F0+3FECB2F0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from ROM..c[?7l[2J==========================================
+=== [QEMU-WBT] KERNEL BOOT SUCCESSFUL ===
+=== PROFILE: sparse  writers=1  readprocs=6 ===
+=== PARAMS: wchunk=4KB wwindow=4MB wstride=4MB wsleep=80ms rpace=1000us target=150us ===
+##########################################
+Linux 6.6.123.2-microsoft-standard-WSL2+ #1 SMP PREEMPT_DYNAMIC Fri Oct 23 16:56:02 UTC 2026 x86_64 GNU/Linux
+--- BLK_WBT config from /proc/config.gz ---
+CONFIG_BLK_WBT=y
+CONFIG_BLK_WBT_MQ=y
+--- Block devices in /sys/block ---
+loop0  loop3  loop6  ram1   ram12  ram15  ram4   ram7   sda
+loop1  loop4  loop7  ram10  ram13  ram2   ram5   ram8
+loop2  loop5  ram0   ram11  ram14  ram3   ram6   ram9
+[+] Target disk detected: /dev/sda
+[i] queue/nr_requests : 256
+[i] queue/rotational  : 1
+[i] queue/scheduler   : none [mq-deadline] kyber 
+[i] queue_depth (blk) : not exposed
+[+] Active wbt_lat_usec: 150
+--- Checking WBT tracepoint directory ---
+[+] /sys/kernel/tracing/events/wbt exists!
+enable     filter     wbt_lat    wbt_stat   wbt_step   wbt_timer
+[+] WBT tracepoints armed (buffer=sda).
+[BLKSTAT] before:        1        0        8        1        0        0        0        0        0        0        1        0        0        0        0        0        0
+--- Matched I/O workload on /dev/sda ---
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=4096B offset=0MB window=4MB sleep=80ms duration=30s
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE_RESULT] SAMPLES=16412 MIN_US=242 P50_US=524 P90_US=801 P99_US=1119 MAX_US=18911 MEAN_US=554.9
+[PROBE_RESULT] SAMPLES=16421 MIN_US=245 P50_US=527 P90_US=802 P99_US=1151 MAX_US=14742 MEAN_US=557.7
+[PROBE_RESULT] SAMPLES=16403 MIN_US=236 P50_US=527 P90_US=802 P99_US=1134 MAX_US=6939 MEAN_US=557.0
+[PROBE_RESULT] SAMPLES=16396 MIN_US=239 P50_US=527 P90_US=807 P99_US=1130 MAX_US=14596 MEAN_US=557.5
+[WRITER_RESULT] OPS=367 BYTES=1503232 ITERS=367 ERR=0 FSYNC_ERR=0
+[PROBE_RESULT] SAMPLES=16403 MIN_US=244 P50_US=524 P90_US=800 P99_US=1133 MAX_US=11344 MEAN_US=554.7
+[PROBE_RESULT] SAMPLES=16401 MIN_US=241 P50_US=527 P90_US=803 P99_US=1155 MAX_US=20203 MEAN_US=558.6
+[BLKSTAT] after :    98437        0   787496    30073      734        0     2936      197        0    15784    30328        0        0        0        0      367       57
+[BLKSTAT-DELTA] read_sectors=787488 write_sectors=2936
+=== [QEMU-WBT] EVENT COUNTS ===
+wbt_timer : 303
+wbt_step  : 6
+wbt_stat  : 0
+0
+wbt_lat   : 0
+0
+wbt_guard : 0
+0
+==========================================
+=== [QEMU-WBT] CAPTURED TRACE BUFFER ===
+==========================================
+# tracer: nop
+#
+# entries-in-buffer/entries-written: 309/309   #P:1
+#
+#                                _-----=> irqs-off/BH-disabled
+#                               / _----=> need-resched
+#                              | / _---=> hardirq/softirq
+#                              || / _--=> preempt-depth
+#                              ||| / _-=> migrate-disable
+#                              |||| /     delay
+#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
+#              | |         |   |||||     |         |
+ read_latency_pr-173     [000] ..s1.     2.152479: wbt_timer: 8:0: status=3, step=0, inflight=0
+ read_latency_pr-173     [000] ..s1.     2.152933: wbt_step: 8:0: scale up: step=-1, window=100000us, background=8, normal=16, max=31
+ read_latency_pr-171     [000] ..s..     2.256232: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..     2.256256: wbt_step: 8:0: scale up: step=-2, window=100000us, background=16, normal=31, max=61
+ read_latency_pr-173     [000] ..s1.     2.360174: wbt_timer: 8:0: status=3, step=-2, inflight=0
+ read_latency_pr-173     [000] ..s1.     2.360225: wbt_step: 8:0: scale up: step=-3, window=100000us, background=24, normal=48, max=96
+ read_latency_pr-176     [000] ..s..     2.464150: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] .Ns..     2.568111: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     2.672113: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s1.     2.776123: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..     2.880166: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     2.984082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..     3.088123: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.     3.192091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     3.296107: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.     3.400108: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.     3.504127: wbt_timer: 8:0: status=3, step=-3, inflight=0
+      wbt_writer-170     [000] ..s..     3.608085: wbt_timer: 8:0: status=3, step=-3, inflight=1
+ read_latency_pr-171     [000] ..s..     3.712146: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     3.816121: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     3.920088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.024141: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     4.128090: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s1.     4.232103: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     4.336086: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] .Ns1.     4.440124: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.544118: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..     4.648354: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..     4.752131: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     4.856100: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.     4.960157: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..     5.064061: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     5.168094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     5.272068: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     5.376064: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..     5.480109: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..     5.584134: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.     5.688147: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     5.792090: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..     5.896097: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.     6.000097: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..     6.104485: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     6.208095: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     6.312094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] .Ns..     6.416120: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     6.520093: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     6.624098: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s1.     6.728117: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     6.832127: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..     6.936100: wbt_timer: 8:0: status=3, step=-3, inflight=0
+      wbt_writer-170     [000] ..s..     7.040112: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..     7.144173: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.248104: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..     7.352143: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.456108: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.560095: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.664110: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.768081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.872078: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.976101: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s1.     8.080132: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..     8.184099: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     8.288120: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     8.392062: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..     8.496133: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     8.600102: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     8.704075: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.     8.808144: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.912145: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     9.016084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.120072: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.     9.224297: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.     9.328082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.432114: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     9.536074: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..     9.640142: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.744130: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.848128: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     9.952089: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    10.056105: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.160081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.264092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.368129: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.472095: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    10.576088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.680073: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    10.784126: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.888076: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..    10.992074: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    11.096155: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    11.200083: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    11.304063: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.    11.408091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    11.512134: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    11.616136: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    11.720129: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] .Ns..    11.824117: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    11.928084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    12.032102: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    12.136120: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    12.240097: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    12.344132: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    12.448094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    12.552092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    12.656082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    12.760122: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] .Ns..    12.864141: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    12.968067: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.072078: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.176072: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    13.280089: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.384082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+      wbt_writer-170     [000] ..s1.    13.488106: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.592091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.696089: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.800069: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.904079: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..    14.008156: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.112126: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    14.216080: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..    14.320082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    14.424072: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.528104: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..    14.632098: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.736139: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    14.840176: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    14.944071: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    15.048167: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    15.152073: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    15.256081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s1.    15.360101: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    15.464147: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    15.568151: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] .Ns..    15.672160: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    15.776099: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s..    15.880104: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] .Ns1.    15.984111: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    16.088083: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    16.192152: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    16.296091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    16.400095: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    16.504086: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    16.608091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    16.712100: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] .Ns..    16.816176: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] .Ns..    16.920102: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    17.024103: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.    17.128096: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    17.232078: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    17.336125: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    17.440111: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    17.544078: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    17.648164: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    17.752098: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    17.856081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    17.960086: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    18.064136: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    18.168085: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    18.272078: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    18.376122: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.    18.480087: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    18.584081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    18.688888: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    18.792067: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    18.896107: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    19.000185: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.104090: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    19.208149: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] .Ns..    19.312110: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.416070: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    19.520111: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    19.624131: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s1.    19.728126: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    19.832120: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    19.936120: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    20.040107: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    20.144088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    20.248126: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    20.352082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    20.456086: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] .Ns..    20.560094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.    20.664135: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    20.768089: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.    20.872190: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.    20.976140: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.080083: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    21.184062: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    21.288077: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    21.392066: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    21.496108: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    21.600081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    21.704098: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    21.808094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.912117: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    22.016115: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    22.120188: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    22.224091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    22.328549: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s1.    22.432088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.536092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.640093: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    22.744115: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    22.848112: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.952084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    23.056076: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] .Ns..    23.160103: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s1.    23.264091: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] .Ns..    23.368108: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    23.472165: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    23.576088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.680236: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    23.784102: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.888088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.992076: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    24.096115: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    24.200131: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    24.304085: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    24.408084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    24.512126: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    24.616094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    24.720070: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    24.824102: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.    24.928145: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    25.032115: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    25.136135: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    25.240164: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    25.344092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    25.448130: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    25.552114: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    25.656080: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.    25.760106: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    25.864177: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    25.968075: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    26.072137: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s1.    26.176164: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    26.280305: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    26.384074: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    26.488105: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    26.592094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    26.696098: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s1.    26.800139: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    26.904079: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s1.    27.008109: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    27.112087: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    27.216130: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s1.    27.320082: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s1.    27.424179: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    27.528087: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    27.632132: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    27.736155: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    27.840169: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    27.944094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    28.048088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    28.152092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    28.256095: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    28.360097: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    28.464078: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    28.568143: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    28.672085: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    28.776092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    28.880070: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] .Ns..    28.984066: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    29.088137: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-173     [000] ..s1.    29.192094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.    29.296084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    29.400081: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    29.504085: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    29.608084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    29.712092: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-172     [000] ..s..    29.816101: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] .Ns..    29.920184: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    30.024204: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    30.128084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    30.232112: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    30.336064: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    30.440101: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s..    30.544088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    30.648098: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    30.752112: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    30.856088: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    30.960103: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-174     [000] ..s..    31.064114: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    31.168112: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-175     [000] ..s..    31.272184: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    31.376117: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    31.480129: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] ..s1.    31.584144: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    31.688084: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-171     [000] ..s..    31.792094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-176     [000] .Ns..    31.896083: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    32.000101: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    32.104284: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    32.208282: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    32.312307: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    32.416305: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    32.520332: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    32.520492: wbt_step: 8:0: scale down: step=-2, window=100000us, background=16, normal=31, max=61
+          <idle>-0       [000] .Ns1.    32.624341: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    32.728290: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    32.832351: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    32.936318: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    33.040321: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    33.040341: wbt_step: 8:0: scale down: step=-1, window=100000us, background=8, normal=16, max=31
+          <idle>-0       [000] ..s1.    33.144272: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.248353: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.352332: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.456345: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.560314: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.560336: wbt_step: 8:0: scale down: step=0, window=100000us, background=4, normal=8, max=16
+==========================================
+=== [QEMU-WBT] BENCHMARK COMPLETE ===
+==========================================
+[   34.259785] reboot: Power down

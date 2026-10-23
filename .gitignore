@@ -5,7 +5,8 @@ __pycache__/
 *.log
 *.trace
 
-# CI benchmark logs are intentionally archived by
-# .github/workflows/qemu-wbt-smoke-test.yml ("Commit benchmark logs to
-# repository") so that every repetition's raw trace survives the run.
+# Raw benchmark traces and the CI archives are the primary evidence for the
+# published analysis, so they are deliberately tracked even though logs are
+# otherwise ignored.
 !benchmarks/smoke_test/*.log
+!results/**/*.log
