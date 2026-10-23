@@ -55,7 +55,7 @@ def p(s=""):
 
 p("=" * 96)
 p("MATCHED BENCHMARK MATRIX - run 40002470957")
-p(f"source: {os.path.abspath(BENCH)}")
+p(f"source: {os.path.relpath(os.path.abspath(BENCH), REPO)}")
 p("=" * 96)
 for r in rows:
     p(f"\n### {r['cfg']}")
