@@ -165,8 +165,6 @@ jobs:
           echo "KERNEL_SHA=$(git -C kernel-src rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "Confirmed SHA: $CLONED"
 
-      - name: Apply patch
-        working-directory: kernel-src
       - name: Apply WBT hold-depth guard and wbt_guard tracepoint
         working-directory: kernel-src
         run: |
