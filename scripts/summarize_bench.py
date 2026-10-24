@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 """Consolidate the 8 matched QEMU benchmark logs into one matrix.
 
-Usage:  python3 scripts/summarize_bench.py [bench_dir]
+Usage:  python3 scripts/summarize_bench.py [bench_dir] [run_label] [out_name]
 
-bench_dir defaults to <repo>/results, which is where the raw *_qemu.log
-traces are archived, so the matrix can be regenerated from a clean
-checkout with no arguments.
+bench_dir defaults to <repo>/results, which is where the run-1 raw
+*_qemu.log traces are archived, so the run-1 matrix can be regenerated
+from a clean checkout with no arguments (this is what CI asserts).
+
+The same generator produces the repetition matrices, e.g.
+
+  python3 scripts/summarize_bench.py results/reps/rep2 \
+      "run 40004718895 (rep 2)" bench_matrix_rep2.txt
+
+which writes results/comparison/bench_matrix_rep2.txt with no values
+transcribed by hand.
 """
 import re, os, sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BENCH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "results")
+LABEL = sys.argv[2] if len(sys.argv) > 2 else "run 40002470957"
+OUT = sys.argv[3] if len(sys.argv) > 3 else "bench_matrix.txt"
 OUTDIR = os.path.join(REPO, "results", "comparison")
 CFGS = ["baseline_ide_h", "patched_ide_h", "baseline_vio_h", "patched_vio_h",
         "baseline_ide_s", "patched_ide_s", "baseline_vio_s", "patched_vio_s"]
@@ -54,7 +64,7 @@ def p(s=""):
     out.append(s)
 
 p("=" * 96)
-p("MATCHED BENCHMARK MATRIX - run 40002470957")
+p(f"MATCHED BENCHMARK MATRIX - {LABEL}")
 p(f"source: {os.path.relpath(os.path.abspath(BENCH), REPO)}")
 p("=" * 96)
 for r in rows:
@@ -107,7 +117,7 @@ for dev in ("ide", "vio"):
 
 txt = "\n".join(out)
 os.makedirs(OUTDIR, exist_ok=True)
-dest = os.path.join(OUTDIR, "bench_matrix.txt")
+dest = os.path.join(OUTDIR, OUT)
 open(dest, "w", encoding="utf-8", newline="\n").write(txt)
 print(f"[written] {dest}\n")
 print(txt)

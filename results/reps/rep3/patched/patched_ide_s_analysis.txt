@@ -1,0 +1,50 @@
+================================================================================
+WBT In-Kernel Trace Analysis: patched_ide_s_qemu.log
+================================================================================
+
+--- Workload Validity (block-layer evidence) ---
+  writer open : dev=/dev/sda mode=BUFFERED chunk=4096B sleep=80ms
+  [+] all writers report mode=BUFFERED (WBT-trackable) - as required
+  writers ran : 1 process(es), OPS=358 BYTES=1466368 ERR=0 FSYNC_ERR=0
+  readers ran : 6 process(es), open_mode=['O_DIRECT']
+  blk delta   : read_sectors=467856 write_sectors=2864
+Total WBT Timer Windows: 293
+Total Step Transitions:  2
+Total Stat Reports:      0
+Total Latency Alerts:    0
+Total Guard Decisions:   288
+
+--- Status Distribution Across Windows ---
+  LAT_UNKNOWN_WRITES  :   288 ( 98.3%)
+  LAT_UNKNOWN         :     5 (  1.7%)
+
+[CRITICAL EVALUATION]
+  LAT_UNKNOWN_WRITES (status=3) Events: 288 / 293
+  --> The kernel entered LAT_UNKNOWN_WRITES in 288 window(s).
+
+[GUARD DECISION AUDIT]
+  Total wbt_guard Evaluations: 288
+    - Guard FIRED (Hold Depth): 3
+    - Guard NOT FIRED (Scale Up): 285
+    [1] ts=2.7614 dev=8:0 step=0 r_samples=192 r_min=113us target=150us --> action=scale_up (fired=0)
+    [2] ts=2.8641 dev=8:0 step=-1 r_samples=198 r_min=121us target=150us --> action=scale_up (fired=0)
+    [3] ts=2.9681 dev=8:0 step=-1 r_samples=194 r_min=131us target=150us --> action=scale_up (fired=0)
+    [4] ts=3.0722 dev=8:0 step=-1 r_samples=213 r_min=125us target=150us --> action=scale_up (fired=0)
+    [5] ts=3.1762 dev=8:0 step=-1 r_samples=209 r_min=124us target=150us --> action=scale_up (fired=0)
+
+--- Correlated Decision Timeline ---
+  [ 1] ts=2.7607 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: scale up -> step=-1 | Guard: guard=scale_up (fired=0, r_min=113us) | Stat: no stat
+  [ 2] ts=2.8641 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=121us) | Stat: no stat
+  [ 3] ts=2.9681 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=131us) | Stat: no stat
+  [ 4] ts=3.0722 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=125us) | Stat: no stat
+  [ 5] ts=3.1762 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=124us) | Stat: no stat
+  [ 6] ts=3.2801 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=119us) | Stat: no stat
+  [ 7] ts=3.3842 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=123us) | Stat: no stat
+  [ 8] ts=3.4881 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=119us) | Stat: no stat
+  [ 9] ts=3.5921 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=120us) | Stat: no stat
+  [10] ts=3.6961 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=126us) | Stat: no stat
+  [11] ts=3.8001 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=144us) | Stat: no stat
+  [12] ts=3.9041 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=139us) | Stat: no stat
+  [13] ts=4.0081 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=119us) | Stat: no stat
+  [14] ts=4.1121 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=114us) | Stat: no stat
+  [15] ts=4.2161 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=scale_up (fired=0, r_min=119us) | Stat: no stat

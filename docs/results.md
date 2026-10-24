@@ -3,7 +3,15 @@
 Primary experiment: GitHub Actions run **`40002470957`**,
 `head_sha = c53cd2a`, `conclusion = success`, all 8 configurations.
 Raw traces in `results/baseline`, `results/patched`; machine-extracted
-matrix in `results/comparison/comparison.md`.
+matrix in `results/comparison/bench_matrix.txt`.
+
+Two further repetitions of the same commit are now **content-available**:
+raw traces in `results/reps/rep2` and `results/reps/rep3`, matrices
+`results/comparison/bench_matrix_rep2.txt` and `_rep3.txt`, all generated
+from the traces by `scripts/summarize_bench.py`. Sections 1–6 describe
+run 1 only; Section 7 reconciles the three runs and Section 8 is the
+cross-run result. The cross-run finding **revises** the run-1 reading in
+Section 5 — see §8.
 
 ## 1. Validity gates — all passed
 
@@ -74,6 +82,15 @@ Reading:
 * **`patched_vio_h` never reaches the branch at all** — the heavy profile
   produces ≥ 3 write completions per window, so `stat_sample_valid()` is
   true, WBT classifies `LAT_OK`, and `LAT_UNKNOWN_WRITES` is not entered.
+
+Caveat introduced by the repetitions (§7): the census above is run-1
+specific. The *decision rule* reproduces exactly, but the *regime* does
+not. On reps 2/3 the slower host stretches both the read-latency floor and
+the 100 ms window, so `patched_vio_s` produces 184 evaluations instead of
+283, every live evaluation holds, and `patched_ide_s` — which never held in
+run 1 (`r_min` 62–77 µs) — holds 3–4 times because its `r_min` floor rises
+to 100–166 µs and now straddles the 150 µs target. The guard is therefore
+not measuring the workload so much as the host's speed.
 
 ## 4. Mechanism evidence: the depth lever moved, and only where predicted
 
@@ -177,68 +194,192 @@ Delta, patched − baseline:
 
 ## 7. Repeatability
 
-| | run | head | conclusion | artifact size |
-| :--- | :--- | :--- | :--- | ---: |
-| rep 1 | 40002470957 | c53cd2a | success | 90 338 B |
-| rep 2 | 40004718895 | c53cd2a | success | 90 956 B |
-| rep 3 | 40004771234 | c53cd2a | success | 90 255 B |
+Three matched runs of the same commit (`c53cd2a`) and the same harness all
+succeeded. All three are now **content-available** in-repo:
 
-All three runs executed the identical commit and harness, and all three
-produced an artifact of comparable size (all 8 configurations × 2 files),
-i.e. the experiment is **operationally** reproducible: it does not
-intermittently collapse into the empty-trace failure mode.
+| rep | run id | `head_sha` | artifact size | artifact sha256 | traces | matrix |
+| :--- | :--- | :--- | ---: | :--- | :--- | :--- |
+| run 1 | `40002470957` | `c53cd2a` | 90 338 B | not published here | `results/baseline`, `results/patched` | `bench_matrix.txt` |
+| rep 2 | `40004718895` | `c53cd2a` | 90 956 B | `d27aaed1…a407587` | `results/reps/rep2` | `bench_matrix_rep2.txt` |
+| rep 3 | `40004771234` | `c53cd2a` | 90 255 B | `575bbfab…9d25dd0e` | `results/reps/rep3` | `bench_matrix_rep3.txt` |
 
-**Content-level comparison across repetitions is now available** in Section 8 and docs/three-run-reconciliation.md. The initial artifact-access limitation was resolved for this research pass.
+### 7.1 Provenance
 
-The three artifact payloads are provably distinct — the run pages expose
-their digests, so the runs are independent executions rather than repeated
-uploads of one file:
+The two repetition payloads were supplied as ZIPs and their digests
+recomputed **from the ZIP bytes**:
 
-| run | artifact sha256 |
-| :--- | :--- |
-| 40004718895 | `d27aaed10c9d0cef512c67fadc9f06d7fedd804b1209809862e9e0115a407587` |
-| 40004771234 | `575bbfab4cf3aea16681abb5bd88317b3e80543b21603bcc696bd0109d25dd0e` |
+| file | sha256 (over the ZIP bytes) | → run |
+| :--- | :--- | :--- |
+| `qemu-matched-benchmark-logs.zip` | `D27AAED10C9D0CEF512C67FADC9F06D7FEDD804B1209809862E9E0115A407587` | `40004718895` (rep 2) |
+| `qemu-matched-benchmark-logs (1).zip` | `575BBFAB4CF3AEA16681ABB5BD88317B3E80543B21603BCC696BD0109D25DD0E` | `40004771234` (rep 3) |
 
-Four retrieval routes were attempted and all are closed to an unauthenticated
-reader:
+Both digests equal the artifact digests the GitHub run pages report for
+those runs — the same values already recorded here before the payloads
+existed — which is what ties each ZIP, and therefore each extracted
+`*_qemu.log` set, to its run. The mapping is fixed by the digest, not by
+file order or ZIP name.
 
-| route | result |
-| :--- | :--- |
-| `GET /actions/artifacts/<id>/zip` | `401` |
-| `GET /actions/runs/<id>/logs` | `403` |
-| run page HTML (anonymous) | run metadata only; the `$GITHUB_STEP_SUMMARY` body, which holds the full per-config analysis, is not served |
-| job page HTML (anonymous) | step names and conclusions only, no step output |
+Each ZIP has the same 16-file structure as run 1: eight `*_qemu.log`
+traces (`{baseline,patched}_{ide,vio}_{h,s}`) plus eight `*_analysis.txt`
+summaries. Both sets are committed under `results/reps/`. The traces carry
+the run's own header, and all three runs report the same
+`PROFILE: sparse writers=1 readprocs=6` / `heavy writers=4 readprocs=2`,
+`wchunk=4KB wwindow=4MB wstride=4MB wsleep=80ms rpace=1000us target=150us`,
+`Linux 6.6.123.2-microsoft-standard-WSL2`, and `CONFIG_BLK_WBT=y` +
+`CONFIG_BLK_WBT_MQ=y`.
 
-Reopening this requires either a rotated token carrying `actions:read`, which
-would allow the artifacts to be fetched, or re-running the harness on a
-KVM-capable host where the repetitions can be produced locally.
+All matrices are regenerated from the committed traces by
 
-The workflow's own `Commit benchmark logs to repository` step does not close
-the gap either: `.gitignore` contains `*.log`, so
-`git add benchmarks/smoke_test/` stages nothing and the push is a no-op —
-`origin/exp/qemu-guard-audit` is still at `c53cd2a`. Repetition 2 and 3
-traces exist only inside their (unauthenticated-inaccessible) artifacts.
+```text
+scripts/summarize_bench.py                                                              # run 1
+scripts/summarize_bench.py results/reps/rep2 "run 40004718895 (rep 2)" bench_matrix_rep2.txt
+scripts/summarize_bench.py results/reps/rep3 "run 40004771234 (rep 3)" bench_matrix_rep3.txt
+```
 
-The per-run tables in Section 8 provide content-level comparison. They do not establish a stable benefit: sparse latency deltas change direction across repetitions. A formal pooled median/variability analysis is not reported here because workload ordering was not randomized and runner drift remains a confound.
+with no value transcribed by hand. The run-1 invocation is unchanged and
+still produces a byte-identical `bench_matrix.txt`, which CI asserts.
 
+The unauthenticated retrieval routes remain closed for anyone reproducing
+this from scratch — `GET /actions/artifacts/<id>/zip` returns `401`,
+`GET /actions/runs/<id>/logs` returns `403`, and neither the run page nor
+the job page HTML is served anonymously — so the payloads had to be
+supplied out-of-band and are now archived in-repo rather than re-fetched.
+`.gitignore` re-includes `results/**/*.log`, so these traces are tracked
+exactly like run 1's.
 
-## 8. Cross-run content reconciliation (2026-10-24)
+### 7.2 The three runs are not three comparable repetitions
 
-Run 1 artifact was downloaded and SHA-256 verified against Actions metadata; runs 2 and 3 were also available locally and parsed. See [three-run-reconciliation.md](three-run-reconciliation.md) for provenance, all workload rows, and the full per-run comparison.
+Same commit, same harness, same declared parameters — yet runs 2 and 3 sit
+at a different operating point from run 1. On the sparse profiles:
 
-Sparse reader means (patched minus baseline):
+| quantity | run 1 | rep 2 | rep 3 | ratio (rep 2 / run 1) |
+| :--- | ---: | ---: | ---: | ---: |
+| `baseline_vio_s` P50 (µs) | 526.0 | 1166.0 | 1142.3 | ≈ 2.2× |
+| `baseline_ide_s` P50 (µs) | 540.2 | 1394.5 | 1361.2 | ≈ 2.6× |
+| read samples per probe (`baseline_vio_s`) | ≈ 16 400 | ≈ 10 360 | ≈ 10 200 | ≈ 1.6× |
+| `wbt_timer`, `patched_vio_s` | 298 | 194 | 195 | ≈ 1.5× |
 
-| run | config | P50 delta | P99 delta | writer OPS |
-|---|---|---:|---:|---:|
-| 1 | ide_s | +3.67 µs (+0.68%) | +15.00 µs (+1.16%) | 364 → 364 |
-| 1 | vio_s | +27.00 µs (+5.13%) | +20.83 µs (+1.83%) | 367 → 367 |
-| 2 | ide_s | −27.00 µs (−1.94%) | −94.67 µs (−3.49%) | 355 → 356 |
-| 2 | vio_s | −10.83 µs (−0.93%) | −53.67 µs (−1.82%) | 362 → 362 |
-| 3 | ide_s | +11.17 µs (+0.82%) | +5.00 µs (+0.19%) | 358 → 358 |
-| 3 | vio_s | −18.33 µs (−1.60%) | −40.83 µs (−1.62%) | 363 → 362 |
+A ~2.2× step in absolute latency with byte-identical workloads, kernel and
+parameters is a **host-speed artifact**, not a configuration change:
+GitHub's `ubuntu-22.04` pool has no usable KVM for this workflow, so the
+guest runs under QEMU **TCG** and the emulation rate dominates everything.
+Every dependent quantity scales coherently with it — the read-latency floor,
+the samples each probe can collect, and the number of 100 ms windows the
+run yields.
 
-The sparse latency effect is mixed across repetitions, not a stable improvement or regression. The earlier one-run conclusion that vio_s latency worsened should be treated as a single-run observation, not the overall repeatability result. Writer OPS remain nearly unchanged in sparse runs. Heavy profile is summarized in the addendum but remains descriptive (two readers/config and TCG).
+Consequence: these are **not three interchangeable replicates of one
+measurement**. They are effectively `n = 1` fast-host run plus `n = 2`
+slow-host runs. Any pooled median therefore mixes two regimes; it is
+arithmetically valid but not an estimate of a common effect.
 
-Run-level guard counts also vary: rep1 patched ide_s 288 (0 holds), vio_s 283 (276 holds); rep2 ide_s 289 (4 holds), vio_s 184 (176 holds); rep3 ide_s 288 (3 holds), vio_s 184 (176 holds). ide_h patched guard decisions were 8/7/6 with no holds; vio_h 0/9/7 and no holds. These are guard decisions, not a performance metric.
+### 7.3 The guard's *regime* moves with the host too
 
-**Updated repeatability assessment:** three content-level repetitions are now reconciled. They do not support a stable latency benefit. Keep the decision **REVISE** and do not claim performance improvement.
+Same nominal configuration, same predicate, very different behaviour:
+
+| run | `patched_vio_s` evaluations | live `hold` | live `scale_up` | teardown `scale_up` (`r_samples=0`) | `r_min` sane (µs) | `patched_ide_s` evaluations | `hold` | `r_min` sane (µs) |
+| :--- | ---: | ---: | ---: | ---: | :--- | ---: | ---: | :--- |
+| run 1 | 283 | 276 | 7 | 0 | 146–175 | 288 | 0 | 62–77 |
+| rep 2 | 184 | 176 | 0 | 8 | 209–276 | 289 | 4 | 100–166 |
+| rep 3 | 184 | 176 | 0 | 8 | 189–268 | 288 | 3 | 106–166 |
+
+Two distinctions matter and were previously conflated:
+
+* **Live vs teardown decisions.** A `hold`/`scale_up` pair is a *live*
+  decision only when `r_samples > 0`. When `r_samples == 0` the predicate
+  short-circuits, `r_min` prints the `U64_MAX/1000` sentinel
+  (`18446744073709551` µs) and the code necessarily takes `scale_up`. In
+  reps 2/3 **all eight** `patched_vio_s` `scale_up` events are of this kind:
+  they occur at t ≈ 32.2–32.9 s, i.e. after the 30 s reader window has
+  closed, and are teardown relaxations, not in-run decisions. Run 1 has
+  none of these (`insane_events = 0`).
+* **The 7 live `scale_up` in run 1 are a boundary effect.** They occur at
+  t = 3.77–31.85 s with `r_min` 146–149 µs, i.e. just *under* the 150 µs
+  target, always with 311–343 read samples. They are genuine in-run
+  decisions at the predicate's edge, and they are the reason the run-1
+  escalation timeline still reaches step −3 (§4).
+
+Because the host is slower in reps 2/3, the `r_min` floor for `vio_s` rises
+to 189–276 µs — comfortably above target — so **every** live evaluation
+holds and there is no in-run `scale_up` at all. The same shift makes
+`patched_ide_s`, inert in run 1 (`r_min` 62–77 µs), hold 3–4 times
+(`r_min` 100–166 µs straddling 150 µs). The predicate is reacting to the
+emulator's speed floor, not to the read-quality situation it was written to
+detect.
+
+## 8. Cross-run result
+
+Averaged over the six reader probes **within** each run (the six probes are
+concurrent observations of one execution, not six repetitions), then
+compared across the three runs. All figures are means in µs; `Δ` is
+patched − baseline.
+
+Treatment, sparse profile (`vio_s`) — the only configuration where the
+guard holds depth:
+
+| run | base P50 | pat P50 | ΔP50 | Δ% | base P99 | pat P99 | ΔP99 | Δ% | writer OPS |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| run 1 | 526.00 | 553.00 | **+27.00** | **+5.13 %** | 1137.00 | 1157.83 | **+20.83** | **+1.83 %** | 367 → 367 |
+| rep 2 | 1166.00 | 1155.17 | −10.83 | −0.93 % | 2955.17 | 2901.50 | −53.67 | −1.82 % | 362 → 362 |
+| rep 3 | 1142.33 | 1124.00 | −18.33 | −1.60 % | 2522.00 | 2481.17 | −40.83 | −1.62 % | 363 → 362 |
+| **median (n=3)** | | | **−10.83** | | | | **−40.83** | | |
+
+Control, sparse profile (`ide_s`) — guard evaluated, depth lever degenerate:
+
+| run | ΔP50 | Δ% | ΔP99 | Δ% | writer OPS |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| run 1 | +3.67 | +0.68 % | +15.00 | +1.16 % | 364 → 364 |
+| rep 2 | −27.00 | −1.94 % | −94.67 | −3.49 % | 355 → 356 |
+| rep 3 | +11.17 | +0.82 % | +5.00 | +0.19 % | 358 → 358 |
+
+All four workloads, per run (heavy has n=2 readers and is reported for
+completeness only — see `limitations.md` §5):
+
+| config | run | ΔP50 µs (%) | ΔP99 µs (%) | writer OPS | guard behaviour |
+| :--- | :--- | ---: | ---: | ---: | :--- |
+| `vio_s` | 1 | +27.00 (+5.13 %) | +20.83 (+1.83 %) | 367 → 367 | 276 hold / 7 live `scale_up` |
+| `vio_s` | 2 | −10.83 (−0.93 %) | −53.67 (−1.82 %) | 362 → 362 | 176 hold / 0 live `scale_up` |
+| `vio_s` | 3 | −18.33 (−1.60 %) | −40.83 (−1.62 %) | 363 → 362 | 176 hold / 0 live `scale_up` |
+| `ide_s` | 1 | +3.67 (+0.68 %) | +15.00 (+1.16 %) | 364 → 364 | 0 holds |
+| `ide_s` | 2 | −27.00 (−1.94 %) | −94.67 (−3.49 %) | 355 → 356 | 4 holds |
+| `ide_s` | 3 | +11.17 (+0.82 %) | +5.00 (+0.19 %) | 358 → 358 | 3 holds |
+| `vio_h` | 1 | +14.50 (+1.68 %) | −135.00 (−6.31 %) | 57 055 → 56 414 | branch never entered |
+| `vio_h` | 2 | −51.50 (−2.77 %) | −198.50 (−4.83 %) | 26 821 → 27 226 | 9 `scale_up`, all `r_samples=0` |
+| `vio_h` | 3 | +29.00 (+1.69 %) | +28.50 (+0.78 %) | 28 310 → 27 725 | 7 `scale_up`, all `r_samples=0` |
+| `ide_h` | 1 | −26.00 (−3.41 %) | −9.50 (−0.39 %) | 33 174 → 35 861 | 8 `scale_up`, inert |
+| `ide_h` | 2 | −58.00 (−3.51 %) | −307.50 (−6.11 %) | 18 548 → 19 888 | 7 `scale_up`, inert |
+| `ide_h` | 3 | −2.50 (−0.16 %) | −405.00 (−8.43 %) | 18 936 → 20 306 | 6 `scale_up`, inert |
+
+### How to read §8
+
+* **The treatment sign flips across runs.** `vio_s` P50 goes
+  +5.13 % → −0.93 % → −1.60 %. The run-1 regression in §5 is not
+  reproduced; it is one point in a spread that changes sign.
+* **The control varies just as much, and also flips sign.** `ide_s` P50
+  goes +0.68 % → −1.94 % → +0.82 %, on a configuration whose depth lever is
+  degenerate (`queue_depth == 1` → `max_depth == 2` for all
+  `scale_step ≤ 0`), so nothing the patch does can produce it.
+* **The noise floor is measured directly, and it is bigger than the
+  effect.** `ide_h` is provably inert — all 6–8 evaluations return
+  `scale_up`, the same decision the baseline kernel makes, and the lever is
+  degenerate — yet its writer throughput differs by **+8.1 % / +7.2 % /
+  +7.2 %** across the three runs. That is a *systematic* bias of the same
+  magnitude as the largest reported latency effect, present in all three
+  runs, on a configuration where the patch cannot act. The likely cause is
+  the harness ordering defect already recorded in `limitations.md` §6
+  (baseline and patched are always executed in the same order, never
+  alternated), which a monotonically drifting runner would bias
+  identically every time.
+* **The one thing that is stable is writer throughput in `vio_s`**:
+  367 → 367, 362 → 362, 363 → 362. Holding depth did not cost write
+  performance in the sparse profile in any run.
+* **The median is not a defensible effect estimate.** −10.83 µs (P50) and
+  −40.83 µs (P99) are correct as medians of three numbers, but they pool a
+  fast-host run with two slow-host ones (§7.2), they mix a live-hold regime
+  with a teardown-only regime (§7.3), and their own control flips sign. The
+  honest statement is that **the effect is not resolvable above the
+  observed cross-run variation** — which is exactly the condition the
+  repeatability plan defines for a REVISE decision.
+
+Consequently §5's conclusion stands only as a *run-1* observation, not as
+the study result. The cross-run result is: mechanism reproduced, direction
+not reproduced, effect not established.

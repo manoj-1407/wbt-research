@@ -1,0 +1,660 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+3FF8B340+3FECB340 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from ROM..c[?7l[2J==========================================
+=== [QEMU-WBT] KERNEL BOOT SUCCESSFUL ===
+=== PROFILE: sparse  writers=1  readprocs=6 ===
+=== PARAMS: wchunk=4KB wwindow=4MB wstride=4MB wsleep=80ms rpace=1000us target=150us ===
+##########################################
+Linux 6.6.123.2-microsoft-standard-WSL2+ #1 SMP PREEMPT_DYNAMIC Fri Oct 23 17:14:31 UTC 2026 x86_64 GNU/Linux
+--- BLK_WBT config from /proc/config.gz ---
+CONFIG_BLK_WBT=y
+CONFIG_BLK_WBT_MQ=y
+--- Block devices in /sys/block ---
+loop0  loop3  loop6  ram1   ram12  ram15  ram4   ram7   sda
+loop1  loop4  loop7  ram10  ram13  ram2   ram5   ram8   sr0
+loop2  loop5  ram0   ram11  ram14  ram3   ram6   ram9
+[+] Target disk detected: /dev/sda
+[i] queue/nr_requests : 2
+[i] queue/rotational  : 1
+[i] queue/scheduler   : none [mq-deadline] kyber 
+[i] queue_depth (blk) : not exposed
+[+] Active wbt_lat_usec: 150
+--- Checking WBT tracepoint directory ---
+[+] /sys/kernel/tracing/events/wbt exists!
+enable     filter     wbt_guard  wbt_lat    wbt_stat   wbt_step   wbt_timer
+[+] WBT tracepoints armed (buffer=sda).
+[BLKSTAT] before:        1        0        8        3        0        0        0        0        0        0        3        0        0        0        0        0        0
+--- Matched I/O workload on /dev/sda ---
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=4096B offset=0MB window=4MB sleep=80ms duration=30s
+[PROBE_RESULT] SAMPLES=9628 MIN_US=283 P50_US=1383 P90_US=2112 P99_US=2608 MAX_US=17417 MEAN_US=1384.8
+[PROBE_RESULT] SAMPLES=9495 MIN_US=291 P50_US=1431 P90_US=2139 P99_US=2640 MAX_US=5012 MEAN_US=1416.5
+[PROBE_RESULT] SAMPLES=9788 MIN_US=283 P50_US=1329 P90_US=2071 P99_US=2591 MAX_US=6073 MEAN_US=1337.0
+[PROBE_RESULT] SAMPLES=9789 MIN_US=296 P50_US=1358 P90_US=2066 P99_US=2581 MAX_US=8825 MEAN_US=1348.7
+[PROBE_RESULT] SAMPLES=9807 MIN_US=296 P50_US=1349 P90_US=2074 P99_US=2650 MAX_US=6395 MEAN_US=1347.1
+[PROBE_RESULT] SAMPLES=9734 MIN_US=285 P50_US=1355 P90_US=2098 P99_US=2648 MAX_US=20298 MEAN_US=1364.9
+[WRITER_RESULT] OPS=356 BYTES=1458176 ITERS=356 ERR=0 FSYNC_ERR=0
+[BLKSTAT] after :    58242        0   465936    22802      712        0     2848      347        0    17344    23340        0        0        0        0      356      190
+[BLKSTAT-DELTA] read_sectors=465928 write_sectors=2848
+=== [QEMU-WBT] EVENT COUNTS ===
+wbt_timer : 294
+wbt_step  : 2
+wbt_stat  : 0
+0
+wbt_lat   : 0
+0
+wbt_guard : 289
+==========================================
+=== [QEMU-WBT] CAPTURED TRACE BUFFER ===
+==========================================
+# tracer: nop
+#
+# entries-in-buffer/entries-written: 585/585   #P:1
+#
+#                                _-----=> irqs-off/BH-disabled
+#                               / _----=> need-resched
+#                              | / _---=> hardirq/softirq
+#                              || / _--=> preempt-depth
+#                              ||| / _-=> migrate-disable
+#                              |||| /     delay
+#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
+#              | |         |   |||||     |         |
+ read_latency_pr-174     [000] ..s..     2.892577: wbt_timer: 8:0: status=3, step=0, inflight=0
+ read_latency_pr-174     [000] .Ns..     2.893176: wbt_guard: 8:0: step=0, r_samples=196, r_min=123us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] .Ns..     2.893407: wbt_step: 8:0: scale up: step=-1, window=100000us, background=1, normal=2, max=2
+ read_latency_pr-170     [000] ..s..     2.996163: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..     2.996177: wbt_guard: 8:0: step=-1, r_samples=216, r_min=106us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.     3.100134: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     3.100148: wbt_guard: 8:0: step=-1, r_samples=209, r_min=117us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.     3.204145: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     3.204160: wbt_guard: 8:0: step=-1, r_samples=217, r_min=109us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     3.308279: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     3.308294: wbt_guard: 8:0: step=-1, r_samples=192, r_min=125us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     3.412274: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     3.412353: wbt_guard: 8:0: step=-1, r_samples=191, r_min=166us, target=150us, guard_fired=1, action=hold
+ read_latency_pr-171     [000] ..s..     3.516156: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..     3.516172: wbt_guard: 8:0: step=-1, r_samples=206, r_min=131us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..     3.620138: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..     3.620154: wbt_guard: 8:0: step=-1, r_samples=216, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.     3.724265: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.     3.724280: wbt_guard: 8:0: step=-1, r_samples=215, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     3.828191: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     3.828206: wbt_guard: 8:0: step=-1, r_samples=189, r_min=144us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.     3.932304: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.     3.932318: wbt_guard: 8:0: step=-1, r_samples=195, r_min=139us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.     4.036325: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.     4.036340: wbt_guard: 8:0: step=-1, r_samples=193, r_min=138us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     4.140260: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     4.140274: wbt_guard: 8:0: step=-1, r_samples=208, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     4.244194: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     4.244209: wbt_guard: 8:0: step=-1, r_samples=219, r_min=121us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     4.348201: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     4.348218: wbt_guard: 8:0: step=-1, r_samples=194, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..     4.452141: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..     4.452155: wbt_guard: 8:0: step=-1, r_samples=216, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     4.556245: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     4.556260: wbt_guard: 8:0: step=-1, r_samples=210, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.     4.660226: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.     4.660241: wbt_guard: 8:0: step=-1, r_samples=205, r_min=119us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.     4.764150: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     4.764166: wbt_guard: 8:0: step=-1, r_samples=202, r_min=128us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.     4.868203: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.     4.868218: wbt_guard: 8:0: step=-1, r_samples=209, r_min=118us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     4.972172: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     4.972186: wbt_guard: 8:0: step=-1, r_samples=210, r_min=118us, target=150us, guard_fired=0, action=scale_up
+      wbt_writer-168     [000] ..s1.     5.076284: wbt_timer: 8:0: status=3, step=-1, inflight=0
+      wbt_writer-168     [000] ..s1.     5.076298: wbt_guard: 8:0: step=-1, r_samples=218, r_min=113us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     5.180161: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     5.180176: wbt_guard: 8:0: step=-1, r_samples=206, r_min=112us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..     5.284208: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..     5.284223: wbt_guard: 8:0: step=-1, r_samples=209, r_min=124us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] .Ns1.     5.388201: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] .Ns1.     5.388216: wbt_guard: 8:0: step=-1, r_samples=214, r_min=103us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     5.492096: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     5.492111: wbt_guard: 8:0: step=-1, r_samples=191, r_min=121us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     5.596580: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     5.596605: wbt_guard: 8:0: step=-1, r_samples=189, r_min=132us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.     5.700173: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.     5.700189: wbt_guard: 8:0: step=-1, r_samples=222, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     5.804156: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     5.804172: wbt_guard: 8:0: step=-1, r_samples=215, r_min=105us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     5.908242: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     5.908256: wbt_guard: 8:0: step=-1, r_samples=222, r_min=114us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     6.012171: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     6.012185: wbt_guard: 8:0: step=-1, r_samples=215, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.     6.116069: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.     6.116084: wbt_guard: 8:0: step=-1, r_samples=207, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns..     6.220165: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns..     6.220180: wbt_guard: 8:0: step=-1, r_samples=204, r_min=130us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..     6.324147: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..     6.324161: wbt_guard: 8:0: step=-1, r_samples=209, r_min=113us, target=150us, guard_fired=0, action=scale_up
+      wbt_writer-168     [000] ..s1.     6.428321: wbt_timer: 8:0: status=3, step=-1, inflight=0
+      wbt_writer-168     [000] ..s1.     6.428336: wbt_guard: 8:0: step=-1, r_samples=202, r_min=128us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns..     6.532140: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns..     6.532156: wbt_guard: 8:0: step=-1, r_samples=205, r_min=120us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     6.636182: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     6.636196: wbt_guard: 8:0: step=-1, r_samples=208, r_min=132us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     6.740194: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     6.740208: wbt_guard: 8:0: step=-1, r_samples=194, r_min=129us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.     6.844193: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     6.844208: wbt_guard: 8:0: step=-1, r_samples=193, r_min=147us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.     6.948313: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.     6.948328: wbt_guard: 8:0: step=-1, r_samples=198, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.     7.052189: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.     7.052205: wbt_guard: 8:0: step=-1, r_samples=201, r_min=127us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.     7.156186: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.     7.156201: wbt_guard: 8:0: step=-1, r_samples=208, r_min=118us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     7.260177: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     7.260192: wbt_guard: 8:0: step=-1, r_samples=203, r_min=131us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     7.364171: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     7.364187: wbt_guard: 8:0: step=-1, r_samples=209, r_min=133us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.     7.468206: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.     7.468220: wbt_guard: 8:0: step=-1, r_samples=214, r_min=130us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     7.572242: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     7.572257: wbt_guard: 8:0: step=-1, r_samples=207, r_min=128us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns1.     7.676220: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.     7.676235: wbt_guard: 8:0: step=-1, r_samples=199, r_min=119us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     7.780185: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     7.780199: wbt_guard: 8:0: step=-1, r_samples=215, r_min=117us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.     7.884176: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     7.884191: wbt_guard: 8:0: step=-1, r_samples=209, r_min=121us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     7.988160: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     7.988174: wbt_guard: 8:0: step=-1, r_samples=222, r_min=112us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     8.092287: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     8.092301: wbt_guard: 8:0: step=-1, r_samples=214, r_min=109us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.     8.196197: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.     8.196213: wbt_guard: 8:0: step=-1, r_samples=220, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns1.     8.300362: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.     8.300450: wbt_guard: 8:0: step=-1, r_samples=199, r_min=124us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.     8.404297: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.     8.404312: wbt_guard: 8:0: step=-1, r_samples=208, r_min=123us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..     8.508169: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..     8.508184: wbt_guard: 8:0: step=-1, r_samples=213, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..     8.612455: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..     8.612472: wbt_guard: 8:0: step=-1, r_samples=203, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..     8.716218: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..     8.716233: wbt_guard: 8:0: step=-1, r_samples=191, r_min=136us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..     8.820114: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..     8.820128: wbt_guard: 8:0: step=-1, r_samples=190, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.     8.924245: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.     8.924282: wbt_guard: 8:0: step=-1, r_samples=194, r_min=137us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns1.     9.028299: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.     9.028314: wbt_guard: 8:0: step=-1, r_samples=204, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.     9.132195: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.     9.132211: wbt_guard: 8:0: step=-1, r_samples=214, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.     9.236291: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.     9.236307: wbt_guard: 8:0: step=-1, r_samples=199, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns1.     9.340317: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.     9.340332: wbt_guard: 8:0: step=-1, r_samples=197, r_min=135us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..     9.444458: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..     9.444474: wbt_guard: 8:0: step=-1, r_samples=209, r_min=109us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] .Ns1.     9.548147: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] .Ns1.     9.548162: wbt_guard: 8:0: step=-1, r_samples=204, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.     9.652223: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.     9.652238: wbt_guard: 8:0: step=-1, r_samples=198, r_min=126us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.     9.756235: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.     9.756252: wbt_guard: 8:0: step=-1, r_samples=221, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..     9.860108: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..     9.860123: wbt_guard: 8:0: step=-1, r_samples=207, r_min=111us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..     9.964238: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..     9.964254: wbt_guard: 8:0: step=-1, r_samples=208, r_min=122us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    10.068184: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    10.068199: wbt_guard: 8:0: step=-1, r_samples=196, r_min=121us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] .Ns1.    10.172224: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] .Ns1.    10.172239: wbt_guard: 8:0: step=-1, r_samples=216, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    10.276223: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    10.276238: wbt_guard: 8:0: step=-1, r_samples=223, r_min=110us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] .Ns..    10.380118: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] .Ns..    10.380133: wbt_guard: 8:0: step=-1, r_samples=199, r_min=119us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    10.484105: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    10.484120: wbt_guard: 8:0: step=-1, r_samples=215, r_min=121us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    10.588103: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    10.588118: wbt_guard: 8:0: step=-1, r_samples=208, r_min=118us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    10.692201: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    10.692217: wbt_guard: 8:0: step=-1, r_samples=214, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.    10.796210: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.    10.796226: wbt_guard: 8:0: step=-1, r_samples=216, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    10.900226: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    10.900240: wbt_guard: 8:0: step=-1, r_samples=226, r_min=109us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] .Ns..    11.004189: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] .Ns..    11.004205: wbt_guard: 8:0: step=-1, r_samples=208, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..    11.108211: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    11.108225: wbt_guard: 8:0: step=-1, r_samples=205, r_min=122us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.    11.212212: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.    11.212228: wbt_guard: 8:0: step=-1, r_samples=213, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] .Ns1.    11.316288: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] .Ns1.    11.316303: wbt_guard: 8:0: step=-1, r_samples=209, r_min=109us, target=150us, guard_fired=0, action=scale_up
+      wbt_writer-168     [000] ..s1.    11.420156: wbt_timer: 8:0: status=3, step=-1, inflight=0
+      wbt_writer-168     [000] ..s1.    11.420172: wbt_guard: 8:0: step=-1, r_samples=210, r_min=125us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    11.524121: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    11.524136: wbt_guard: 8:0: step=-1, r_samples=203, r_min=127us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    11.628118: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    11.628134: wbt_guard: 8:0: step=-1, r_samples=214, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    11.732173: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    11.732189: wbt_guard: 8:0: step=-1, r_samples=202, r_min=123us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    11.836179: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    11.836194: wbt_guard: 8:0: step=-1, r_samples=188, r_min=140us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] .Ns1.    11.940243: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] .Ns1.    11.940258: wbt_guard: 8:0: step=-1, r_samples=190, r_min=139us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    12.044135: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    12.044150: wbt_guard: 8:0: step=-1, r_samples=199, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    12.148150: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    12.148165: wbt_guard: 8:0: step=-1, r_samples=219, r_min=126us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    12.252100: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    12.252115: wbt_guard: 8:0: step=-1, r_samples=212, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    12.356105: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    12.356120: wbt_guard: 8:0: step=-1, r_samples=206, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    12.460097: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    12.460112: wbt_guard: 8:0: step=-1, r_samples=218, r_min=121us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    12.564184: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    12.564199: wbt_guard: 8:0: step=-1, r_samples=212, r_min=124us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    12.668159: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    12.668175: wbt_guard: 8:0: step=-1, r_samples=206, r_min=131us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    12.772116: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    12.772130: wbt_guard: 8:0: step=-1, r_samples=209, r_min=115us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    12.876210: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    12.876225: wbt_guard: 8:0: step=-1, r_samples=218, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.    12.980244: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.    12.980259: wbt_guard: 8:0: step=-1, r_samples=206, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    13.084398: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] .Ns..    13.084923: wbt_guard: 8:0: step=-1, r_samples=219, r_min=126us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    13.188156: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    13.188171: wbt_guard: 8:0: step=-1, r_samples=222, r_min=118us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    13.292183: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    13.292198: wbt_guard: 8:0: step=-1, r_samples=222, r_min=100us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    13.396234: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    13.396585: wbt_guard: 8:0: step=-1, r_samples=199, r_min=125us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    13.500146: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    13.500160: wbt_guard: 8:0: step=-1, r_samples=185, r_min=143us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    13.604107: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    13.604122: wbt_guard: 8:0: step=-1, r_samples=201, r_min=121us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    13.708125: wbt_timer: 8:0: status=3, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    13.708139: wbt_guard: 8:0: step=-1, r_samples=214, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    13.812088: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    13.812106: wbt_guard: 8:0: step=-1, r_samples=211, r_min=110us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    13.916158: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    13.916173: wbt_guard: 8:0: step=-1, r_samples=193, r_min=138us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns..    14.020117: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns..    14.020132: wbt_guard: 8:0: step=-1, r_samples=217, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    14.124201: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    14.124217: wbt_guard: 8:0: step=-1, r_samples=218, r_min=119us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    14.228116: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    14.228131: wbt_guard: 8:0: step=-1, r_samples=218, r_min=120us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    14.332209: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    14.332224: wbt_guard: 8:0: step=-1, r_samples=220, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..    14.436179: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    14.436196: wbt_guard: 8:0: step=-1, r_samples=197, r_min=139us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    14.540249: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    14.540264: wbt_guard: 8:0: step=-1, r_samples=194, r_min=144us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    14.644141: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    14.644156: wbt_guard: 8:0: step=-1, r_samples=186, r_min=159us, target=150us, guard_fired=1, action=hold
+          <idle>-0       [000] ..s1.    14.748124: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    14.748138: wbt_guard: 8:0: step=-1, r_samples=209, r_min=126us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    14.852100: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    14.852115: wbt_guard: 8:0: step=-1, r_samples=207, r_min=110us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    14.956214: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    14.956229: wbt_guard: 8:0: step=-1, r_samples=213, r_min=116us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    15.060232: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    15.060247: wbt_guard: 8:0: step=-1, r_samples=209, r_min=121us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    15.164204: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    15.164220: wbt_guard: 8:0: step=-1, r_samples=206, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    15.268133: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    15.268148: wbt_guard: 8:0: step=-1, r_samples=225, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    15.372160: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    15.372175: wbt_guard: 8:0: step=-1, r_samples=218, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    15.476121: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    15.476137: wbt_guard: 8:0: step=-1, r_samples=214, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    15.580229: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    15.580244: wbt_guard: 8:0: step=-1, r_samples=202, r_min=139us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.    15.684241: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.    15.684256: wbt_guard: 8:0: step=-1, r_samples=217, r_min=119us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    15.788128: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    15.788143: wbt_guard: 8:0: step=-1, r_samples=218, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    15.892257: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    15.892272: wbt_guard: 8:0: step=-1, r_samples=211, r_min=110us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    15.996207: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    15.996223: wbt_guard: 8:0: step=-1, r_samples=220, r_min=109us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    16.100151: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    16.100165: wbt_guard: 8:0: step=-1, r_samples=202, r_min=121us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    16.204185: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    16.204200: wbt_guard: 8:0: step=-1, r_samples=209, r_min=118us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    16.308141: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    16.308156: wbt_guard: 8:0: step=-1, r_samples=210, r_min=131us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    16.412109: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    16.412123: wbt_guard: 8:0: step=-1, r_samples=207, r_min=119us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    16.516139: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    16.516154: wbt_guard: 8:0: step=-1, r_samples=208, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    16.620168: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    16.620183: wbt_guard: 8:0: step=-1, r_samples=208, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    16.724209: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    16.724224: wbt_guard: 8:0: step=-1, r_samples=203, r_min=134us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    16.828144: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    16.828160: wbt_guard: 8:0: step=-1, r_samples=199, r_min=130us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..    16.932146: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    16.932161: wbt_guard: 8:0: step=-1, r_samples=210, r_min=134us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] .Ns..    17.036152: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] .Ns..    17.036167: wbt_guard: 8:0: step=-1, r_samples=208, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    17.140253: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    17.140274: wbt_guard: 8:0: step=-1, r_samples=206, r_min=130us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    17.244111: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    17.244126: wbt_guard: 8:0: step=-1, r_samples=211, r_min=109us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    17.348180: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    17.348194: wbt_guard: 8:0: step=-1, r_samples=215, r_min=111us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    17.452154: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    17.452176: wbt_guard: 8:0: step=-1, r_samples=196, r_min=127us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    17.556153: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    17.556169: wbt_guard: 8:0: step=-1, r_samples=191, r_min=127us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    17.660202: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    17.660230: wbt_guard: 8:0: step=-1, r_samples=203, r_min=142us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.    17.764124: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.    17.764139: wbt_guard: 8:0: step=-1, r_samples=193, r_min=138us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.    17.868170: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.    17.868185: wbt_guard: 8:0: step=-1, r_samples=208, r_min=141us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    17.972145: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    17.972160: wbt_guard: 8:0: step=-1, r_samples=212, r_min=123us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    18.076275: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    18.076290: wbt_guard: 8:0: step=-1, r_samples=212, r_min=110us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    18.180198: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    18.180214: wbt_guard: 8:0: step=-1, r_samples=207, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    18.284164: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    18.284182: wbt_guard: 8:0: step=-1, r_samples=190, r_min=133us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    18.388203: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    18.388219: wbt_guard: 8:0: step=-1, r_samples=198, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..    18.492165: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    18.492180: wbt_guard: 8:0: step=-1, r_samples=188, r_min=142us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    18.596272: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    18.596287: wbt_guard: 8:0: step=-1, r_samples=200, r_min=130us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    18.700307: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    18.700322: wbt_guard: 8:0: step=-1, r_samples=202, r_min=131us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    18.804183: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    18.804198: wbt_guard: 8:0: step=-1, r_samples=192, r_min=152us, target=150us, guard_fired=1, action=hold
+ read_latency_pr-174     [000] ..s..    18.908231: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    18.908246: wbt_guard: 8:0: step=-1, r_samples=194, r_min=132us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    19.012177: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    19.012196: wbt_guard: 8:0: step=-1, r_samples=194, r_min=139us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    19.116098: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    19.116112: wbt_guard: 8:0: step=-1, r_samples=200, r_min=119us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    19.220161: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    19.220177: wbt_guard: 8:0: step=-1, r_samples=220, r_min=107us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    19.324194: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    19.324212: wbt_guard: 8:0: step=-1, r_samples=208, r_min=114us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    19.428145: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    19.428161: wbt_guard: 8:0: step=-1, r_samples=193, r_min=141us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    19.532241: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    19.532256: wbt_guard: 8:0: step=-1, r_samples=188, r_min=141us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    19.636171: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    19.636186: wbt_guard: 8:0: step=-1, r_samples=206, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    19.740179: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    19.740195: wbt_guard: 8:0: step=-1, r_samples=190, r_min=132us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s1.    19.844229: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s1.    19.844243: wbt_guard: 8:0: step=-1, r_samples=206, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    19.948189: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    19.948204: wbt_guard: 8:0: step=-1, r_samples=198, r_min=119us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    20.052221: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    20.052236: wbt_guard: 8:0: step=-1, r_samples=210, r_min=118us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    20.156128: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    20.156144: wbt_guard: 8:0: step=-1, r_samples=198, r_min=131us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    20.260190: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    20.260205: wbt_guard: 8:0: step=-1, r_samples=203, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    20.364132: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    20.364155: wbt_guard: 8:0: step=-1, r_samples=216, r_min=121us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    20.468217: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    20.468231: wbt_guard: 8:0: step=-1, r_samples=218, r_min=116us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    20.572223: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    20.572237: wbt_guard: 8:0: step=-1, r_samples=212, r_min=117us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    20.676145: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    20.676165: wbt_guard: 8:0: step=-1, r_samples=204, r_min=112us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    20.780150: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    20.780164: wbt_guard: 8:0: step=-1, r_samples=195, r_min=132us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    20.884116: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    20.884130: wbt_guard: 8:0: step=-1, r_samples=200, r_min=128us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    20.988205: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    20.988220: wbt_guard: 8:0: step=-1, r_samples=208, r_min=108us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    21.092160: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    21.092175: wbt_guard: 8:0: step=-1, r_samples=211, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] .Ns1.    21.196256: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] .Ns1.    21.196271: wbt_guard: 8:0: step=-1, r_samples=194, r_min=130us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    21.300189: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    21.300204: wbt_guard: 8:0: step=-1, r_samples=206, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] .Ns..    21.404187: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] .Ns..    21.404202: wbt_guard: 8:0: step=-1, r_samples=192, r_min=125us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    21.508124: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    21.508140: wbt_guard: 8:0: step=-1, r_samples=206, r_min=132us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    21.612200: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    21.612215: wbt_guard: 8:0: step=-1, r_samples=216, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    21.716084: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    21.716125: wbt_guard: 8:0: step=-1, r_samples=209, r_min=122us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    21.820090: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    21.820141: wbt_guard: 8:0: step=-1, r_samples=216, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] .Ns..    21.924130: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] .Ns..    21.924148: wbt_guard: 8:0: step=-1, r_samples=220, r_min=122us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    22.028284: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    22.028298: wbt_guard: 8:0: step=-1, r_samples=219, r_min=116us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    22.132187: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    22.132199: wbt_guard: 8:0: step=-1, r_samples=213, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    22.236184: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    22.236205: wbt_guard: 8:0: step=-1, r_samples=208, r_min=105us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] .Ns..    22.340164: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] .Ns..    22.340180: wbt_guard: 8:0: step=-1, r_samples=196, r_min=105us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    22.444201: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    22.444217: wbt_guard: 8:0: step=-1, r_samples=196, r_min=133us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    22.548155: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    22.548169: wbt_guard: 8:0: step=-1, r_samples=212, r_min=123us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    22.652261: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    22.652276: wbt_guard: 8:0: step=-1, r_samples=213, r_min=132us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    22.756231: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    22.756245: wbt_guard: 8:0: step=-1, r_samples=214, r_min=129us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    22.860285: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    22.860301: wbt_guard: 8:0: step=-1, r_samples=208, r_min=139us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    22.964223: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    22.964238: wbt_guard: 8:0: step=-1, r_samples=209, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] .Ns1.    23.068262: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] .Ns1.    23.068277: wbt_guard: 8:0: step=-1, r_samples=208, r_min=131us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    23.172249: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    23.172264: wbt_guard: 8:0: step=-1, r_samples=220, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    23.276132: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    23.276154: wbt_guard: 8:0: step=-1, r_samples=197, r_min=116us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    23.380094: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    23.380111: wbt_guard: 8:0: step=-1, r_samples=216, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    23.484085: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    23.484099: wbt_guard: 8:0: step=-1, r_samples=214, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    23.588291: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    23.588305: wbt_guard: 8:0: step=-1, r_samples=210, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    23.692235: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    23.692251: wbt_guard: 8:0: step=-1, r_samples=199, r_min=137us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    23.796155: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    23.796172: wbt_guard: 8:0: step=-1, r_samples=198, r_min=133us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    23.900176: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    23.900190: wbt_guard: 8:0: step=-1, r_samples=202, r_min=123us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    24.004219: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    24.004239: wbt_guard: 8:0: step=-1, r_samples=205, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    24.108149: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    24.108170: wbt_guard: 8:0: step=-1, r_samples=199, r_min=131us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    24.212299: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    24.212313: wbt_guard: 8:0: step=-1, r_samples=197, r_min=140us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] .Ns..    24.316176: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] .Ns..    24.316192: wbt_guard: 8:0: step=-1, r_samples=202, r_min=114us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    24.420299: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    24.420314: wbt_guard: 8:0: step=-1, r_samples=199, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    24.524229: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    24.524247: wbt_guard: 8:0: step=-1, r_samples=187, r_min=141us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    24.628159: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    24.628174: wbt_guard: 8:0: step=-1, r_samples=196, r_min=145us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    24.732089: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    24.732103: wbt_guard: 8:0: step=-1, r_samples=205, r_min=130us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    24.836091: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    24.836109: wbt_guard: 8:0: step=-1, r_samples=213, r_min=121us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    24.940100: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    24.940116: wbt_guard: 8:0: step=-1, r_samples=209, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    25.044101: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    25.044116: wbt_guard: 8:0: step=-1, r_samples=209, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    25.148088: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    25.148102: wbt_guard: 8:0: step=-1, r_samples=221, r_min=114us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    25.252098: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    25.252113: wbt_guard: 8:0: step=-1, r_samples=200, r_min=122us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    25.356206: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    25.356221: wbt_guard: 8:0: step=-1, r_samples=217, r_min=114us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    25.460081: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    25.460096: wbt_guard: 8:0: step=-1, r_samples=212, r_min=133us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    25.564116: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    25.564131: wbt_guard: 8:0: step=-1, r_samples=213, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    25.668118: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    25.668133: wbt_guard: 8:0: step=-1, r_samples=214, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    25.772218: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    25.772234: wbt_guard: 8:0: step=-1, r_samples=204, r_min=119us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    25.876249: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    25.876264: wbt_guard: 8:0: step=-1, r_samples=203, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    25.980238: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    25.980253: wbt_guard: 8:0: step=-1, r_samples=193, r_min=149us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    26.084221: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    26.084236: wbt_guard: 8:0: step=-1, r_samples=209, r_min=123us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    26.188135: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    26.188170: wbt_guard: 8:0: step=-1, r_samples=211, r_min=129us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    26.292125: wbt_timer: 8:0: status=3, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    26.292140: wbt_guard: 8:0: step=-1, r_samples=208, r_min=117us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    26.396194: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    26.396208: wbt_guard: 8:0: step=-1, r_samples=217, r_min=117us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    26.500094: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    26.500109: wbt_guard: 8:0: step=-1, r_samples=223, r_min=115us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] .Ns1.    26.604167: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] .Ns1.    26.604182: wbt_guard: 8:0: step=-1, r_samples=218, r_min=121us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    26.708175: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    26.708191: wbt_guard: 8:0: step=-1, r_samples=198, r_min=121us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    26.812260: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    26.812274: wbt_guard: 8:0: step=-1, r_samples=227, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s..    26.916137: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s..    26.916176: wbt_guard: 8:0: step=-1, r_samples=194, r_min=132us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    27.020285: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    27.020299: wbt_guard: 8:0: step=-1, r_samples=201, r_min=146us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] .Ns..    27.124106: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] .Ns..    27.124121: wbt_guard: 8:0: step=-1, r_samples=204, r_min=129us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    27.228254: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    27.228269: wbt_guard: 8:0: step=-1, r_samples=215, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s1.    27.332177: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s1.    27.332192: wbt_guard: 8:0: step=-1, r_samples=209, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    27.436148: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    27.436192: wbt_guard: 8:0: step=-1, r_samples=201, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    27.540091: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    27.540106: wbt_guard: 8:0: step=-1, r_samples=218, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    27.644227: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    27.644240: wbt_guard: 8:0: step=-1, r_samples=216, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    27.748098: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    27.748114: wbt_guard: 8:0: step=-1, r_samples=210, r_min=127us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    27.852148: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    27.852193: wbt_guard: 8:0: step=-1, r_samples=218, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.    27.956085: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.    27.956100: wbt_guard: 8:0: step=-1, r_samples=211, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    28.060125: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    28.060140: wbt_guard: 8:0: step=-1, r_samples=216, r_min=109us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s1.    28.164159: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s1.    28.164194: wbt_guard: 8:0: step=-1, r_samples=206, r_min=112us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    28.268105: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    28.268119: wbt_guard: 8:0: step=-1, r_samples=197, r_min=120us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    28.372081: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    28.372096: wbt_guard: 8:0: step=-1, r_samples=216, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..    28.476109: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    28.476123: wbt_guard: 8:0: step=-1, r_samples=209, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    28.580064: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    28.580079: wbt_guard: 8:0: step=-1, r_samples=211, r_min=120us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    28.684079: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    28.684094: wbt_guard: 8:0: step=-1, r_samples=222, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] .Ns..    28.788170: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] .Ns..    28.788202: wbt_guard: 8:0: step=-1, r_samples=223, r_min=115us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] .Ns..    28.892101: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] .Ns..    28.892115: wbt_guard: 8:0: step=-1, r_samples=224, r_min=116us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    28.996205: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    28.996219: wbt_guard: 8:0: step=-1, r_samples=218, r_min=108us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    29.100260: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    29.100278: wbt_guard: 8:0: step=-1, r_samples=215, r_min=117us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    29.204277: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    29.204291: wbt_guard: 8:0: step=-1, r_samples=203, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s..    29.308096: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s..    29.308110: wbt_guard: 8:0: step=-1, r_samples=215, r_min=122us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s..    29.412168: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    29.412206: wbt_guard: 8:0: step=-1, r_samples=207, r_min=137us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns1.    29.516252: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.    29.516267: wbt_guard: 8:0: step=-1, r_samples=188, r_min=140us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    29.620230: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    29.620246: wbt_guard: 8:0: step=-1, r_samples=204, r_min=120us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    29.724099: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    29.724115: wbt_guard: 8:0: step=-1, r_samples=198, r_min=126us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    29.828249: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    29.828263: wbt_guard: 8:0: step=-1, r_samples=208, r_min=132us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    29.932101: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    29.932115: wbt_guard: 8:0: step=-1, r_samples=207, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-174     [000] ..s..    30.036083: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-174     [000] ..s..    30.036097: wbt_guard: 8:0: step=-1, r_samples=219, r_min=110us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    30.140131: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    30.140147: wbt_guard: 8:0: step=-1, r_samples=217, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    30.244144: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    30.244160: wbt_guard: 8:0: step=-1, r_samples=214, r_min=111us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] .Ns..    30.348165: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] .Ns..    30.348182: wbt_guard: 8:0: step=-1, r_samples=192, r_min=161us, target=150us, guard_fired=1, action=hold
+ read_latency_pr-169     [000] ..s1.    30.452166: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.    30.452182: wbt_guard: 8:0: step=-1, r_samples=201, r_min=107us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] ..s1.    30.556263: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] ..s1.    30.556278: wbt_guard: 8:0: step=-1, r_samples=219, r_min=108us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    30.660259: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    30.660274: wbt_guard: 8:0: step=-1, r_samples=222, r_min=115us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    30.764191: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    30.764223: wbt_guard: 8:0: step=-1, r_samples=217, r_min=116us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s1.    30.868175: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    30.868209: wbt_guard: 8:0: step=-1, r_samples=219, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-170     [000] ..s..    30.972099: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-170     [000] ..s..    30.972114: wbt_guard: 8:0: step=-1, r_samples=224, r_min=118us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] .Ns1.    31.076253: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] .Ns1.    31.076269: wbt_guard: 8:0: step=-1, r_samples=209, r_min=119us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-171     [000] ..s1.    31.180099: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    31.180115: wbt_guard: 8:0: step=-1, r_samples=216, r_min=114us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    31.284117: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    31.284133: wbt_guard: 8:0: step=-1, r_samples=213, r_min=118us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns..    31.388106: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns..    31.388122: wbt_guard: 8:0: step=-1, r_samples=218, r_min=116us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] .Ns1.    31.492250: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.    31.492266: wbt_guard: 8:0: step=-1, r_samples=218, r_min=123us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    31.596074: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    31.596089: wbt_guard: 8:0: step=-1, r_samples=190, r_min=127us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-173     [000] ..s1.    31.700178: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-173     [000] ..s1.    31.700193: wbt_guard: 8:0: step=-1, r_samples=202, r_min=122us, target=150us, guard_fired=0, action=scale_up
+    kworker/0:1H-42      [000] ..s..    31.804150: wbt_timer: 8:0: status=3, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    31.804165: wbt_guard: 8:0: step=-1, r_samples=204, r_min=113us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-172     [000] ..s..    31.908318: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..    31.908335: wbt_guard: 8:0: step=-1, r_samples=193, r_min=149us, target=150us, guard_fired=0, action=scale_up
+ read_latency_pr-169     [000] .Ns..    32.012140: wbt_timer: 8:0: status=3, step=-1, inflight=0
+ read_latency_pr-169     [000] .Ns..    32.012156: wbt_guard: 8:0: step=-1, r_samples=173, r_min=144us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.116465: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.116487: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.220179: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.220196: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.324172: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.324186: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.428207: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.428220: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.532419: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.532433: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] .Ns1.    32.636260: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    32.636272: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.740291: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.740304: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.844338: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.844356: wbt_guard: 8:0: step=-1, r_samples=0, r_min=18446744073709551us, target=150us, guard_fired=0, action=scale_up
+          <idle>-0       [000] ..s1.    32.948477: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.052404: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.156396: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    33.260349: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    33.364467: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    33.364647: wbt_step: 8:0: scale down: step=0, window=100000us, background=1, normal=2, max=2
+==========================================
+=== [QEMU-WBT] BENCHMARK COMPLETE ===
+==========================================
+[   34.571223] reboot: Power down

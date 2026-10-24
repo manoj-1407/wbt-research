@@ -1,0 +1,160 @@
+================================================================================================
+MATCHED BENCHMARK MATRIX - run 40004771234 (rep 3)
+source: results\reps\rep3
+================================================================================================
+
+### baseline_ide_h
+    BLKSTAT-DELTA read=124296 write=2423808
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=279 wbt_step=2 wbt_timer=294
+    writers: n=4 OPS=18936 BYTES=1240989696 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=7772 MIN=301 P50=1569 P90=2938 P99=4900 MAX=295492 MEAN=1911.8
+      SAMPLES=7765 MIN=315 P50=1578 P90=2910 P99=4712 MAX=294778 MEAN=1907.6
+    guard  : none (baseline or not hit)
+    steps  : distinct=[-1, 0] final=0 n_transitions=2
+
+### patched_ide_h
+    BLKSTAT-DELTA read=130632 write=2599168
+    counters: wbt_guard=6 wbt_lat=0 wbt_stat=282 wbt_step=2 wbt_timer=294
+    writers: n=4 OPS=20306 BYTES=1330774016 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=8157 MIN=285 P50=1577 P90=2948 P99=4448 MAX=12362 MEAN=1733.2
+      SAMPLES=8172 MIN=284 P50=1565 P90=2909 P99=4354 MAX=12688 MEAN=1717.7
+    guard  : total=6 FIRED=0 NOT_FIRED=6
+             r_min sane range -..-us; insane_events=6; target=1000us
+             actions={'scale_up': 6}
+    steps  : distinct=[-1, 0] final=0 n_transitions=2
+
+### baseline_vio_h
+    BLKSTAT-DELTA read=127904 write=3623680
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=279 wbt_step=5 wbt_timer=299
+    writers: n=4 OPS=28310 BYTES=1855324160 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=7973 MIN=443 P50=1727 P90=2658 P99=3652 MAX=10451 MEAN=1757.2
+      SAMPLES=8015 MIN=414 P50=1711 P90=2651 P99=3689 MAX=11963 MEAN=1742.4
+    guard  : none (baseline or not hit)
+    steps  : distinct=[-3, -2, -1] final=-1 n_transitions=5
+
+### patched_vio_h
+    BLKSTAT-DELTA read=128072 write=3548800
+    counters: wbt_guard=7 wbt_lat=0 wbt_stat=281 wbt_step=5 wbt_timer=301
+    writers: n=4 OPS=27725 BYTES=1816985600 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=8014 MIN=398 P50=1740 P90=2697 P99=3696 MAX=12088 MEAN=1762.8
+      SAMPLES=7995 MIN=394 P50=1756 P90=2687 P99=3702 MAX=15061 MEAN=1778.3
+    guard  : total=7 FIRED=0 NOT_FIRED=7
+             r_min sane range -..-us; insane_events=7; target=1000us
+             actions={'scale_up': 7}
+    steps  : distinct=[-3, -2, -1] final=-1 n_transitions=5
+
+### baseline_ide_s
+    BLKSTAT-DELTA read=468016 write=2864
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=0 wbt_step=2 wbt_timer=294
+    writers: n=1 OPS=358 BYTES=1466368 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=9546 MIN=303 P50=1422 P90=2129 P99=2629 MAX=6956 MEAN=1415.6
+      SAMPLES=9736 MIN=304 P50=1370 P90=2095 P99=2602 MAX=18581 MEAN=1370.0
+      SAMPLES=9850 MIN=286 P50=1328 P90=2056 P99=2558 MAX=5547 MEAN=1330.7
+      SAMPLES=9805 MIN=293 P50=1350 P90=2080 P99=2608 MAX=8935 MEAN=1349.5
+      SAMPLES=9760 MIN=300 P50=1360 P90=2107 P99=2663 MAX=5786 MEAN=1360.5
+      SAMPLES=9805 MIN=289 P50=1337 P90=2088 P99=2597 MAX=7428 MEAN=1343.0
+    guard  : none (baseline or not hit)
+    steps  : distinct=[-1, 0] final=0 n_transitions=2
+
+### patched_ide_s
+    BLKSTAT-DELTA read=467856 write=2864
+    counters: wbt_guard=288 wbt_lat=0 wbt_stat=0 wbt_step=2 wbt_timer=293
+    writers: n=1 OPS=358 BYTES=1466368 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=9525 MIN=299 P50=1445 P90=2150 P99=2651 MAX=12678 MEAN=1430.3
+      SAMPLES=9797 MIN=304 P50=1352 P90=2088 P99=2618 MAX=6906 MEAN=1355.0
+      SAMPLES=9695 MIN=289 P50=1381 P90=2100 P99=2621 MAX=4900 MEAN=1375.7
+      SAMPLES=9855 MIN=302 P50=1346 P90=2083 P99=2601 MAX=12515 MEAN=1344.9
+      SAMPLES=9729 MIN=302 P50=1374 P90=2102 P99=2608 MAX=17197 MEAN=1371.2
+      SAMPLES=9881 MIN=305 P50=1336 P90=2073 P99=2588 MAX=20990 MEAN=1336.8
+    guard  : total=288 FIRED=3 NOT_FIRED=285
+             r_min sane range 106..166us; insane_events=5; target=150us
+             actions={'scale_up': 285, 'hold': 3}
+    steps  : distinct=[-1, 0] final=0 n_transitions=2
+
+### baseline_vio_s
+    BLKSTAT-DELTA read=489680 write=2904
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=0 wbt_step=4 wbt_timer=298
+    writers: n=1 OPS=363 BYTES=1486848 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=10193 MIN=414 P50=1140 P90=1923 P99=2542 MAX=8408 MEAN=1230.4
+      SAMPLES=10216 MIN=411 P50=1146 P90=1914 P99=2495 MAX=8625 MEAN=1226.6
+      SAMPLES=10193 MIN=423 P50=1142 P90=1917 P99=2528 MAX=11338 MEAN=1230.7
+      SAMPLES=10206 MIN=435 P50=1139 P90=1912 P99=2523 MAX=7972 MEAN=1226.8
+      SAMPLES=10199 MIN=431 P50=1139 P90=1924 P99=2501 MAX=8825 MEAN=1230.3
+      SAMPLES=10203 MIN=406 P50=1148 P90=1934 P99=2543 MAX=8853 MEAN=1236.2
+    guard  : none (baseline or not hit)
+    steps  : distinct=[-3, -2, -1] final=-2 n_transitions=4
+
+### patched_vio_s
+    BLKSTAT-DELTA read=495136 write=2896
+    counters: wbt_guard=184 wbt_lat=0 wbt_stat=0 wbt_step=5 wbt_timer=195
+    writers: n=1 OPS=362 BYTES=1482752 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=10314 MIN=416 P50=1136 P90=1894 P99=2470 MAX=7978 MEAN=1214.4
+      SAMPLES=10308 MIN=422 P50=1127 P90=1906 P99=2488 MAX=8981 MEAN=1213.4
+      SAMPLES=10311 MIN=422 P50=1125 P90=1887 P99=2480 MAX=19545 MEAN=1216.1
+      SAMPLES=10315 MIN=419 P50=1116 P90=1891 P99=2473 MAX=16404 MEAN=1207.4
+      SAMPLES=10307 MIN=419 P50=1120 P90=1911 P99=2478 MAX=8608 MEAN=1211.7
+      SAMPLES=10337 MIN=412 P50=1120 P90=1901 P99=2498 MAX=12702 MEAN=1210.4
+    guard  : total=184 FIRED=176 NOT_FIRED=8
+             r_min sane range 189..268us; insane_events=8; target=150us
+             actions={'hold': 176, 'scale_up': 8}
+    steps  : distinct=[-3, -2, -1] final=-1 n_transitions=5
+
+================================================================================================
+PAIRED COMPARISON
+================================================================================================
+
+-- ide / h --
+   samples : base=15537 patched=16329
+   MIN     : base=[301.0, 315.0] patched=[285.0, 284.0]
+   P50     : base=[1569.0, 1578.0] patched=[1577.0, 1565.0]
+   P90     : base=[2938.0, 2910.0] patched=[2948.0, 2909.0]
+   P99     : base=[4900.0, 4712.0] patched=[4448.0, 4354.0]
+   MAX     : base=[295492.0, 294778.0] patched=[12362.0, 12688.0]
+   wOPS    : base=18936 patched=20306
+   timer   : base=294 patched=294
+   guard   : base=0 patched=6
+   finstep : base=0 patched=0
+
+-- ide / s --
+   samples : base=58502 patched=58482
+   MIN     : base=[303.0, 304.0, 286.0, 293.0, 300.0, 289.0] patched=[299.0, 304.0, 289.0, 302.0, 302.0, 305.0]
+   P50     : base=[1422.0, 1370.0, 1328.0, 1350.0, 1360.0, 1337.0] patched=[1445.0, 1352.0, 1381.0, 1346.0, 1374.0, 1336.0]
+   P90     : base=[2129.0, 2095.0, 2056.0, 2080.0, 2107.0, 2088.0] patched=[2150.0, 2088.0, 2100.0, 2083.0, 2102.0, 2073.0]
+   P99     : base=[2629.0, 2602.0, 2558.0, 2608.0, 2663.0, 2597.0] patched=[2651.0, 2618.0, 2621.0, 2601.0, 2608.0, 2588.0]
+   MAX     : base=[6956.0, 18581.0, 5547.0, 8935.0, 5786.0, 7428.0] patched=[12678.0, 6906.0, 4900.0, 12515.0, 17197.0, 20990.0]
+   wOPS    : base=358 patched=358
+   timer   : base=294 patched=293
+   guard   : base=0 patched=288
+   finstep : base=0 patched=0
+
+-- vio / h --
+   samples : base=15988 patched=16009
+   MIN     : base=[443.0, 414.0] patched=[398.0, 394.0]
+   P50     : base=[1727.0, 1711.0] patched=[1740.0, 1756.0]
+   P90     : base=[2658.0, 2651.0] patched=[2697.0, 2687.0]
+   P99     : base=[3652.0, 3689.0] patched=[3696.0, 3702.0]
+   MAX     : base=[10451.0, 11963.0] patched=[12088.0, 15061.0]
+   wOPS    : base=28310 patched=27725
+   timer   : base=299 patched=301
+   guard   : base=0 patched=7
+   finstep : base=-1 patched=-1
+
+-- vio / s --
+   samples : base=61210 patched=61892
+   MIN     : base=[414.0, 411.0, 423.0, 435.0, 431.0, 406.0] patched=[416.0, 422.0, 422.0, 419.0, 419.0, 412.0]
+   P50     : base=[1140.0, 1146.0, 1142.0, 1139.0, 1139.0, 1148.0] patched=[1136.0, 1127.0, 1125.0, 1116.0, 1120.0, 1120.0]
+   P90     : base=[1923.0, 1914.0, 1917.0, 1912.0, 1924.0, 1934.0] patched=[1894.0, 1906.0, 1887.0, 1891.0, 1911.0, 1901.0]
+   P99     : base=[2542.0, 2495.0, 2528.0, 2523.0, 2501.0, 2543.0] patched=[2470.0, 2488.0, 2480.0, 2473.0, 2478.0, 2498.0]
+   MAX     : base=[8408.0, 8625.0, 11338.0, 7972.0, 8825.0, 8853.0] patched=[7978.0, 8981.0, 19545.0, 16404.0, 8608.0, 12702.0]
+   wOPS    : base=363 patched=362
+   timer   : base=298 patched=195
+   guard   : base=0 patched=184
+   finstep : base=-2 patched=-1
