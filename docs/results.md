@@ -188,10 +188,7 @@ produced an artifact of comparable size (all 8 configurations × 2 files),
 i.e. the experiment is **operationally** reproducible: it does not
 intermittently collapse into the empty-trace failure mode.
 
-**Content-level comparison across repetitions is not available.** GitHub
-requires authentication to download Actions artifacts; this environment has
-no GitHub credential, and the token used earlier in the project was exposed
-and must be rotated.
+**Content-level comparison across repetitions is now available** in Section 8 and docs/three-run-reconciliation.md. The initial artifact-access limitation was resolved for this research pass.
 
 The three artifact payloads are provably distinct — the run pages expose
 their digests, so the runs are independent executions rather than repeated
@@ -222,10 +219,7 @@ the gap either: `.gitignore` contains `*.log`, so
 `origin/exp/qemu-guard-audit` is still at `c53cd2a`. Repetition 2 and 3
 traces exist only inside their (unauthenticated-inaccessible) artifacts.
 
-Consequently the 3-repetition median/variability table required by the
-repeatability plan **could not be produced**, and no claim in Section 5 is
-backed by cross-run statistics. This is a limitation of the evidence, not a
-result.
+The per-run tables in Section 8 provide content-level comparison. They do not establish a stable benefit: sparse latency deltas change direction across repetitions. A formal pooled median/variability analysis is not reported here because workload ordering was not randomized and runner drift remains a confound.
 
 
 ## 8. Cross-run content reconciliation (2026-10-24)
