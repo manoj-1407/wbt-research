@@ -194,3 +194,12 @@ attention; the current remediation does not.
    of content on hand.
 5. **Security follow-up:** revoke/rotate the previously exposed GitHub token
    before any further CI work.
+
+
+## Repeatability update (2026-10-24)
+
+The three Actions artifacts have now been downloaded/parsed at content level. This supersedes the earlier statement in this report that only repetition 1 had content and that cross-run statistics could not be produced. The per-run sparse results are mixed: vio_s P50 deltas are +5.13%, −0.93%, −1.60%; P99 deltas are +1.83%, −1.82%, −1.62%. ide_s also changes direction across runs. No stable latency improvement or stable regression is established. Sparse writer OPS are essentially flat.
+
+**Final decision remains REVISE.** The controller mechanism is demonstrated, but the performance hypothesis is not supported by a consistent benefit. Do not make a performance-improvement claim. Redesign the predicate/action and run a larger randomized repetition set; keep results scoped to QEMU TCG.
+
+Detailed provenance and heavy/sparse summaries: docs/three-run-reconciliation.md. Updated sparse matrix: docs/results.md §8.
