@@ -1,5 +1,13 @@
 # Upstream RFC & Maintainer Inquiry Draft
 
+> [!IMPORTANT]
+> **Pre-send checklist (from final audit, 2026-10-25):**
+> 1. Replace `Signed-off-by: VoxBridge Research <research@voxbridge.local>` in the
+>    kernel patch file with the real author identity (name + kernel.org-registered email)
+>    before sending or attaching the patch.
+> 2. Confirm the previously exposed GitHub Actions token has been revoked/rotated.
+> 3. The inquiry email text below is otherwise verified correct and ready to send.
+
 **Target:** `linux-block@vger.kernel.org`  
 **CC:** Jens Axboe `<axboe@kernel.dk>`  
 **Topic:** `block/blk-wbt.c: LAT_UNKNOWN_WRITES` controller decision under concurrent elevated read latency  
