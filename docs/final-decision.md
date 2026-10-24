@@ -9,7 +9,7 @@ demonstrably changes the controller's decision in exactly the branch it
 patches. The *performance hypothesis it was built to test is not
 supported*: in the single configuration where the guard actually held depth,
 read latency was slightly **worse** (+1.8 % P99, +5.1 % P50) with unchanged
-writer throughput. Content-level repeatability could not be obtained. This
+writer throughput. Content-level repeatability is now available for all three repetitions; the observed latency deltas are mixed. This
 is not a failure of the mechanism — it is a failure of the premise, and it
 needs a redesign of the predicate before any upstream claim.
 
@@ -24,7 +24,7 @@ branches `exp/qemu-guard-audit` @ `c53cd2a`, `exp/hold-depth-wbt-guard`,
 | 1 — build + patch audit | complete |
 | 2 — matched baseline-vs-patched QEMU experiment | complete, valid (8/8 configs) |
 | 3 — evidence analysis | complete |
-| 4 — bounded repeatability (3 repetitions) | **partial** — 3 runs executed and succeeded; only 1 run's content retrievable |
+| 4 — bounded repeatability (3 repetitions) | complete — 3 runs executed and content-level reconciled |
 | 5 — research package | complete (`docs/`, `results/`, `scripts/`) |
 | 6 — GO / REVISE / STOP | **REVISE** |
 
@@ -133,7 +133,7 @@ patch is provably inert outside its branch.
 
 ## Limitations
 
-* **Only one repetition has content.** Reps 2 and 3 (`40004718895`,
+* **All three repetitions have content-level summaries (see docs/three-run-reconciliation.md).** Reps 2 and 3 (`40004718895`,
   `40004771234`) both completed `success` at the same commit with
   comparable artifact sizes, proving operational reproducibility, but their
   logs could not be downloaded: GitHub artifact download returns `401` and
