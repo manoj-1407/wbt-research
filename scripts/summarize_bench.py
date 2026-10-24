@@ -65,7 +65,7 @@ def p(s=""):
 
 p("=" * 96)
 p(f"MATCHED BENCHMARK MATRIX - {LABEL}")
-p(f"source: {os.path.relpath(os.path.abspath(BENCH), REPO)}")
+p(f"source: {os.path.relpath(os.path.abspath(BENCH), REPO).replace(os.sep, '/')}")
 p("=" * 96)
 for r in rows:
     p(f"\n### {r['cfg']}")
