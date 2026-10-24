@@ -226,3 +226,25 @@ Consequently the 3-repetition median/variability table required by the
 repeatability plan **could not be produced**, and no claim in Section 5 is
 backed by cross-run statistics. This is a limitation of the evidence, not a
 result.
+
+
+## 8. Cross-run content reconciliation (2026-10-24)
+
+Run 1 artifact was downloaded and SHA-256 verified against Actions metadata; runs 2 and 3 were also available locally and parsed. See [three-run-reconciliation.md](three-run-reconciliation.md) for provenance, all workload rows, and the full per-run comparison.
+
+Sparse reader means (patched minus baseline):
+
+| run | config | P50 delta | P99 delta | writer OPS |
+|---|---|---:|---:|---:|
+| 1 | ide_s | +3.67 µs (+0.68%) | +15.00 µs (+1.16%) | 364 → 364 |
+| 1 | vio_s | +27.00 µs (+5.13%) | +20.83 µs (+1.83%) | 367 → 367 |
+| 2 | ide_s | −27.00 µs (−1.94%) | −94.67 µs (−3.49%) | 355 → 356 |
+| 2 | vio_s | −10.83 µs (−0.93%) | −53.67 µs (−1.82%) | 362 → 362 |
+| 3 | ide_s | +11.17 µs (+0.82%) | +5.00 µs (+0.19%) | 358 → 358 |
+| 3 | vio_s | −18.33 µs (−1.60%) | −40.83 µs (−1.62%) | 363 → 362 |
+
+The sparse latency effect is mixed across repetitions, not a stable improvement or regression. The earlier one-run conclusion that vio_s latency worsened should be treated as a single-run observation, not the overall repeatability result. Writer OPS remain nearly unchanged in sparse runs. Heavy profile is summarized in the addendum but remains descriptive (two readers/config and TCG).
+
+Run-level guard counts also vary: rep1 patched ide_s 288 (0 holds), vio_s 283 (276 holds); rep2 ide_s 289 (4 holds), vio_s 184 (176 holds); rep3 ide_s 288 (3 holds), vio_s 184 (176 holds). ide_h patched guard decisions were 8/7/6 with no holds; vio_h 0/9/7 and no holds. These are guard decisions, not a performance metric.
+
+**Updated repeatability assessment:** three content-level repetitions are now reconciled. They do not support a stable latency benefit. Keep the decision **REVISE** and do not claim performance improvement.
