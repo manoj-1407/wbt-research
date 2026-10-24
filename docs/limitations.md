@@ -1,24 +1,12 @@
 # Limitations
 
-## 1. Single repetition carries all content
+## 1. Three repetitions; no stable effect established
 
-Three matched runs were executed (see `results.md` §7) but only run 1's logs
-were retrievable. GitHub Actions artifact download requires authentication
-(`401`), and the run-logs endpoint returns `403`; this environment has no
-GitHub credential. The token that was used earlier in the project must be
-treated as compromised and rotated, so it is deliberately not reused.
+Three matched runs were executed and all three artifacts were retrieved and parsed during the 2026-10-24 reconciliation. Provenance and content-level summaries are in docs/three-run-reconciliation.md and docs/results.md §8.
 
-Effect: every latency and throughput number in `results.md` §5 comes from
-**one** execution. The direction of the `vio_s` effect is consistent across
-six independent reader processes with a within-run spread far smaller than
-the observed gap, but the experiment cannot separate a real +2…5 %
-regression from run-to-run variation in shared-runner QEMU. No median,
-no inter-run variability, and no per-repetition guard counts exist.
+Effect: the sparse latency deltas change direction across runs, so there is no stable improvement or regression. The runs share a QEMU TCG runner and were not randomized/alternated; drift and order effects remain possible. Three runs are insufficient for a robust variability estimate.
 
-Secondary defect found while investigating this: the workflow's
-`Commit benchmark logs to repository` step is inert because `.gitignore`
-lists `*.log`. Fixing it (see §6) would make future repetitions
-self-archiving without any token.
+The archive/logging workflow defect remains a future-run concern; this reconciliation used downloaded Actions artifacts.
 
 ## 2. Emulation, not hardware
 
