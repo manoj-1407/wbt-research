@@ -9,11 +9,11 @@ and asserts that:
 
   1. Original behavior is preserved for pure-write windows (no reads).
   2. The patch guard fires correctly: when reads are present AND
-     stat[READ].min > min_lat_nsec, the window produces scale_down()
-     instead of scale_up().
+     stat[READ].min > min_lat_nsec, the window holds the current depth
+     (break;) instead of calling scale_up().
   3. The patch does NOT fire when reads are present but latency is below target.
-  4. The guard uses hard_throttle=False (soft scale_down), matching the
-     LAT_UNKNOWN fallback path, not the LAT_EXCEEDED hard throttle.
+  4. The guard performs a hold, not a scale change: it neither scale_up()s
+     (the unpatched behaviour) nor scale_down()s (the LAT_EXCEEDED behaviour).
 
 This is NOT a proof that the kernel is correct or that the patch fixes
 the real hardware problem. It is a specification test that verifies the
@@ -150,7 +150,7 @@ def wb_timer_fn_baseline(rwb: RqWb, stat) -> str:
 def wb_timer_fn_patched(rwb: RqWb, stat) -> str:
     """
     block/blk-wbt.c:422-470 — wb_timer_fn() — PATCHED
-    Adds the LAT_UNKNOWN_WRITES guard.
+    Adds the LAT_UNKNOWN_WRITES guard (hold depth).
     """
     status = latency_exceeded(rwb, stat)
 
@@ -161,9 +161,9 @@ def wb_timer_fn_patched(rwb: RqWb, stat) -> str:
         return scale_up(rwb)
 
     elif status == LAT_UNKNOWN_WRITES:
-        # ---- PATCH START ----
+        # ---- PATCH START: HOLD DEPTH ----
         if stat[READ].nr_samples and stat[READ].min > rwb.min_lat_nsec:
-            return scale_down(rwb, hard_throttle=False)  # conservative, not hard
+            return "hold"  # Conservatively hold current depth (break;), no scale_up
         # ---- PATCH END ----
         return scale_up(rwb)
 
@@ -223,170 +223,266 @@ def run_test(name, fn_baseline, fn_patched, rwb_b, stat_b, rwb_p, stat_p,
 
     status = "PASS" if passed else "FAIL"
     print(f"[{status}] {name}")
-    print(f"        baseline: {result_b}  (step {step_before_b} → {step_after_b})")
-    print(f"        patched:  {result_p}  (step {step_before_p} → {step_after_p})")
+    print(f"        baseline: {result_b}  (step {step_before_b} -> {step_after_b})")
+    print(f"        patched:  {result_p}  (step {step_before_p} -> {step_after_p})")
     if issues:
         for issue in issues:
             print(issue)
     return passed
 
 
-all_passed = True
+if __name__ == '__main__':
+    all_passed = True
 
-print("=" * 70)
-print("WBT State Transition Tests — Baseline vs Patched")
-print(f"min_lat_nsec = {MIN_LAT:,} ns ({MIN_LAT/1e6:.1f} ms)")
-print("=" * 70)
-print()
-
-# ---------------------------------------------------------------------------
-# TC-1: Pure write window (no reads) — guard must NOT fire
-# Expected: both baseline and patched call scale_up (step decreases by 1)
-# ---------------------------------------------------------------------------
-print("--- TC-1: Pure write window (sparse writes, no reads) ---")
-stat = make_stat(r_samples=0, w_samples=1, w_min_ns=500_000)
-rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
-passed = run_test(
-    "TC-1: LAT_UNKNOWN_WRITES, no read samples → both scale_up",
-    wb_timer_fn_baseline, wb_timer_fn_patched,
-    rwb_b, stat, rwb_p, stat,
-    expected_baseline="scale_up",
-    expected_patched="scale_up",
-    expected_step_delta_b=-1,
-    expected_step_delta_p=-1,
-)
-all_passed = all_passed and passed
-print()
-
-# ---------------------------------------------------------------------------
-# TC-2: Mixed window — reads present, read latency BELOW target
-# Expected: guard does NOT fire; both scale_up
-# ---------------------------------------------------------------------------
-print("--- TC-2: Sparse writes, reads present but latency BELOW target ---")
-stat = make_stat(r_samples=5, r_min_ns=500_000, w_samples=1, w_min_ns=200_000)
-rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
-passed = run_test(
-    "TC-2: LAT_UNKNOWN_WRITES, r_min < min_lat → both scale_up",
-    wb_timer_fn_baseline, wb_timer_fn_patched,
-    rwb_b, stat, rwb_p, stat,
-    expected_baseline="scale_up",
-    expected_patched="scale_up",
-    expected_step_delta_b=-1,
-    expected_step_delta_p=-1,
-)
-all_passed = all_passed and passed
-print()
-
-# ---------------------------------------------------------------------------
-# TC-3: THE CRITICAL CASE — sparse writes, reads present, read latency ABOVE target
-# Expected:
-#   baseline → scale_up  (wrong direction — this is the bug hypothesis)
-#   patched  → scale_down(hard=False)  (conservative correction)
-# ---------------------------------------------------------------------------
-print("--- TC-3: CRITICAL — sparse writes, reads elevated above target ---")
-stat = make_stat(r_samples=3, r_min_ns=8_000_000, w_samples=1, w_min_ns=200_000)
-# r_min = 8 ms >> min_lat = 2 ms; write samples = 1 < RWB_MIN_WRITE_SAMPLES = 3
-rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
-passed = run_test(
-    "TC-3: LAT_UNKNOWN_WRITES + r_min > min_lat → baseline scale_up, patched scale_down",
-    wb_timer_fn_baseline, wb_timer_fn_patched,
-    rwb_b, stat, rwb_p, stat,
-    expected_baseline="scale_up",
-    expected_patched="scale_down(hard=False)",
-    expected_step_delta_b=-1,   # baseline increases write depth (step goes more negative)
-    expected_step_delta_p=+1,   # patched decreases write depth
-)
-all_passed = all_passed and passed
-print()
-
-# ---------------------------------------------------------------------------
-# TC-4: Sufficient write samples + read latency exceeded → both see LAT_EXCEEDED
-# The patch should NOT touch this path (stat_sample_valid → True)
-# ---------------------------------------------------------------------------
-print("--- TC-4: Sufficient write samples + read latency above target → LAT_EXCEEDED ---")
-stat = make_stat(r_samples=5, r_min_ns=8_000_000, w_samples=5, w_min_ns=200_000)
-rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
-passed = run_test(
-    "TC-4: stat_sample_valid=True + r_min > min_lat → both scale_down(hard=True)",
-    wb_timer_fn_baseline, wb_timer_fn_patched,
-    rwb_b, stat, rwb_p, stat,
-    expected_baseline="scale_down(hard=True)",
-    expected_patched="scale_down(hard=True)",
-    expected_step_delta_b=+1,
-    expected_step_delta_p=+1,
-)
-all_passed = all_passed and passed
-print()
-
-# ---------------------------------------------------------------------------
-# TC-5: Sufficient write samples + latency OK → both scale_up
-# ---------------------------------------------------------------------------
-print("--- TC-5: Sufficient write samples + read latency below target → LAT_OK ---")
-stat = make_stat(r_samples=5, r_min_ns=500_000, w_samples=5, w_min_ns=200_000)
-rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
-passed = run_test(
-    "TC-5: stat_sample_valid=True + r_min < min_lat → both scale_up",
-    wb_timer_fn_baseline, wb_timer_fn_patched,
-    rwb_b, stat, rwb_p, stat,
-    expected_baseline="scale_up",
-    expected_patched="scale_up",
-    expected_step_delta_b=-1,
-    expected_step_delta_p=-1,
-)
-all_passed = all_passed and passed
-print()
-
-# ---------------------------------------------------------------------------
-# TC-6: Boundary — read latency exactly equals target
-# stat[READ].min == min_lat_nsec → guard condition is STRICT GREATER THAN
-# Expected: guard does NOT fire; both scale_up
-# ---------------------------------------------------------------------------
-print("--- TC-6: Boundary — r_min exactly equals min_lat_nsec ---")
-stat = make_stat(r_samples=3, r_min_ns=MIN_LAT, w_samples=1)
-rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
-passed = run_test(
-    "TC-6: r_min == min_lat_nsec (not >) → both scale_up (guard does not fire)",
-    wb_timer_fn_baseline, wb_timer_fn_patched,
-    rwb_b, stat, rwb_p, stat,
-    expected_baseline="scale_up",
-    expected_patched="scale_up",
-    expected_step_delta_b=-1,
-    expected_step_delta_p=-1,
-)
-all_passed = all_passed and passed
-print()
-
-# ---------------------------------------------------------------------------
-# TC-7: Sustained patched behavior — 5 consecutive LAT_UNKNOWN_WRITES windows
-#        with reads elevated.  Step should increase each window (depth tightens).
-# ---------------------------------------------------------------------------
-print("--- TC-7: 5 consecutive windows with reads elevated (patched) ---")
-rwb_p = RqWb(MIN_LAT)
-stat = make_stat(r_samples=3, r_min_ns=8_000_000, w_samples=1)
-steps = [rwb_p.rq_depth.scale_step]
-for i in range(5):
-    wb_timer_fn_patched(rwb_p, stat)
-    steps.append(rwb_p.rq_depth.scale_step)
-expected_steps = [0, 1, 2, 3, 4, 5]
-step_ok = steps == expected_steps
-print(f"  scale_step progression: {steps}")
-print(f"  expected:               {expected_steps}")
-tc7_pass = step_ok
-print(f"[{'PASS' if tc7_pass else 'FAIL'}] TC-7: 5-window escalation")
-all_passed = all_passed and tc7_pass
-print()
-
-# ---------------------------------------------------------------------------
-# Summary
-# ---------------------------------------------------------------------------
-print("=" * 70)
-if all_passed:
-    print("ALL TESTS PASSED")
+    print("=" * 70)
+    print("WBT State Transition Tests -- Baseline vs Patched (Hold-Depth)")
+    print(f"min_lat_nsec = {MIN_LAT:,} ns ({MIN_LAT/1e6:.1f} ms)")
+    print("=" * 70)
     print()
-    print("The patch logic is internally consistent with the intended behavior.")
-    print("This is a specification test — it does NOT validate actual kernel")
-    print("execution or hardware-level interference reduction.")
-    sys.exit(0)
-else:
-    print("SOME TESTS FAILED — review output above.")
-    sys.exit(1)
+
+    # ---------------------------------------------------------------------------
+    # TC-1: Pure write window (no reads) -- guard must NOT fire
+    # Expected: both baseline and patched call scale_up (step decreases by 1)
+    # ---------------------------------------------------------------------------
+    print("--- TC-1: Pure write window (sparse writes, no reads) ---")
+    stat = make_stat(r_samples=0, w_samples=1, w_min_ns=500_000)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-1: LAT_UNKNOWN_WRITES, no read samples -> both scale_up",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="scale_up",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=-1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-2: Mixed window -- reads present, read latency BELOW target
+    # Expected: guard does NOT fire; both scale_up
+    # ---------------------------------------------------------------------------
+    print("--- TC-2: Sparse writes, reads present but latency BELOW target ---")
+    stat = make_stat(r_samples=5, r_min_ns=500_000, w_samples=1, w_min_ns=200_000)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-2: LAT_UNKNOWN_WRITES, r_min < min_lat -> both scale_up",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="scale_up",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=-1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-3: THE CRITICAL CASE -- sparse writes, reads present, read latency ABOVE target
+    # Expected:
+    #   baseline -> scale_up  (escalates write depth)
+    #   patched  -> hold      (holds existing scale step, delta=0)
+    # ---------------------------------------------------------------------------
+    print("--- TC-3: CRITICAL -- sparse writes, reads elevated above target ---")
+    stat = make_stat(r_samples=3, r_min_ns=8_000_000, w_samples=1, w_min_ns=200_000)
+    # r_min = 8 ms >> min_lat = 2 ms; write samples = 1 < RWB_MIN_WRITE_SAMPLES = 3
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-3: LAT_UNKNOWN_WRITES + r_min > min_lat -> baseline scale_up, patched hold",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="hold",
+        expected_step_delta_b=-1,   # baseline increases write depth (step goes more negative)
+        expected_step_delta_p=0,    # patched holds existing step (no change)
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-4: Sufficient write samples + read latency exceeded -> both see LAT_EXCEEDED
+    # The patch should NOT touch this path (stat_sample_valid -> True)
+    # ---------------------------------------------------------------------------
+    print("--- TC-4: Sufficient write samples + read latency above target -> LAT_EXCEEDED ---")
+    stat = make_stat(r_samples=5, r_min_ns=8_000_000, w_samples=5, w_min_ns=200_000)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-4: stat_sample_valid=True + r_min > min_lat -> both scale_down(hard=True)",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_down(hard=True)",
+        expected_patched="scale_down(hard=True)",
+        expected_step_delta_b=+1,
+        expected_step_delta_p=+1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-5: Sufficient write samples + latency OK -> both scale_up
+    # ---------------------------------------------------------------------------
+    print("--- TC-5: Sufficient write samples + read latency below target -> LAT_OK ---")
+    stat = make_stat(r_samples=5, r_min_ns=500_000, w_samples=5, w_min_ns=200_000)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-5: stat_sample_valid=True + r_min < min_lat -> both scale_up",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="scale_up",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=-1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-6: Boundary -- read latency exactly equals target
+    # stat[READ].min == min_lat_nsec -> guard condition is STRICT GREATER THAN
+    # Expected: guard does NOT fire; both scale_up
+    # ---------------------------------------------------------------------------
+    print("--- TC-6: Boundary -- r_min exactly equals min_lat_nsec ---")
+    stat = make_stat(r_samples=3, r_min_ns=MIN_LAT, w_samples=1)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-6: r_min == min_lat_nsec (not >) -> both scale_up (guard does not fire)",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="scale_up",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=-1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-7: Sustained patched behavior -- 5 consecutive LAT_UNKNOWN_WRITES windows
+    #        with reads elevated.
+    #        Baseline should escalate step: 0 -> -1 -> -2 -> -3 -> -4 -> -5
+    #        Patched should hold step:      0 ->  0 ->  0 ->  0 ->  0 ->  0
+    # ---------------------------------------------------------------------------
+    print("--- TC-7: 5 consecutive windows with reads elevated (patched vs baseline) ---")
+    rwb_b = RqWb(MIN_LAT)
+    rwb_p = RqWb(MIN_LAT)
+    stat = make_stat(r_samples=3, r_min_ns=8_000_000, w_samples=1)
+    steps_b = [rwb_b.rq_depth.scale_step]
+    steps_p = [rwb_p.rq_depth.scale_step]
+    for i in range(5):
+        wb_timer_fn_baseline(rwb_b, stat)
+        wb_timer_fn_patched(rwb_p, stat)
+        steps_b.append(rwb_b.rq_depth.scale_step)
+        steps_p.append(rwb_p.rq_depth.scale_step)
+
+    expected_steps_b = [0, -1, -2, -3, -4, -5]
+    expected_steps_p = [0, 0, 0, 0, 0, 0]
+    step_b_ok = steps_b == expected_steps_b
+    step_p_ok = steps_p == expected_steps_p
+    print(f"  baseline scale_step progression: {steps_b} (expected {expected_steps_b})")
+    print(f"  patched  scale_step progression: {steps_p} (expected {expected_steps_p})")
+    tc7_pass = step_b_ok and step_p_ok
+    print(f"[{'PASS' if tc7_pass else 'FAIL'}] TC-7: 5-window hold vs escalation divergence")
+    all_passed = all_passed and tc7_pass
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-8: Sentinel / uninitialized read latency (ULLONG_MAX) when r_samples == 0
+    # stat[READ].nr_samples == 0, min is ULLONG_MAX (e.g. 18446744073709551615 ns).
+    # Expected: Guard must short-circuit on r_samples == 0 and NOT fire "hold",
+    # allowing normal scale_up without integer overflow or erroneous hold.
+    # ---------------------------------------------------------------------------
+    print("--- TC-8: Sentinel uninitialized latency (ULLONG_MAX, r_samples=0) ---")
+    ULLONG_MAX = (1 << 64) - 1
+    stat = make_stat(r_samples=0, r_min_ns=ULLONG_MAX, w_samples=1, w_min_ns=200_000)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-8: r_samples=0 with ULLONG_MAX sentinel -> short-circuit, both scale_up",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="scale_up",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=-1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-9: Guard evaluation when already at negative scale_step (deep queue)
+    # When scale_step is already -3 (widened depth), guard firing should hold
+    # at -3, preventing step from reaching -4.
+    # ---------------------------------------------------------------------------
+    print("--- TC-9: Guard evaluation at negative scale_step (-3) ---")
+    stat = make_stat(r_samples=4, r_min_ns=8_000_000, w_samples=1, w_min_ns=200_000)
+    rwb_b = RqWb(MIN_LAT); rwb_b.rq_depth.scale_step = -3
+    rwb_p = RqWb(MIN_LAT); rwb_p.rq_depth.scale_step = -3
+    passed = run_test(
+        "TC-9: scale_step=-3, r_min > target -> baseline widens to -4, patched holds at -3",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="hold",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=0,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-10: Zero write completions (w_samples=0) -> LAT_UNKNOWN, not LAT_UNKNOWN_WRITES
+    # When no writes completed, latency_exceeded returns LAT_UNKNOWN.
+    # Guard is on LAT_UNKNOWN_WRITES branch, so LAT_UNKNOWN goes to unknown_cnt logic.
+    # ---------------------------------------------------------------------------
+    print("--- TC-10: Zero write completions (w_samples=0) -> LAT_UNKNOWN ---")
+    stat = make_stat(r_samples=4, r_min_ns=8_000_000, w_samples=0)
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-10: w_samples=0 -> LAT_UNKNOWN (unknown_cnt bump), noop for both",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="noop",
+        expected_patched="noop",
+        expected_step_delta_b=0,
+        expected_step_delta_p=0,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # TC-11: THE MASKING DEFECT -- High P50/P99 latency with low minimum read latency
+    # If 99% of reads are severely degraded (e.g. 10 ms) but a single read is fast
+    # (e.g. 500 us < target 2 ms), stat[READ].min is 500 us.
+    # The guard checks `stat[READ].min > min_lat_nsec`, which is FALSE.
+    # Consequently, the guard FAILS to fire and calls scale_up despite read degradation.
+    # This unit test documents the fundamental structural limitation of the min-latency predicate.
+    # ---------------------------------------------------------------------------
+    print("--- TC-11: Structural limitation: Fast minimum read masks severe tail/median degradation ---")
+    stat = make_stat(r_samples=100, r_min_ns=500_000, w_samples=1) # min is 500us < 2000us target
+    rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+    passed = run_test(
+        "TC-11: stat[READ].min < target despite degraded tail -> guard does not fire, both scale_up",
+        wb_timer_fn_baseline, wb_timer_fn_patched,
+        rwb_b, stat, rwb_p, stat,
+        expected_baseline="scale_up",
+        expected_patched="scale_up",
+        expected_step_delta_b=-1,
+        expected_step_delta_p=-1,
+    )
+    all_passed = all_passed and passed
+    print()
+
+    # ---------------------------------------------------------------------------
+    # Summary
+    # ---------------------------------------------------------------------------
+    print("=" * 70)
+    if all_passed:
+        print("ALL TESTS PASSED")
+        print()
+        print("The patch logic is internally consistent with the intended behavior.")
+        print("This is a specification test — it does NOT validate actual kernel")
+        print("execution or hardware-level interference reduction.")
+        sys.exit(0)
+    else:
+        print("SOME TESTS FAILED — review output above.")
+        sys.exit(1)

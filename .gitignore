@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.exe
+*.o
+*.log
+*.trace
+
+# Raw benchmark traces and the CI archives are the primary evidence for the
+# published analysis, so they are deliberately tracked even though logs are
+# otherwise ignored.
+!benchmarks/smoke_test/*.log
+!results/**/*.log

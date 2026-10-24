@@ -1,0 +1,155 @@
+﻿# Raw comparison matrix - run 40002470957 (head c53cd2a)
+
+Auto-extracted from the eight `*_qemu.log` files in ../baseline and ../patched by
+`scripts/summarize_bench.py`. No values are transcribed by hand.
+``````text
+================================================================================================
+MATCHED BENCHMARK MATRIX - run 40002470957
+================================================================================================
+
+### baseline_ide_h
+    BLKSTAT-DELTA read=188928 write=4246272
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=272 wbt_step=2 wbt_timer=294
+    writers: n=4 OPS=33174 BYTES=2174091264 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=11829 MIN=169 P50=760 P90=1509 P99=2408 MAX=644775 MEAN=997.3
+      SAMPLES=11787 MIN=171 P50=764 P90=1545 P99=2446 MAX=644674 MEAN=1007.4
+    guard  : none (baseline or not hit)
+
+### patched_ide_h
+    BLKSTAT-DELTA read=200680 write=4590208
+    counters: wbt_guard=8 wbt_lat=0 wbt_stat=280 wbt_step=2 wbt_timer=294
+    writers: n=4 OPS=35861 BYTES=2350186496 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=12543 MIN=162 P50=734 P90=1529 P99=2413 MAX=26314 MEAN=855.0
+      SAMPLES=12542 MIN=160 P50=738 P90=1535 P99=2422 MAX=25266 MEAN=859.2
+    guard  : total=8 FIRED=0 NOT_FIRED=8
+             r_min sane range -..-us; insane_events=8; target=1000us
+             actions={'scale_up': 8}
+
+### baseline_vio_h
+    BLKSTAT-DELTA read=199560 write=7303040
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=287 wbt_step=6 wbt_timer=304
+    writers: n=4 OPS=57055 BYTES=3739156480 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=12464 MIN=250 P50=864 P90=1440 P99=2148 MAX=9631 MEAN=915.5
+      SAMPLES=12481 MIN=234 P50=859 P90=1434 P99=2129 MAX=8139 MEAN=912.6
+    guard  : none (baseline or not hit)
+
+### patched_vio_h
+    BLKSTAT-DELTA read=199544 write=7220992
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=288 wbt_step=6 wbt_timer=304
+    writers: n=4 OPS=56414 BYTES=3697147904 ERR=0 FSYNC_ERR=0
+    probes : n=2
+      SAMPLES=12471 MIN=246 P50=877 P90=1450 P99=1996 MAX=4390 MEAN=917.7
+      SAMPLES=12472 MIN=254 P50=875 P90=1464 P99=2011 MAX=8355 MEAN=920.3
+    guard  : none (baseline or not hit)
+
+### baseline_ide_s
+    BLKSTAT-DELTA read=758456 write=2912
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=0 wbt_step=2 wbt_timer=293
+    writers: n=1 OPS=364 BYTES=1490944 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=15468 MIN=148 P50=586 P90=976 P99=1320 MAX=20167 MEAN=600.8
+      SAMPLES=15922 MIN=135 P50=521 P90=947 P99=1284 MAX=6739 MEAN=555.1
+      SAMPLES=15810 MIN=137 P50=545 P90=961 P99=1305 MAX=10745 MEAN=568.8
+      SAMPLES=15931 MIN=139 P50=522 P90=946 P99=1271 MAX=8673 MEAN=553.7
+      SAMPLES=15771 MIN=134 P50=542 P90=967 P99=1306 MAX=17625 MEAN=571.3
+      SAMPLES=15905 MIN=142 P50=525 P90=946 P99=1283 MAX=7189 MEAN=556.5
+    guard  : none (baseline or not hit)
+
+### patched_ide_s
+    BLKSTAT-DELTA read=759640 write=2912
+    counters: wbt_guard=288 wbt_lat=0 wbt_stat=0 wbt_step=2 wbt_timer=293
+    writers: n=1 OPS=364 BYTES=1490944 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=15522 MIN=134 P50=582 P90=973 P99=1312 MAX=21395 MEAN=598.8
+      SAMPLES=15800 MIN=140 P50=550 P90=960 P99=1339 MAX=9967 MEAN=572.7
+      SAMPLES=15929 MIN=141 P50=525 P90=944 P99=1299 MAX=12569 MEAN=556.3
+      SAMPLES=15808 MIN=137 P50=545 P90=951 P99=1314 MAX=19085 MEAN=570.2
+      SAMPLES=15944 MIN=149 P50=528 P90=940 P99=1297 MAX=6649 MEAN=555.7
+      SAMPLES=15952 MIN=139 P50=533 P90=949 P99=1298 MAX=17643 MEAN=560.1
+    guard  : total=288 FIRED=0 NOT_FIRED=288
+             r_min sane range 62..77us; insane_events=7; target=150us
+             actions={'scale_up': 288}
+
+### baseline_vio_s
+    BLKSTAT-DELTA read=787488 write=2936
+    counters: wbt_guard=0 wbt_lat=0 wbt_stat=0 wbt_step=6 wbt_timer=303
+    writers: n=1 OPS=367 BYTES=1503232 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=16412 MIN=242 P50=524 P90=801 P99=1119 MAX=18911 MEAN=554.9
+      SAMPLES=16421 MIN=245 P50=527 P90=802 P99=1151 MAX=14742 MEAN=557.7
+      SAMPLES=16403 MIN=236 P50=527 P90=802 P99=1134 MAX=6939 MEAN=557.0
+      SAMPLES=16396 MIN=239 P50=527 P90=807 P99=1130 MAX=14596 MEAN=557.5
+      SAMPLES=16403 MIN=244 P50=524 P90=800 P99=1133 MAX=11344 MEAN=554.7
+      SAMPLES=16401 MIN=241 P50=527 P90=803 P99=1155 MAX=20203 MEAN=558.6
+    guard  : none (baseline or not hit)
+
+### patched_vio_s
+    BLKSTAT-DELTA read=769664 write=2936
+    counters: wbt_guard=283 wbt_lat=0 wbt_stat=0 wbt_step=6 wbt_timer=298
+    writers: n=1 OPS=367 BYTES=1503232 ERR=0 FSYNC_ERR=0
+    probes : n=6
+      SAMPLES=16046 MIN=250 P50=552 P90=832 P99=1153 MAX=7393 MEAN=577.6
+      SAMPLES=16018 MIN=249 P50=552 P90=831 P99=1161 MAX=10646 MEAN=580.2
+      SAMPLES=16043 MIN=249 P50=556 P90=836 P99=1170 MAX=8545 MEAN=582.2
+      SAMPLES=16028 MIN=253 P50=549 P90=827 P99=1149 MAX=13953 MEAN=575.5
+      SAMPLES=16050 MIN=254 P50=553 P90=833 P99=1154 MAX=20174 MEAN=580.2
+      SAMPLES=16023 MIN=253 P50=556 P90=837 P99=1160 MAX=20482 MEAN=582.9
+    guard  : total=283 FIRED=276 NOT_FIRED=7
+             r_min sane range 146..175us; insane_events=0; target=150us
+             actions={'hold': 276, 'scale_up': 7}
+
+================================================================================================
+PAIRED COMPARISON
+================================================================================================
+
+-- ide / h --
+   samples : base=23616 patched=25085
+   MIN     : base=[169.0, 171.0] patched=[162.0, 160.0]
+   P50     : base=[760.0, 764.0] patched=[734.0, 738.0]
+   P90     : base=[1509.0, 1545.0] patched=[1529.0, 1535.0]
+   P99     : base=[2408.0, 2446.0] patched=[2413.0, 2422.0]
+   MAX     : base=[644775.0, 644674.0] patched=[26314.0, 25266.0]
+   wOPS    : base=33174 patched=35861
+   timer   : base=294 patched=294
+   guard   : base=0 patched=8
+   finstep : base=None patched=None
+
+-- ide / s --
+   samples : base=94807 patched=94955
+   MIN     : base=[148.0, 135.0, 137.0, 139.0, 134.0, 142.0] patched=[134.0, 140.0, 141.0, 137.0, 149.0, 139.0]
+   P50     : base=[586.0, 521.0, 545.0, 522.0, 542.0, 525.0] patched=[582.0, 550.0, 525.0, 545.0, 528.0, 533.0]
+   P90     : base=[976.0, 947.0, 961.0, 946.0, 967.0, 946.0] patched=[973.0, 960.0, 944.0, 951.0, 940.0, 949.0]
+   P99     : base=[1320.0, 1284.0, 1305.0, 1271.0, 1306.0, 1283.0] patched=[1312.0, 1339.0, 1299.0, 1314.0, 1297.0, 1298.0]
+   MAX     : base=[20167.0, 6739.0, 10745.0, 8673.0, 17625.0, 7189.0] patched=[21395.0, 9967.0, 12569.0, 19085.0, 6649.0, 17643.0]
+   wOPS    : base=364 patched=364
+   timer   : base=293 patched=293
+   guard   : base=0 patched=288
+   finstep : base=None patched=None
+
+-- vio / h --
+   samples : base=24945 patched=24943
+   MIN     : base=[250.0, 234.0] patched=[246.0, 254.0]
+   P50     : base=[864.0, 859.0] patched=[877.0, 875.0]
+   P90     : base=[1440.0, 1434.0] patched=[1450.0, 1464.0]
+   P99     : base=[2148.0, 2129.0] patched=[1996.0, 2011.0]
+   MAX     : base=[9631.0, 8139.0] patched=[4390.0, 8355.0]
+   wOPS    : base=57055 patched=56414
+   timer   : base=304 patched=304
+   guard   : base=0 patched=0
+   finstep : base=None patched=None
+
+-- vio / s --
+   samples : base=98436 patched=96208
+   MIN     : base=[242.0, 245.0, 236.0, 239.0, 244.0, 241.0] patched=[250.0, 249.0, 249.0, 253.0, 254.0, 253.0]
+   P50     : base=[524.0, 527.0, 527.0, 527.0, 524.0, 527.0] patched=[552.0, 552.0, 556.0, 549.0, 553.0, 556.0]
+   P90     : base=[801.0, 802.0, 802.0, 807.0, 800.0, 803.0] patched=[832.0, 831.0, 836.0, 827.0, 833.0, 837.0]
+   P99     : base=[1119.0, 1151.0, 1134.0, 1130.0, 1133.0, 1155.0] patched=[1153.0, 1161.0, 1170.0, 1149.0, 1154.0, 1160.0]
+   MAX     : base=[18911.0, 14742.0, 6939.0, 14596.0, 11344.0, 20203.0] patched=[7393.0, 10646.0, 8545.0, 13953.0, 20174.0, 20482.0]
+   wOPS    : base=367 patched=367
+   timer   : base=303 patched=298
+   guard   : base=0 patched=283
+   finstep : base=None patched=None
+``````

@@ -1,0 +1,50 @@
+================================================================================
+WBT In-Kernel Trace Analysis: patched_vio_s_qemu.log
+================================================================================
+
+--- Workload Validity (block-layer evidence) ---
+  writer open : dev=/dev/sda mode=BUFFERED chunk=4096B sleep=80ms
+  [+] all writers report mode=BUFFERED (WBT-trackable) - as required
+  writers ran : 1 process(es), OPS=362 BYTES=1482752 ERR=0 FSYNC_ERR=0
+  readers ran : 6 process(es), open_mode=['O_DIRECT']
+  blk delta   : read_sectors=486912 write_sectors=2896
+Total WBT Timer Windows: 194
+Total Step Transitions:  5
+Total Stat Reports:      0
+Total Latency Alerts:    0
+Total Guard Decisions:   184
+
+--- Status Distribution Across Windows ---
+  LAT_UNKNOWN_WRITES  :   184 ( 94.8%)
+  LAT_UNKNOWN         :    10 (  5.2%)
+
+[CRITICAL EVALUATION]
+  LAT_UNKNOWN_WRITES (status=3) Events: 184 / 194
+  --> The kernel entered LAT_UNKNOWN_WRITES in 184 window(s).
+
+[GUARD DECISION AUDIT]
+  Total wbt_guard Evaluations: 184
+    - Guard FIRED (Hold Depth): 176
+    - Guard NOT FIRED (Scale Up): 8
+    [1] ts=2.9972 dev=8:0 step=0 r_samples=208 r_min=240us target=150us --> action=hold (fired=1)
+    [2] ts=3.1722 dev=8:0 step=0 r_samples=215 r_min=229us target=150us --> action=hold (fired=1)
+    [3] ts=3.3363 dev=8:0 step=0 r_samples=215 r_min=231us target=150us --> action=hold (fired=1)
+    [4] ts=3.5041 dev=8:0 step=0 r_samples=217 r_min=245us target=150us --> action=hold (fired=1)
+    [5] ts=3.6682 dev=8:0 step=0 r_samples=198 r_min=233us target=150us --> action=hold (fired=1)
+
+--- Correlated Decision Timeline ---
+  [ 1] ts=2.9966 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=240us) | Stat: no stat
+  [ 2] ts=3.1721 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=229us) | Stat: no stat
+  [ 3] ts=3.3363 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=231us) | Stat: no stat
+  [ 4] ts=3.5041 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=245us) | Stat: no stat
+  [ 5] ts=3.6682 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=233us) | Stat: no stat
+  [ 6] ts=3.8361 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=273us) | Stat: no stat
+  [ 7] ts=4.0042 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=239us) | Stat: no stat
+  [ 8] ts=4.1681 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=226us) | Stat: no stat
+  [ 9] ts=4.3361 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=232us) | Stat: no stat
+  [10] ts=4.5001 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=239us) | Stat: no stat
+  [11] ts=4.6683 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=239us) | Stat: no stat
+  [12] ts=4.8322 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=235us) | Stat: no stat
+  [13] ts=4.9961 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=230us) | Stat: no stat
+  [14] ts=5.1642 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=242us) | Stat: no stat
+  [15] ts=5.3322 dev=8:0 status=LAT_UNKNOWN_WRITES pre_step=0 | Action: [NO STEP CHANGE LOGGED] | Guard: guard=hold (fired=1, r_min=241us) | Stat: no stat

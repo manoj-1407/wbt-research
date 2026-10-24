@@ -1,0 +1,641 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+3FF8B340+3FECB340 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from ROM..c[?7l[2J==========================================
+=== [QEMU-WBT] KERNEL BOOT SUCCESSFUL ===
+=== PROFILE: heavy  writers=4  readprocs=2 ===
+=== PARAMS: wchunk=64KB wwindow=8MB wstride=8MB wsleep=0ms rpace=1000us target=1000us ===
+##########################################
+Linux 6.6.123.2-microsoft-standard-WSL2+ #1 SMP PREEMPT_DYNAMIC Fri Oct 23 16:56:02 UTC 2026 x86_64 GNU/Linux
+--- BLK_WBT config from /proc/config.gz ---
+CONFIG_BLK_WBT=y
+CONFIG_BLK_WBT_MQ=y
+--- Block devices in /sys/block ---
+loop0  loop3  loop6  ram1   ram12  ram15  ram4   ram7   sda
+loop1  loop4  loop7  ram10  ram13  ram2   ram5   ram8   sr0
+loop2  loop5  ram0   ram11  ram14  ram3   ram6   ram9
+[+] Target disk detected: /dev/sda
+[i] queue/nr_requests : 2
+[i] queue/rotational  : 1
+[i] queue/scheduler   : none [mq-deadline] kyber 
+[i] queue_depth (blk) : not exposed
+[+] Active wbt_lat_usec: 1000
+--- Checking WBT tracepoint directory ---
+[+] /sys/kernel/tracing/events/wbt exists!
+enable     filter     wbt_lat    wbt_stat   wbt_step   wbt_timer
+[+] WBT tracepoints armed (buffer=sda).
+[BLKSTAT] before:        1        0        8        2        0        0        0        0        0        4        2        0        0        0        0        0        0
+--- Matched I/O workload on /dev/sda ---
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=65536B offset=24MB window=8MB sleep=0ms duration=30s
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=65536B offset=0MB window=8MB sleep=0ms duration=30s
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=65536B offset=8MB window=8MB sleep=0ms duration=30s
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=65536B offset=16MB window=8MB sleep=0ms duration=30s
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE_RESULT] SAMPLES=11829 MIN_US=169 P50_US=760 P90_US=1509 P99_US=2408 MAX_US=644775 MEAN_US=997.3
+[PROBE_RESULT] SAMPLES=11787 MIN_US=171 P50_US=764 P90_US=1545 P99_US=2446 MAX_US=644674 MEAN_US=1007.4
+[WRITER_RESULT] OPS=8164 BYTES=535035904 ITERS=8164 ERR=0 FSYNC_ERR=0
+[WRITER_RESULT] OPS=8225 BYTES=539033600 ITERS=8225 ERR=0 FSYNC_ERR=0
+[WRITER_RESULT] OPS=8288 BYTES=543162368 ITERS=8288 ERR=0 FSYNC_ERR=0
+[WRITER_RESULT] OPS=8497 BYTES=556859392 ITERS=8497 ERR=0 FSYNC_ERR=0
+[BLKSTAT] after :    23617        0   188936     5885    83880   480078  4246272    24858        0    20528    39272        0        0        0        0    33174     8529
+[BLKSTAT-DELTA] read_sectors=188928 write_sectors=4246272
+=== [QEMU-WBT] EVENT COUNTS ===
+wbt_timer : 294
+wbt_step  : 2
+wbt_stat  : 272
+wbt_lat   : 0
+0
+wbt_guard : 0
+0
+==========================================
+=== [QEMU-WBT] CAPTURED TRACE BUFFER ===
+==========================================
+# tracer: nop
+#
+# entries-in-buffer/entries-written: 568/568   #P:1
+#
+#                                _-----=> irqs-off/BH-disabled
+#                               / _----=> need-resched
+#                              | / _---=> hardirq/softirq
+#                              || / _--=> preempt-depth
+#                              ||| / _-=> migrate-disable
+#                              |||| /     delay
+#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
+#              | |         |   |||||     |         |
+          <idle>-0       [000] ..s1.     2.052715: wbt_timer: 8:0: status=1, step=0, inflight=2
+          <idle>-0       [000] ..s1.     2.053137: wbt_step: 8:0: scale up: step=-1, window=100000us, background=1, normal=2, max=2
+          <idle>-0       [000] ..s1.     2.156440: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.     2.260218: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.     2.364308: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.     2.468287: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.     2.572240: wbt_timer: 8:0: status=3, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.     2.676237: wbt_stat: 8:0: rmean=107081, rmin=80863, rmax=298032, rsamples=40, wmean=167948, wmin=80362, wmax=1779153, wsamples=78
+    kworker/0:1H-42      [000] ..s1.     2.676319: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] .Ns1.     2.780099: wbt_stat: 8:0: rmean=97227, rmin=74113, rmax=119281, rsamples=92, wmean=124205, wmin=73822, wmax=229409, wsamples=184
+      wbt_writer-170     [000] .Ns1.     2.780122: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-168     [000] ..s..     2.884076: wbt_stat: 8:0: rmean=98358, rmin=77718, rmax=132852, rsamples=87, wmean=126713, wmin=79090, wmax=236299, wsamples=173
+      wbt_writer-168     [000] ..s..     2.884099: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] .Ns..     2.988155: wbt_stat: 8:0: rmean=97961, rmin=76777, rmax=141915, rsamples=92, wmean=131036, wmin=84979, wmax=255328, wsamples=166
+      wbt_writer-169     [000] .Ns..     2.988178: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] .Ns..     3.092350: wbt_stat: 8:0: rmean=112642, rmin=76526, rmax=559620, rsamples=85, wmean=141675, wmin=79511, wmax=725152, wsamples=161
+      wbt_writer-169     [000] .Ns..     3.092534: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s1.     3.196150: wbt_stat: 8:0: rmean=97314, rmin=70037, rmax=142695, rsamples=90, wmean=129617, wmin=89616, wmax=324523, wsamples=190
+      wbt_writer-170     [000] ..s1.     3.196173: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.     3.300124: wbt_stat: 8:0: rmean=109055, rmin=71568, rmax=703569, rsamples=87, wmean=131869, wmin=79802, wmax=330782, wsamples=187
+ read_latency_pr-171     [000] ..s1.     3.300146: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..     3.404064: wbt_stat: 8:0: rmean=96283, rmin=75826, rmax=157219, rsamples=89, wmean=128214, wmin=75185, wmax=306515, wsamples=199
+    kworker/0:1H-42      [000] ..s..     3.404087: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..     3.508078: wbt_stat: 8:0: rmean=103316, rmin=76937, rmax=247216, rsamples=86, wmean=131376, wmin=73081, wmax=232543, wsamples=190
+      wbt_writer-168     [000] ..s..     3.508100: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..     3.612088: wbt_stat: 8:0: rmean=107312, rmin=77968, rmax=162157, rsamples=83, wmean=145839, wmin=81043, wmax=349872, wsamples=172
+      wbt_writer-167     [000] ..s..     3.612110: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     3.716159: wbt_stat: 8:0: rmean=108991, rmin=77227, rmax=187926, rsamples=84, wmean=140260, wmin=80653, wmax=320988, wsamples=181
+    kworker/0:1H-42      [000] ..s1.     3.716182: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s..     3.820069: wbt_stat: 8:0: rmean=106088, rmin=76036, rmax=133193, rsamples=88, wmean=142459, wmin=75094, wmax=339476, wsamples=180
+ read_latency_pr-172     [000] ..s..     3.820091: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..     3.924089: wbt_stat: 8:0: rmean=119600, rmin=85470, rmax=448711, rsamples=83, wmean=146492, wmin=80593, wmax=754416, wsamples=172
+ read_latency_pr-172     [000] ..s..     3.924112: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s..     4.028092: wbt_stat: 8:0: rmean=106408, rmin=77648, rmax=148216, rsamples=88, wmean=140195, wmin=78099, wmax=658751, wsamples=187
+      wbt_writer-169     [000] .Ns..     4.028137: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-172     [000] ..s..     4.132103: wbt_stat: 8:0: rmean=108576, rmin=82625, rmax=210270, rsamples=87, wmean=132072, wmin=78580, wmax=257251, wsamples=190
+ read_latency_pr-172     [000] ..s..     4.132125: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.     4.236092: wbt_stat: 8:0: rmean=105948, rmin=79221, rmax=138300, rsamples=86, wmean=144073, wmin=81494, wmax=351093, wsamples=177
+      wbt_writer-168     [000] ..s1.     4.236114: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s..     4.340174: wbt_stat: 8:0: rmean=106493, rmin=83076, rmax=164550, rsamples=88, wmean=145977, wmin=91929, wmax=343562, wsamples=174
+      wbt_writer-170     [000] ..s..     4.340197: wbt_timer: 8:0: status=1, step=-1, inflight=1
+          <idle>-0       [000] .Ns1.     4.444162: wbt_stat: 8:0: rmean=108729, rmin=92420, rmax=141686, rsamples=88, wmean=139132, wmin=81144, wmax=350012, wsamples=183
+          <idle>-0       [000] .Ns1.     4.444184: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.     4.548090: wbt_stat: 8:0: rmean=107484, rmin=82405, rmax=127383, rsamples=86, wmean=142831, wmin=88956, wmax=367888, wsamples=177
+      wbt_writer-167     [000] ..s1.     4.548112: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s..     4.652068: wbt_stat: 8:0: rmean=103563, rmin=78440, rmax=144299, rsamples=92, wmean=133641, wmin=76366, wmax=251692, wsamples=189
+      wbt_writer-170     [000] ..s..     4.652286: wbt_timer: 8:0: status=1, step=-1, inflight=0
+          <idle>-0       [000] ..s1.     4.756237: wbt_stat: 8:0: rmean=103052, rmin=73392, rmax=134015, rsamples=60, wmean=138127, wmin=73783, wmax=395681, wsamples=125
+          <idle>-0       [000] ..s1.     4.756264: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] ..s1.     4.860165: wbt_stat: 8:0: rmean=161711, rmin=128836, rmax=194586, rsamples=2, wmean=178076, wmin=131089, wmax=271052, wsamples=5
+          <idle>-0       [000] ..s1.     4.860193: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] ..s1.     4.964312: wbt_timer: 8:0: status=3, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..     5.068119: wbt_stat: 8:0: rmean=154330, rmin=109627, rmax=255518, rsamples=5, wmean=147559, wmin=111309, wmax=205642, wsamples=8
+      wbt_writer-170     [000] ..s..     5.068141: wbt_timer: 8:0: status=1, step=-1, inflight=1
+          <idle>-0       [000] ..s1.     5.172159: wbt_stat: 8:0: rmean=121261, rmin=102676, rmax=165351, rsamples=4, wmean=137566, wmin=103147, wmax=205573, wsamples=9
+          <idle>-0       [000] ..s1.     5.172187: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s1.     5.276077: wbt_stat: 8:0: rmean=122364, rmin=87533, rmax=257151, rsamples=19, wmean=159826, wmin=98800, wmax=326386, wsamples=33
+      wbt_writer-167     [000] ..s1.     5.276102: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.     5.380100: wbt_stat: 8:0: rmean=102585, rmin=81584, rmax=216058, rsamples=87, wmean=130440, wmin=77958, wmax=214877, wsamples=189
+      wbt_writer-168     [000] ..s1.     5.380123: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..     5.484085: wbt_stat: 8:0: rmean=107002, rmin=78369, rmax=151551, rsamples=90, wmean=137923, wmin=75405, wmax=232223, wsamples=186
+      wbt_writer-168     [000] ..s..     5.484110: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] .Ns1.     5.588112: wbt_stat: 8:0: rmean=108074, rmin=80682, rmax=155216, rsamples=77, wmean=143452, wmin=87914, wmax=458527, wsamples=156
+      wbt_writer-167     [000] .Ns1.     5.588134: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..     5.692078: wbt_stat: 8:0: rmean=102605, rmin=75034, rmax=131079, rsamples=85, wmean=144746, wmin=75805, wmax=253595, wsamples=175
+      wbt_writer-168     [000] ..s..     5.692102: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.     5.796095: wbt_stat: 8:0: rmean=105187, rmin=75204, rmax=253295, rsamples=90, wmean=136475, wmin=82095, wmax=261888, wsamples=185
+    kworker/0:1H-42      [000] ..s1.     5.796116: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] .Ns..     5.900063: wbt_stat: 8:0: rmean=104111, rmin=80953, rmax=132361, rsamples=88, wmean=141113, wmin=76666, wmax=265163, wsamples=178
+      wbt_writer-168     [000] .Ns..     5.900085: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..     6.004064: wbt_stat: 8:0: rmean=103605, rmin=70457, rmax=133012, rsamples=88, wmean=135121, wmin=75775, wmax=246795, wsamples=189
+      wbt_writer-169     [000] ..s..     6.004086: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s1.     6.108156: wbt_stat: 8:0: rmean=104451, rmin=80062, rmax=146283, rsamples=94, wmean=130746, wmin=77267, wmax=263530, wsamples=192
+      wbt_writer-170     [000] ..s1.     6.108178: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..     6.212082: wbt_stat: 8:0: rmean=103375, rmin=80342, rmax=128766, rsamples=85, wmean=133399, wmin=74634, wmax=254487, wsamples=195
+    kworker/0:1H-42      [000] ..s..     6.212105: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.     6.316049: wbt_stat: 8:0: rmean=99515, rmin=73412, rmax=133663, rsamples=90, wmean=137043, wmin=77318, wmax=240445, wsamples=183
+ read_latency_pr-172     [000] ..s1.     6.316072: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s..     6.420063: wbt_stat: 8:0: rmean=99946, rmin=72590, rmax=132992, rsamples=88, wmean=144284, wmin=85620, wmax=248478, wsamples=171
+      wbt_writer-169     [000] ..s..     6.420086: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.     6.524075: wbt_stat: 8:0: rmean=103532, rmin=74803, rmax=125560, rsamples=92, wmean=133800, wmin=75304, wmax=241216, wsamples=196
+    kworker/0:1H-42      [000] ..s1.     6.524099: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.     6.628119: wbt_stat: 8:0: rmean=97324, rmin=82765, rmax=124298, rsamples=91, wmean=127923, wmin=79812, wmax=240706, wsamples=196
+ read_latency_pr-172     [000] ..s1.     6.628143: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s..     6.732073: wbt_stat: 8:0: rmean=96783, rmin=74964, rmax=132481, rsamples=88, wmean=129711, wmin=79751, wmax=304813, wsamples=194
+      wbt_writer-167     [000] ..s..     6.732097: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..     6.836072: wbt_stat: 8:0: rmean=97255, rmin=73041, rmax=124249, rsamples=90, wmean=129705, wmin=78459, wmax=253004, wsamples=193
+      wbt_writer-168     [000] ..s..     6.836095: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s..     6.940082: wbt_stat: 8:0: rmean=94334, rmin=65570, rmax=123408, rsamples=87, wmean=131127, wmin=72119, wmax=264722, wsamples=189
+      wbt_writer-168     [000] ..s..     6.940106: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..     7.044172: wbt_stat: 8:0: rmean=101718, rmin=82275, rmax=151440, rsamples=87, wmean=132792, wmin=78299, wmax=253555, wsamples=195
+      wbt_writer-168     [000] ..s..     7.044196: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.     7.148138: wbt_stat: 8:0: rmean=98400, rmin=70477, rmax=160273, rsamples=78, wmean=136145, wmin=78459, wmax=250781, wsamples=160
+    kworker/0:1H-42      [000] ..s1.     7.148161: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s..     7.252106: wbt_stat: 8:0: rmean=94950, rmin=80913, rmax=120964, rsamples=91, wmean=127803, wmin=72109, wmax=325574, wsamples=196
+      wbt_writer-169     [000] ..s..     7.252129: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s..     7.356070: wbt_stat: 8:0: rmean=100410, rmin=72530, rmax=151390, rsamples=90, wmean=133834, wmin=75976, wmax=328299, wsamples=185
+      wbt_writer-169     [000] ..s..     7.356093: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.     7.460083: wbt_stat: 8:0: rmean=102742, rmin=75074, rmax=129998, rsamples=91, wmean=133481, wmin=72520, wmax=253796, wsamples=190
+      wbt_writer-168     [000] ..s1.     7.460105: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s1.     7.564078: wbt_stat: 8:0: rmean=103516, rmin=79561, rmax=129677, rsamples=87, wmean=136797, wmin=71538, wmax=262329, wsamples=186
+      wbt_writer-170     [000] ..s1.     7.564103: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s..     7.668077: wbt_stat: 8:0: rmean=104246, rmin=82525, rmax=154855, rsamples=82, wmean=149981, wmin=83326, wmax=339185, wsamples=167
+      wbt_writer-167     [000] ..s..     7.668099: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s..     7.772079: wbt_stat: 8:0: rmean=103169, rmin=76426, rmax=134685, rsamples=95, wmean=133236, wmin=75574, wmax=412417, wsamples=189
+      wbt_writer-167     [000] ..s..     7.772101: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.     7.876182: wbt_stat: 8:0: rmean=103589, rmin=76156, rmax=202198, rsamples=90, wmean=142622, wmin=72511, wmax=327067, wsamples=169
+      wbt_writer-169     [000] ..s1.     7.876205: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.     7.980106: wbt_stat: 8:0: rmean=97377, rmin=73061, rmax=120994, rsamples=91, wmean=131494, wmin=71148, wmax=245904, wsamples=191
+ read_latency_pr-171     [000] ..s1.     7.980128: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..     8.084095: wbt_stat: 8:0: rmean=104778, rmin=75474, rmax=170138, rsamples=88, wmean=132220, wmin=74844, wmax=248257, wsamples=191
+      wbt_writer-168     [000] ..s..     8.084117: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s1.     8.188084: wbt_stat: 8:0: rmean=102875, rmin=77919, rmax=149166, rsamples=93, wmean=134698, wmin=76106, wmax=264151, wsamples=190
+      wbt_writer-167     [000] ..s1.     8.188106: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] .Ns1.     8.292156: wbt_stat: 8:0: rmean=102233, rmin=78479, rmax=124359, rsamples=89, wmean=136217, wmin=76967, wmax=263510, wsamples=187
+      wbt_writer-167     [000] .Ns1.     8.292179: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.     8.396095: wbt_stat: 8:0: rmean=98642, rmin=75075, rmax=123258, rsamples=91, wmean=127517, wmin=79812, wmax=248257, wsamples=201
+      wbt_writer-167     [000] ..s1.     8.396118: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.     8.500160: wbt_stat: 8:0: rmean=100879, rmin=75605, rmax=134434, rsamples=88, wmean=135339, wmin=72149, wmax=250801, wsamples=182
+ read_latency_pr-172     [000] ..s1.     8.500184: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     8.604157: wbt_stat: 8:0: rmean=98805, rmin=79411, rmax=201106, rsamples=93, wmean=124404, wmin=77357, wmax=292485, wsamples=208
+    kworker/0:1H-42      [000] ..s1.     8.604180: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s1.     8.708108: wbt_stat: 8:0: rmean=105448, rmin=76837, rmax=167850, rsamples=90, wmean=141410, wmin=74223, wmax=345465, wsamples=177
+      wbt_writer-170     [000] ..s1.     8.708131: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.     8.812109: wbt_stat: 8:0: rmean=107523, rmin=83026, rmax=209478, rsamples=85, wmean=147201, wmin=76677, wmax=263010, wsamples=165
+    kworker/0:1H-42      [000] ..s1.     8.812183: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..     8.916124: wbt_stat: 8:0: rmean=108873, rmin=85550, rmax=143658, rsamples=79, wmean=155553, wmin=80091, wmax=464696, wsamples=165
+      wbt_writer-169     [000] ..s..     8.916146: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.     9.020159: wbt_stat: 8:0: rmean=105805, rmin=77367, rmax=146372, rsamples=84, wmean=148556, wmin=84719, wmax=348920, wsamples=172
+ read_latency_pr-171     [000] ..s1.     9.020183: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-168     [000] ..s..     9.124077: wbt_stat: 8:0: rmean=108417, rmin=75154, rmax=138159, rsamples=82, wmean=146998, wmin=81734, wmax=363402, wsamples=177
+      wbt_writer-168     [000] ..s..     9.124099: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s..     9.228079: wbt_stat: 8:0: rmean=106286, rmin=84628, rmax=146293, rsamples=90, wmean=135499, wmin=79831, wmax=257361, wsamples=185
+      wbt_writer-170     [000] ..s..     9.228100: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s1.     9.332089: wbt_stat: 8:0: rmean=104421, rmin=81334, rmax=124840, rsamples=87, wmean=138258, wmin=79451, wmax=243430, wsamples=180
+      wbt_writer-167     [000] ..s1.     9.332111: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s1.     9.436090: wbt_stat: 8:0: rmean=106404, rmin=80653, rmax=227987, rsamples=86, wmean=136804, wmin=78449, wmax=277872, wsamples=192
+      wbt_writer-169     [000] ..s1.     9.436113: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] .Ns1.     9.540088: wbt_stat: 8:0: rmean=104691, rmin=77237, rmax=159963, rsamples=90, wmean=135210, wmin=81564, wmax=257881, wsamples=184
+      wbt_writer-169     [000] .Ns1.     9.540112: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] .Ns1.     9.644085: wbt_stat: 8:0: rmean=110101, rmin=80493, rmax=295829, rsamples=88, wmean=137006, wmin=79290, wmax=267086, wsamples=188
+      wbt_writer-169     [000] .Ns1.     9.644107: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s1.     9.748083: wbt_stat: 8:0: rmean=106242, rmin=82285, rmax=129537, rsamples=85, wmean=145578, wmin=93862, wmax=252594, wsamples=170
+      wbt_writer-170     [000] ..s1.     9.748106: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.     9.852071: wbt_stat: 8:0: rmean=105265, rmin=74744, rmax=153428, rsamples=86, wmean=143147, wmin=85119, wmax=234997, wsamples=178
+      wbt_writer-169     [000] ..s1.     9.852094: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.     9.956086: wbt_stat: 8:0: rmean=103000, rmin=72541, rmax=151721, rsamples=87, wmean=137365, wmin=79041, wmax=270111, wsamples=183
+      wbt_writer-167     [000] ..s1.     9.956109: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    10.060162: wbt_stat: 8:0: rmean=104069, rmin=79381, rmax=123107, rsamples=89, wmean=133446, wmin=78450, wmax=236880, wsamples=190
+    kworker/0:1H-42      [000] ..s1.    10.060185: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    10.164118: wbt_stat: 8:0: rmean=103183, rmin=81304, rmax=120563, rsamples=86, wmean=133847, wmin=78620, wmax=243059, wsamples=194
+ read_latency_pr-171     [000] ..s1.    10.164140: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] .Ns1.    10.268105: wbt_stat: 8:0: rmean=96369, rmin=76185, rmax=121335, rsamples=88, wmean=124922, wmin=74674, wmax=235918, wsamples=206
+    kworker/0:1H-42      [000] .Ns1.    10.268127: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    10.372166: wbt_stat: 8:0: rmean=104062, rmin=80692, rmax=131610, rsamples=87, wmean=143742, wmin=78940, wmax=381519, wsamples=177
+      wbt_writer-167     [000] ..s1.    10.372189: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] .Ns1.    10.476098: wbt_stat: 8:0: rmean=104882, rmin=80993, rmax=125080, rsamples=87, wmean=140885, wmin=81323, wmax=337463, wsamples=179
+      wbt_writer-168     [000] .Ns1.    10.476121: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..    10.580073: wbt_stat: 8:0: rmean=101053, rmin=75264, rmax=154024, rsamples=88, wmean=133546, wmin=71909, wmax=342831, wsamples=185
+      wbt_writer-169     [000] ..s..    10.580095: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s..    10.684072: wbt_stat: 8:0: rmean=101278, rmin=69225, rmax=176848, rsamples=94, wmean=137650, wmin=86351, wmax=304012, wsamples=184
+      wbt_writer-167     [000] ..s..    10.684096: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    10.788115: wbt_stat: 8:0: rmean=96847, rmin=78119, rmax=153563, rsamples=93, wmean=131261, wmin=78810, wmax=232923, wsamples=191
+          <idle>-0       [000] .Ns1.    10.788138: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s..    10.892066: wbt_stat: 8:0: rmean=94886, rmin=69425, rmax=123678, rsamples=92, wmean=122331, wmin=82305, wmax=233985, wsamples=205
+ read_latency_pr-172     [000] ..s..    10.892089: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s..    10.996101: wbt_stat: 8:0: rmean=93637, rmin=70978, rmax=127885, rsamples=94, wmean=124221, wmin=70998, wmax=239133, wsamples=210
+    kworker/0:1H-42      [000] ..s..    10.996124: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    11.100131: wbt_stat: 8:0: rmean=98308, rmin=74883, rmax=147244, rsamples=93, wmean=126285, wmin=73612, wmax=245944, wsamples=201
+      wbt_writer-167     [000] ..s1.    11.100153: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-171     [000] ..s1.    11.204120: wbt_stat: 8:0: rmean=106915, rmin=83256, rmax=138280, rsamples=85, wmean=138979, wmin=79271, wmax=366527, wsamples=184
+ read_latency_pr-171     [000] ..s1.    11.204144: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.    11.308115: wbt_stat: 8:0: rmean=105025, rmin=79801, rmax=156618, rsamples=86, wmean=140628, wmin=82365, wmax=255128, wsamples=179
+      wbt_writer-169     [000] ..s1.    11.308137: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns1.    11.412087: wbt_stat: 8:0: rmean=99712, rmin=78128, rmax=146363, rsamples=89, wmean=128110, wmin=84058, wmax=255948, wsamples=199
+ read_latency_pr-172     [000] .Ns1.    11.412110: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s1.    11.516082: wbt_stat: 8:0: rmean=94137, rmin=76486, rmax=107794, rsamples=98, wmean=124093, wmin=72740, wmax=240435, wsamples=199
+      wbt_writer-170     [000] ..s1.    11.516105: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    11.620148: wbt_stat: 8:0: rmean=101659, rmin=78248, rmax=134564, rsamples=90, wmean=135474, wmin=73241, wmax=250300, wsamples=183
+    kworker/0:1H-42      [000] ..s1.    11.620170: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..    11.724069: wbt_stat: 8:0: rmean=107709, rmin=85690, rmax=241197, rsamples=86, wmean=139431, wmin=78520, wmax=197651, wsamples=176
+      wbt_writer-167     [000] ..s..    11.724090: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    11.828104: wbt_stat: 8:0: rmean=102851, rmin=73491, rmax=122416, rsamples=87, wmean=139516, wmin=75745, wmax=255187, wsamples=182
+          <idle>-0       [000] .Ns1.    11.828127: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s1.    11.932109: wbt_stat: 8:0: rmean=102363, rmin=72390, rmax=131139, rsamples=92, wmean=140518, wmin=75615, wmax=247035, wsamples=174
+      wbt_writer-170     [000] ..s1.    11.932131: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s..    12.036524: wbt_stat: 8:0: rmean=102778, rmin=88585, rmax=130088, rsamples=86, wmean=137649, wmin=74013, wmax=239824, wsamples=180
+ read_latency_pr-171     [000] ..s..    12.036926: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    12.140116: wbt_stat: 8:0: rmean=103746, rmin=69806, rmax=212002, rsamples=84, wmean=141283, wmin=84379, wmax=334318, wsamples=179
+    kworker/0:1H-42      [000] ..s1.    12.140137: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    12.244090: wbt_stat: 8:0: rmean=95318, rmin=76196, rmax=121144, rsamples=92, wmean=124124, wmin=78038, wmax=230871, wsamples=203
+      wbt_writer-168     [000] ..s1.    12.244113: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    12.348181: wbt_stat: 8:0: rmean=99704, rmin=73081, rmax=204140, rsamples=91, wmean=134230, wmin=78710, wmax=284593, wsamples=188
+    kworker/0:1H-42      [000] ..s1.    12.348204: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    12.452135: wbt_stat: 8:0: rmean=96207, rmin=76647, rmax=155887, rsamples=97, wmean=125698, wmin=74493, wmax=238132, wsamples=193
+    kworker/0:1H-42      [000] ..s1.    12.452158: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    12.556088: wbt_stat: 8:0: rmean=93498, rmin=70307, rmax=136768, rsamples=90, wmean=129785, wmin=71208, wmax=315299, wsamples=194
+    kworker/0:1H-42      [000] ..s1.    12.556109: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..    12.660077: wbt_stat: 8:0: rmean=102038, rmin=84990, rmax=199574, rsamples=87, wmean=132848, wmin=73332, wmax=358475, wsamples=196
+      wbt_writer-168     [000] ..s..    12.660100: wbt_timer: 8:0: status=1, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    12.764118: wbt_stat: 8:0: rmean=105619, rmin=79000, rmax=247516, rsamples=89, wmean=152000, wmin=84418, wmax=2798041, wsamples=181
+          <idle>-0       [000] .Ns1.    12.764140: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    12.868119: wbt_stat: 8:0: rmean=101755, rmin=74644, rmax=128666, rsamples=88, wmean=135566, wmin=75275, wmax=249900, wsamples=190
+    kworker/0:1H-42      [000] ..s1.    12.868142: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    12.972105: wbt_stat: 8:0: rmean=103424, rmin=79541, rmax=126812, rsamples=92, wmean=134739, wmin=77127, wmax=246495, wsamples=180
+ read_latency_pr-171     [000] ..s1.    12.972127: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    13.076146: wbt_stat: 8:0: rmean=101825, rmin=75345, rmax=145961, rsamples=84, wmean=137662, wmin=76526, wmax=252394, wsamples=183
+    kworker/0:1H-42      [000] ..s1.    13.076170: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s..    13.180074: wbt_stat: 8:0: rmean=95393, rmin=72060, rmax=128035, rsamples=89, wmean=127788, wmin=69215, wmax=243620, wsamples=190
+    kworker/0:1H-42      [000] ..s..    13.180096: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] .Ns..    13.284104: wbt_stat: 8:0: rmean=101167, rmin=76186, rmax=127884, rsamples=89, wmean=134059, wmin=70897, wmax=347217, wsamples=192
+      wbt_writer-169     [000] .Ns..    13.284127: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.    13.388071: wbt_stat: 8:0: rmean=101296, rmin=82535, rmax=136317, rsamples=89, wmean=133355, wmin=75295, wmax=270141, wsamples=194
+      wbt_writer-169     [000] ..s1.    13.388093: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    13.492078: wbt_stat: 8:0: rmean=93981, rmin=70076, rmax=124049, rsamples=96, wmean=119334, wmin=70237, wmax=281207, wsamples=215
+      wbt_writer-170     [000] ..s..    13.492100: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    13.596082: wbt_stat: 8:0: rmean=104095, rmin=81554, rmax=133242, rsamples=87, wmean=136326, wmin=82906, wmax=334959, wsamples=189
+      wbt_writer-168     [000] ..s1.    13.596103: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    13.700073: wbt_stat: 8:0: rmean=103839, rmin=73602, rmax=179413, rsamples=90, wmean=138347, wmin=75865, wmax=261497, wsamples=183
+    kworker/0:1H-42      [000] ..s1.    13.700095: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..    13.804089: wbt_stat: 8:0: rmean=104985, rmin=78450, rmax=126743, rsamples=87, wmean=143720, wmin=79431, wmax=252744, wsamples=175
+      wbt_writer-168     [000] ..s..    13.804112: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s..    13.908096: wbt_stat: 8:0: rmean=104257, rmin=82987, rmax=134865, rsamples=93, wmean=131417, wmin=81284, wmax=242939, wsamples=194
+      wbt_writer-167     [000] ..s..    13.908119: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    14.012129: wbt_stat: 8:0: rmean=102420, rmin=77007, rmax=212533, rsamples=92, wmean=132038, wmin=78299, wmax=251111, wsamples=190
+          <idle>-0       [000] .Ns1.    14.012151: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s..    14.116089: wbt_stat: 8:0: rmean=95634, rmin=73311, rmax=121795, rsamples=87, wmean=128643, wmin=76997, wmax=328299, wsamples=199
+    kworker/0:1H-42      [000] ..s..    14.116125: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.    14.220089: wbt_stat: 8:0: rmean=99168, rmin=73812, rmax=162507, rsamples=92, wmean=129797, wmin=76416, wmax=252083, wsamples=194
+ read_latency_pr-172     [000] ..s1.    14.220112: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s1.    14.324085: wbt_stat: 8:0: rmean=106018, rmin=84028, rmax=246294, rsamples=91, wmean=132810, wmin=81494, wmax=254888, wsamples=191
+      wbt_writer-168     [000] ..s1.    14.324108: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.    14.428112: wbt_stat: 8:0: rmean=104999, rmin=74413, rmax=166833, rsamples=93, wmean=133033, wmin=82405, wmax=254697, wsamples=191
+      wbt_writer-169     [000] ..s1.    14.428136: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s1.    14.532134: wbt_stat: 8:0: rmean=104313, rmin=80112, rmax=231702, rsamples=87, wmean=139058, wmin=79161, wmax=256910, wsamples=181
+      wbt_writer-170     [000] ..s1.    14.532155: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..    14.636071: wbt_stat: 8:0: rmean=100838, rmin=73502, rmax=198181, rsamples=90, wmean=133751, wmin=77628, wmax=267827, wsamples=186
+      wbt_writer-169     [000] ..s..    14.636095: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s..    14.740069: wbt_stat: 8:0: rmean=99679, rmin=75435, rmax=222157, rsamples=93, wmean=127170, wmin=78449, wmax=272214, wsamples=199
+      wbt_writer-167     [000] ..s..    14.740091: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s..    14.844115: wbt_stat: 8:0: rmean=94210, rmin=71349, rmax=177159, rsamples=93, wmean=128936, wmin=80152, wmax=309620, wsamples=197
+      wbt_writer-169     [000] ..s..    14.844137: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    14.948061: wbt_stat: 8:0: rmean=96108, rmin=78980, rmax=144289, rsamples=93, wmean=127953, wmin=72641, wmax=287907, wsamples=200
+    kworker/0:1H-42      [000] ..s1.    14.948083: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    15.052067: wbt_stat: 8:0: rmean=94582, rmin=71649, rmax=118890, rsamples=95, wmean=122484, wmin=72490, wmax=328159, wsamples=210
+      wbt_writer-170     [000] ..s..    15.052089: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    15.156176: wbt_stat: 8:0: rmean=102579, rmin=76275, rmax=127984, rsamples=90, wmean=133646, wmin=77308, wmax=191441, wsamples=192
+    kworker/0:1H-42      [000] ..s1.    15.156199: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    15.260171: wbt_stat: 8:0: rmean=106717, rmin=79521, rmax=143388, rsamples=89, wmean=140811, wmin=91699, wmax=436974, wsamples=176
+    kworker/0:1H-42      [000] ..s1.    15.260192: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s1.    15.364115: wbt_stat: 8:0: rmean=106522, rmin=77708, rmax=148485, rsamples=89, wmean=139595, wmin=82996, wmax=251472, wsamples=181
+      wbt_writer-169     [000] ..s1.    15.364137: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    15.468178: wbt_stat: 8:0: rmean=101573, rmin=77118, rmax=133824, rsamples=84, wmean=137452, wmin=81724, wmax=251792, wsamples=185
+      wbt_writer-167     [000] ..s1.    15.468200: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s..    15.572085: wbt_stat: 8:0: rmean=94471, rmin=75285, rmax=208717, rsamples=89, wmean=132704, wmin=86331, wmax=334088, wsamples=192
+      wbt_writer-170     [000] ..s..    15.572108: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-171     [000] ..s..    15.676076: wbt_stat: 8:0: rmean=93821, rmin=69886, rmax=125611, rsamples=94, wmean=126515, wmin=70747, wmax=327137, wsamples=198
+ read_latency_pr-171     [000] .Ns..    15.676151: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s1.    15.780090: wbt_stat: 8:0: rmean=102088, rmin=74854, rmax=121815, rsamples=92, wmean=133548, wmin=82746, wmax=221466, wsamples=186
+      wbt_writer-168     [000] ..s1.    15.780114: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s1.    15.884103: wbt_stat: 8:0: rmean=103675, rmin=72300, rmax=123918, rsamples=87, wmean=146102, wmin=78909, wmax=340137, wsamples=175
+      wbt_writer-170     [000] ..s1.    15.884127: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s..    15.988070: wbt_stat: 8:0: rmean=102244, rmin=74373, rmax=130218, rsamples=88, wmean=140551, wmin=73662, wmax=253575, wsamples=176
+      wbt_writer-170     [000] ..s..    15.988092: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] .Ns1.    16.092083: wbt_stat: 8:0: rmean=103955, rmin=85940, rmax=137899, rsamples=85, wmean=143588, wmin=83126, wmax=267536, wsamples=175
+    kworker/0:1H-42      [000] .Ns1.    16.092105: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    16.196076: wbt_stat: 8:0: rmean=105920, rmin=85140, rmax=161946, rsamples=91, wmean=136381, wmin=83117, wmax=246675, wsamples=187
+    kworker/0:1H-42      [000] ..s1.    16.196098: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    16.300068: wbt_stat: 8:0: rmean=101385, rmin=73672, rmax=137529, rsamples=87, wmean=137874, wmin=75604, wmax=277442, wsamples=186
+ read_latency_pr-171     [000] ..s1.    16.300090: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    16.404139: wbt_stat: 8:0: rmean=104279, rmin=83297, rmax=132111, rsamples=92, wmean=133682, wmin=79000, wmax=261738, wsamples=191
+    kworker/0:1H-42      [000] ..s1.    16.404162: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s1.    16.508075: wbt_stat: 8:0: rmean=101841, rmin=76496, rmax=125571, rsamples=86, wmean=135874, wmin=73912, wmax=242899, wsamples=185
+      wbt_writer-170     [000] ..s1.    16.508096: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..    16.612099: wbt_stat: 8:0: rmean=97052, rmin=68645, rmax=117499, rsamples=93, wmean=131825, wmin=75194, wmax=327287, wsamples=193
+      wbt_writer-168     [000] ..s..    16.612122: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s..    16.716086: wbt_stat: 8:0: rmean=97645, rmin=73091, rmax=157710, rsamples=91, wmean=130575, wmin=70167, wmax=312275, wsamples=195
+    kworker/0:1H-42      [000] ..s..    16.716108: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s..    16.820269: wbt_stat: 8:0: rmean=102797, rmin=73532, rmax=150378, rsamples=81, wmean=140927, wmin=80542, wmax=208707, wsamples=159
+ read_latency_pr-171     [000] ..s..    16.820290: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..    16.924061: wbt_stat: 8:0: rmean=100655, rmin=73071, rmax=117057, rsamples=84, wmean=139655, wmin=77128, wmax=246305, wsamples=183
+      wbt_writer-169     [000] ..s..    16.924084: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s..    17.028084: wbt_stat: 8:0: rmean=101171, rmin=73041, rmax=140253, rsamples=86, wmean=141377, wmin=75545, wmax=335960, wsamples=178
+      wbt_writer-169     [000] ..s..    17.028106: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    17.132137: wbt_stat: 8:0: rmean=100245, rmin=80993, rmax=123367, rsamples=81, wmean=138493, wmin=77597, wmax=257291, wsamples=179
+          <idle>-0       [000] .Ns1.    17.132159: wbt_timer: 8:0: status=1, step=-1, inflight=1
+          <idle>-0       [000] .Ns1.    17.236087: wbt_stat: 8:0: rmean=102182, rmin=81264, rmax=150469, rsamples=88, wmean=129456, wmin=75404, wmax=354629, wsamples=202
+          <idle>-0       [000] .Ns1.    17.236110: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s..    17.340083: wbt_stat: 8:0: rmean=98167, rmin=77097, rmax=144680, rsamples=93, wmean=129082, wmin=76766, wmax=325364, wsamples=195
+      wbt_writer-169     [000] ..s..    17.340105: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] .Ns..    17.444075: wbt_stat: 8:0: rmean=101186, rmin=84349, rmax=120874, rsamples=84, wmean=136462, wmin=76696, wmax=261147, wsamples=189
+      wbt_writer-167     [000] .Ns..    17.444097: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s1.    17.548063: wbt_stat: 8:0: rmean=102878, rmin=73151, rmax=124279, rsamples=90, wmean=135842, wmin=80883, wmax=247166, wsamples=182
+      wbt_writer-170     [000] ..s1.    17.548085: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    17.652074: wbt_stat: 8:0: rmean=100886, rmin=77138, rmax=125080, rsamples=83, wmean=142145, wmin=77588, wmax=250621, wsamples=183
+      wbt_writer-170     [000] ..s..    17.652097: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] .Ns..    17.756073: wbt_stat: 8:0: rmean=95823, rmin=71088, rmax=137238, rsamples=95, wmean=125599, wmin=73201, wmax=320287, wsamples=203
+      wbt_writer-170     [000] .Ns..    17.756095: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.    17.860152: wbt_stat: 8:0: rmean=102592, rmin=68705, rmax=661365, rsamples=89, wmean=134574, wmin=78179, wmax=311844, wsamples=191
+      wbt_writer-169     [000] ..s1.    17.860174: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s..    17.964118: wbt_stat: 8:0: rmean=102292, rmin=79460, rmax=122486, rsamples=90, wmean=137752, wmin=79200, wmax=248568, wsamples=180
+      wbt_writer-169     [000] .Ns..    17.964197: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.    18.068144: wbt_stat: 8:0: rmean=101383, rmin=81594, rmax=165282, rsamples=88, wmean=139759, wmin=76926, wmax=248287, wsamples=178
+ read_latency_pr-172     [000] ..s1.    18.068166: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    18.172069: wbt_stat: 8:0: rmean=101494, rmin=74103, rmax=120043, rsamples=88, wmean=134642, wmin=78159, wmax=256740, wsamples=189
+      wbt_writer-167     [000] ..s1.    18.172092: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s1.    18.276073: wbt_stat: 8:0: rmean=98576, rmin=75405, rmax=167555, rsamples=92, wmean=133416, wmin=76656, wmax=246384, wsamples=188
+      wbt_writer-170     [000] ..s1.    18.276096: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s..    18.380088: wbt_stat: 8:0: rmean=105085, rmin=79040, rmax=145831, rsamples=85, wmean=134519, wmin=80422, wmax=244802, wsamples=190
+      wbt_writer-170     [000] ..s..    18.380111: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] .Ns1.    18.484121: wbt_stat: 8:0: rmean=105498, rmin=77638, rmax=146252, rsamples=91, wmean=135007, wmin=81334, wmax=292875, wsamples=188
+      wbt_writer-170     [000] .Ns1.    18.484144: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    18.588060: wbt_stat: 8:0: rmean=104640, rmin=83236, rmax=138680, rsamples=89, wmean=133798, wmin=74873, wmax=341519, wsamples=187
+    kworker/0:1H-42      [000] ..s1.    18.588084: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s..    18.692071: wbt_stat: 8:0: rmean=104008, rmin=72920, rmax=146963, rsamples=90, wmean=129579, wmin=74443, wmax=260255, wsamples=198
+    kworker/0:1H-42      [000] ..s..    18.692093: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s..    18.796143: wbt_stat: 8:0: rmean=95395, rmin=72360, rmax=130488, rsamples=98, wmean=126018, wmin=74623, wmax=325044, wsamples=207
+      wbt_writer-168     [000] ..s..    18.796166: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s1.    18.900136: wbt_stat: 8:0: rmean=95745, rmin=68925, rmax=154314, rsamples=89, wmean=130587, wmin=76206, wmax=246755, wsamples=192
+      wbt_writer-170     [000] .Ns1.    18.900159: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    19.004185: wbt_stat: 8:0: rmean=95880, rmin=75124, rmax=127534, rsamples=91, wmean=131953, wmin=74143, wmax=318795, wsamples=191
+    kworker/0:1H-42      [000] ..s1.    19.004207: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    19.108138: wbt_stat: 8:0: rmean=97002, rmin=70237, rmax=141475, rsamples=93, wmean=131873, wmin=73802, wmax=370263, wsamples=191
+ read_latency_pr-171     [000] ..s1.    19.108160: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s1.    19.212137: wbt_stat: 8:0: rmean=94644, rmin=70366, rmax=119642, rsamples=96, wmean=123326, wmin=70667, wmax=315369, wsamples=204
+      wbt_writer-168     [000] .Ns1.    19.212160: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-172     [000] ..s..    19.316220: wbt_stat: 8:0: rmean=96337, rmin=76136, rmax=126262, rsamples=95, wmean=124778, wmin=75564, wmax=245774, wsamples=200
+ read_latency_pr-172     [000] ..s..    19.316243: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..    19.420075: wbt_stat: 8:0: rmean=99491, rmin=72039, rmax=131760, rsamples=99, wmean=127836, wmin=73712, wmax=221697, wsamples=197
+      wbt_writer-168     [000] ..s..    19.420098: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.    19.524087: wbt_stat: 8:0: rmean=102828, rmin=78129, rmax=205502, rsamples=89, wmean=134305, wmin=75285, wmax=254286, wsamples=192
+ read_latency_pr-172     [000] ..s1.    19.524110: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    19.628093: wbt_stat: 8:0: rmean=106231, rmin=82275, rmax=189788, rsamples=84, wmean=141033, wmin=92220, wmax=211822, wsamples=175
+      wbt_writer-167     [000] ..s1.    19.628115: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    19.732086: wbt_stat: 8:0: rmean=103782, rmin=77408, rmax=125841, rsamples=85, wmean=138048, wmin=81935, wmax=246865, wsamples=188
+ read_latency_pr-171     [000] ..s1.    19.732109: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] .Ns..    19.836134: wbt_stat: 8:0: rmean=101068, rmin=79651, rmax=125020, rsamples=87, wmean=134151, wmin=73612, wmax=338845, wsamples=195
+      wbt_writer-170     [000] .Ns..    19.836157: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    19.940142: wbt_stat: 8:0: rmean=101885, rmin=71188, rmax=213675, rsamples=89, wmean=133089, wmin=74243, wmax=236920, wsamples=189
+      wbt_writer-167     [000] ..s1.    19.940165: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s1.    20.044101: wbt_stat: 8:0: rmean=93529, rmin=74944, rmax=107513, rsamples=93, wmean=130986, wmin=75304, wmax=329230, wsamples=192
+      wbt_writer-170     [000] ..s1.    20.044123: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    20.148166: wbt_stat: 8:0: rmean=94724, rmin=70677, rmax=125491, rsamples=90, wmean=129697, wmin=79370, wmax=297412, wsamples=193
+    kworker/0:1H-42      [000] ..s1.    20.148188: wbt_timer: 8:0: status=1, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    20.252110: wbt_stat: 8:0: rmean=95471, rmin=72390, rmax=136798, rsamples=93, wmean=125840, wmin=80101, wmax=328359, wsamples=208
+          <idle>-0       [000] .Ns1.    20.252132: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    20.356069: wbt_stat: 8:0: rmean=101632, rmin=80141, rmax=135556, rsamples=93, wmean=131194, wmin=75444, wmax=188807, wsamples=186
+    kworker/0:1H-42      [000] ..s1.    20.356093: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] .Ns1.    20.460170: wbt_stat: 8:0: rmean=101826, rmin=81554, rmax=133843, rsamples=85, wmean=138697, wmin=79471, wmax=271542, wsamples=191
+      wbt_writer-170     [000] .Ns1.    20.460192: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s..    20.564063: wbt_stat: 8:0: rmean=104487, rmin=81955, rmax=134184, rsamples=92, wmean=135571, wmin=71548, wmax=294317, wsamples=187
+ read_latency_pr-172     [000] ..s..    20.564085: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    20.668117: wbt_stat: 8:0: rmean=100466, rmin=82225, rmax=118120, rsamples=28, wmean=142132, wmin=75876, wmax=269540, wsamples=62
+      wbt_writer-170     [000] ..s..    20.668140: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    20.772143: wbt_stat: 8:0: rmean=106299, rmin=83087, rmax=211442, rsamples=90, wmean=133124, wmin=81344, wmax=251833, wsamples=194
+      wbt_writer-167     [000] ..s1.    20.772166: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] .Ns..    20.876140: wbt_stat: 8:0: rmean=103537, rmin=74333, rmax=198672, rsamples=88, wmean=137036, wmin=77648, wmax=270021, wsamples=180
+      wbt_writer-169     [000] .Ns..    20.876163: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s1.    20.980073: wbt_stat: 8:0: rmean=100447, rmin=75304, rmax=150559, rsamples=90, wmean=132317, wmin=67783, wmax=244331, wsamples=192
+      wbt_writer-167     [000] ..s1.    20.980095: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    21.084071: wbt_stat: 8:0: rmean=95956, rmin=76056, rmax=135756, rsamples=89, wmean=127545, wmin=72631, wmax=250340, wsamples=199
+      wbt_writer-170     [000] ..s..    21.084094: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    21.188094: wbt_stat: 8:0: rmean=101910, rmin=71749, rmax=127204, rsamples=93, wmean=132699, wmin=75385, wmax=246204, wsamples=189
+ read_latency_pr-171     [000] ..s..    21.188118: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    21.292089: wbt_stat: 8:0: rmean=99835, rmin=73592, rmax=157690, rsamples=83, wmean=123678, wmin=74873, wmax=236119, wsamples=190
+      wbt_writer-168     [000] ..s1.    21.292113: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s..    21.396161: wbt_stat: 8:0: rmean=97752, rmin=73251, rmax=144559, rsamples=96, wmean=124791, wmin=77377, wmax=252033, wsamples=206
+      wbt_writer-169     [000] ..s..    21.396184: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] .Ns1.    21.500113: wbt_stat: 8:0: rmean=95200, rmin=77828, rmax=148706, rsamples=91, wmean=127277, wmin=81133, wmax=338995, wsamples=202
+      wbt_writer-167     [000] .Ns1.    21.500136: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    21.604117: wbt_stat: 8:0: rmean=95518, rmin=69365, rmax=124039, rsamples=90, wmean=132300, wmin=74243, wmax=311923, wsamples=190
+    kworker/0:1H-42      [000] ..s1.    21.604139: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    21.708125: wbt_stat: 8:0: rmean=104173, rmin=72580, rmax=139131, rsamples=94, wmean=137308, wmin=79861, wmax=263741, wsamples=183
+    kworker/0:1H-42      [000] ..s1.    21.708146: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    21.812085: wbt_stat: 8:0: rmean=103982, rmin=77377, rmax=138050, rsamples=89, wmean=137803, wmin=78028, wmax=232393, wsamples=186
+ read_latency_pr-171     [000] ..s1.    21.812107: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    21.916072: wbt_stat: 8:0: rmean=104511, rmin=79381, rmax=137629, rsamples=88, wmean=139690, wmin=82095, wmax=312565, wsamples=180
+    kworker/0:1H-42      [000] ..s..    21.916093: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    22.020142: wbt_stat: 8:0: rmean=104224, rmin=78710, rmax=128205, rsamples=88, wmean=137645, wmin=87423, wmax=252063, wsamples=189
+    kworker/0:1H-42      [000] ..s1.    22.020163: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    22.124062: wbt_stat: 8:0: rmean=102015, rmin=79480, rmax=123718, rsamples=92, wmean=134347, wmin=77778, wmax=182628, wsamples=183
+      wbt_writer-168     [000] ..s1.    22.124085: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] .Ns1.    22.228150: wbt_stat: 8:0: rmean=101806, rmin=75134, rmax=146112, rsamples=86, wmean=134964, wmin=73582, wmax=353147, wsamples=191
+ read_latency_pr-171     [000] .Ns1.    22.228174: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s..    22.332084: wbt_stat: 8:0: rmean=93942, rmin=77538, rmax=118760, rsamples=96, wmean=122646, wmin=76196, wmax=224521, wsamples=203
+ read_latency_pr-172     [000] ..s..    22.332108: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..    22.436102: wbt_stat: 8:0: rmean=93539, rmin=69886, rmax=119782, rsamples=94, wmean=125664, wmin=84378, wmax=336100, wsamples=201
+      wbt_writer-168     [000] ..s..    22.436125: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    22.540105: wbt_stat: 8:0: rmean=95954, rmin=68244, rmax=131640, rsamples=93, wmean=120732, wmin=72851, wmax=253225, wsamples=215
+ read_latency_pr-171     [000] ..s1.    22.540128: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s1.    22.644153: wbt_stat: 8:0: rmean=95456, rmin=78289, rmax=127043, rsamples=91, wmean=125819, wmin=69135, wmax=298613, wsamples=197
+      wbt_writer-167     [000] ..s1.    22.644176: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..    22.748049: wbt_stat: 8:0: rmean=97261, rmin=76116, rmax=135015, rsamples=93, wmean=128516, wmin=74924, wmax=250251, wsamples=188
+      wbt_writer-167     [000] ..s..    22.748072: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    22.852117: wbt_stat: 8:0: rmean=97173, rmin=74914, rmax=129707, rsamples=92, wmean=130731, wmin=76286, wmax=320387, wsamples=194
+      wbt_writer-168     [000] ..s1.    22.852140: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    22.956093: wbt_stat: 8:0: rmean=102527, rmin=73251, rmax=124029, rsamples=90, wmean=134045, wmin=79231, wmax=243860, wsamples=192
+      wbt_writer-167     [000] ..s1.    22.956117: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s1.    23.060129: wbt_stat: 8:0: rmean=105161, rmin=83928, rmax=132631, rsamples=88, wmean=138193, wmin=78780, wmax=281878, wsamples=181
+      wbt_writer-167     [000] ..s1.    23.060153: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    23.164105: wbt_stat: 8:0: rmean=97170, rmin=73001, rmax=122185, rsamples=94, wmean=127427, wmin=68013, wmax=211631, wsamples=200
+      wbt_writer-168     [000] ..s1.    23.164128: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] .Ns..    23.268085: wbt_stat: 8:0: rmean=101367, rmin=76256, rmax=684396, rsamples=93, wmean=128596, wmin=77507, wmax=323452, wsamples=191
+      wbt_writer-168     [000] .Ns..    23.268108: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    23.372137: wbt_stat: 8:0: rmean=98267, rmin=73111, rmax=159392, rsamples=93, wmean=127326, wmin=75074, wmax=322911, wsamples=200
+    kworker/0:1H-42      [000] ..s1.    23.372159: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    23.476167: wbt_stat: 8:0: rmean=101351, rmin=76807, rmax=156858, rsamples=85, wmean=132982, wmin=80452, wmax=309240, wsamples=198
+          <idle>-0       [000] .Ns1.    23.476189: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s..    23.580124: wbt_stat: 8:0: rmean=107004, rmin=82114, rmax=157970, rsamples=88, wmean=138502, wmin=85300, wmax=260115, wsamples=180
+    kworker/0:1H-42      [000] ..s..    23.580148: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s1.    23.684085: wbt_stat: 8:0: rmean=107965, rmin=79571, rmax=163819, rsamples=86, wmean=141341, wmin=78048, wmax=244051, wsamples=174
+ read_latency_pr-171     [000] ..s1.    23.684109: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s1.    23.788150: wbt_stat: 8:0: rmean=98525, rmin=77608, rmax=151750, rsamples=91, wmean=126613, wmin=76396, wmax=319746, wsamples=205
+      wbt_writer-167     [000] ..s1.    23.788172: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..    23.892082: wbt_stat: 8:0: rmean=98341, rmin=67923, rmax=159102, rsamples=90, wmean=124752, wmin=69786, wmax=264422, wsamples=207
+      wbt_writer-167     [000] ..s..    23.892104: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..    23.996073: wbt_stat: 8:0: rmean=106994, rmin=78359, rmax=165712, rsamples=87, wmean=142428, wmin=83207, wmax=257621, wsamples=176
+      wbt_writer-169     [000] ..s..    23.996096: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s1.    24.100104: wbt_stat: 8:0: rmean=103441, rmin=74654, rmax=153063, rsamples=83, wmean=142509, wmin=82345, wmax=444255, wsamples=179
+      wbt_writer-170     [000] ..s1.    24.100127: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s1.    24.204080: wbt_stat: 8:0: rmean=104996, rmin=79090, rmax=152101, rsamples=89, wmean=131430, wmin=80332, wmax=235468, wsamples=196
+      wbt_writer-169     [000] ..s1.    24.204104: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-171     [000] ..s1.    24.308114: wbt_stat: 8:0: rmean=104568, rmin=77938, rmax=140864, rsamples=90, wmean=133457, wmin=78829, wmax=252904, wsamples=194
+ read_latency_pr-171     [000] ..s1.    24.308137: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-172     [000] .Ns..    24.412168: wbt_stat: 8:0: rmean=105908, rmin=72461, rmax=168206, rsamples=87, wmean=139277, wmin=80282, wmax=252714, wsamples=183
+ read_latency_pr-172     [000] .Ns..    24.412191: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    24.516083: wbt_stat: 8:0: rmean=105910, rmin=78249, rmax=125511, rsamples=88, wmean=137822, wmin=81594, wmax=326005, wsamples=182
+      wbt_writer-168     [000] ..s1.    24.516107: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-168     [000] ..s..    24.620153: wbt_stat: 8:0: rmean=103083, rmin=79280, rmax=137589, rsamples=84, wmean=142476, wmin=79601, wmax=337753, wsamples=177
+      wbt_writer-168     [000] ..s..    24.620176: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-168     [000] ..s..    24.724060: wbt_stat: 8:0: rmean=102878, rmin=77147, rmax=126041, rsamples=89, wmean=136247, wmin=80543, wmax=290181, wsamples=178
+      wbt_writer-168     [000] ..s..    24.724082: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.    24.828107: wbt_stat: 8:0: rmean=96633, rmin=70978, rmax=154185, rsamples=91, wmean=129809, wmin=74764, wmax=352876, wsamples=191
+      wbt_writer-169     [000] ..s1.    24.828131: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-171     [000] ..s..    24.932088: wbt_stat: 8:0: rmean=96894, rmin=74403, rmax=213143, rsamples=88, wmean=136000, wmin=79972, wmax=315769, wsamples=186
+ read_latency_pr-171     [000] ..s..    24.932112: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s1.    25.036146: wbt_stat: 8:0: rmean=107494, rmin=81935, rmax=143854, rsamples=85, wmean=136096, wmin=86592, wmax=255218, wsamples=188
+      wbt_writer-169     [000] ..s1.    25.036169: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s1.    25.140104: wbt_stat: 8:0: rmean=109762, rmin=80753, rmax=158801, rsamples=84, wmean=141911, wmin=83587, wmax=270021, wsamples=178
+      wbt_writer-167     [000] ..s1.    25.140128: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] .Ns1.    25.244181: wbt_stat: 8:0: rmean=105926, rmin=75595, rmax=244351, rsamples=88, wmean=137205, wmin=77037, wmax=270901, wsamples=181
+    kworker/0:1H-42      [000] .Ns1.    25.244204: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s..    25.348106: wbt_stat: 8:0: rmean=101612, rmin=75675, rmax=136588, rsamples=87, wmean=135459, wmin=77548, wmax=250440, wsamples=184
+      wbt_writer-169     [000] ..s..    25.348127: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    25.452182: wbt_stat: 8:0: rmean=103870, rmin=83196, rmax=146733, rsamples=91, wmean=132631, wmin=80542, wmax=262589, wsamples=190
+    kworker/0:1H-42      [000] ..s1.    25.452204: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    25.556085: wbt_stat: 8:0: rmean=104508, rmin=83096, rmax=160193, rsamples=88, wmean=136873, wmin=78359, wmax=193093, wsamples=188
+      wbt_writer-170     [000] ..s..    25.556108: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-169     [000] ..s1.    25.660107: wbt_stat: 8:0: rmean=105048, rmin=80312, rmax=131505, rsamples=85, wmean=137707, wmin=82856, wmax=260696, wsamples=187
+      wbt_writer-169     [000] ..s1.    25.660130: wbt_timer: 8:0: status=1, step=-1, inflight=0
+    kworker/0:1H-42      [000] ..s1.    25.764132: wbt_stat: 8:0: rmean=102823, rmin=77287, rmax=127584, rsamples=93, wmean=136849, wmin=76006, wmax=259865, wsamples=180
+    kworker/0:1H-42      [000] ..s1.    25.764155: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] .Ns..    25.868079: wbt_stat: 8:0: rmean=103206, rmin=87543, rmax=122757, rsamples=86, wmean=136336, wmin=76676, wmax=231452, wsamples=184
+      wbt_writer-168     [000] .Ns..    25.868103: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    25.972128: wbt_stat: 8:0: rmean=102234, rmin=84719, rmax=121124, rsamples=89, wmean=133446, wmin=73772, wmax=355029, wsamples=191
+          <idle>-0       [000] .Ns1.    25.972150: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] .Ns1.    26.076130: wbt_stat: 8:0: rmean=101667, rmin=71709, rmax=142136, rsamples=88, wmean=133524, wmin=74834, wmax=256750, wsamples=193
+      wbt_writer-169     [000] .Ns1.    26.076153: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s..    26.180080: wbt_stat: 8:0: rmean=104422, rmin=82205, rmax=130659, rsamples=87, wmean=137052, wmin=75795, wmax=261477, wsamples=186
+    kworker/0:1H-42      [000] ..s..    26.180102: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-172     [000] ..s1.    26.284103: wbt_stat: 8:0: rmean=105158, rmin=77247, rmax=129957, rsamples=88, wmean=133997, wmin=81684, wmax=330752, wsamples=191
+ read_latency_pr-172     [000] ..s1.    26.284126: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] .Ns1.    26.388071: wbt_stat: 8:0: rmean=105390, rmin=73732, rmax=152111, rsamples=89, wmean=134770, wmin=74032, wmax=343122, wsamples=188
+      wbt_writer-168     [000] .Ns1.    26.388094: wbt_timer: 8:0: status=1, step=-1, inflight=1
+          <idle>-0       [000] ..s1.    26.492095: wbt_stat: 8:0: rmean=105747, rmin=77819, rmax=146693, rsamples=86, wmean=143812, wmin=80162, wmax=383232, wsamples=177
+          <idle>-0       [000] ..s1.    26.492116: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s..    26.596054: wbt_stat: 8:0: rmean=101624, rmin=78629, rmax=230310, rsamples=89, wmean=135077, wmin=80923, wmax=235608, wsamples=178
+      wbt_writer-169     [000] ..s..    26.596076: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] .Ns1.    26.700127: wbt_stat: 8:0: rmean=102285, rmin=78689, rmax=152106, rsamples=91, wmean=136704, wmin=80162, wmax=337813, wsamples=187
+      wbt_writer-168     [000] .Ns1.    26.700150: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..    26.804057: wbt_stat: 8:0: rmean=99355, rmin=73472, rmax=131210, rsamples=91, wmean=128734, wmin=76156, wmax=258763, wsamples=200
+      wbt_writer-167     [000] ..s..    26.804080: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-171     [000] ..s1.    26.908097: wbt_stat: 8:0: rmean=101498, rmin=71569, rmax=128626, rsamples=90, wmean=135527, wmin=76556, wmax=243771, wsamples=188
+ read_latency_pr-171     [000] ..s1.    26.908119: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    27.012122: wbt_stat: 8:0: rmean=96465, rmin=73692, rmax=148836, rsamples=87, wmean=132155, wmin=75445, wmax=311734, wsamples=181
+    kworker/0:1H-42      [000] ..s1.    27.012145: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    27.116130: wbt_stat: 8:0: rmean=94225, rmin=69215, rmax=126682, rsamples=96, wmean=126344, wmin=79942, wmax=343311, wsamples=198
+    kworker/0:1H-42      [000] ..s1.    27.116153: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s1.    27.220089: wbt_stat: 8:0: rmean=99637, rmin=72951, rmax=124279, rsamples=88, wmean=132208, wmin=71488, wmax=339896, wsamples=197
+      wbt_writer-167     [000] ..s1.    27.220112: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    27.324090: wbt_stat: 8:0: rmean=103599, rmin=77869, rmax=161064, rsamples=91, wmean=134601, wmin=81514, wmax=299135, wsamples=187
+ read_latency_pr-171     [000] ..s..    27.324112: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s1.    27.428163: wbt_stat: 8:0: rmean=108325, rmin=79010, rmax=154695, rsamples=92, wmean=134388, wmin=79440, wmax=301949, wsamples=186
+      wbt_writer-169     [000] ..s1.    27.428186: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] .Ns..    27.532142: wbt_stat: 8:0: rmean=106902, rmin=90607, rmax=146923, rsamples=87, wmean=137874, wmin=81503, wmax=353397, wsamples=186
+      wbt_writer-167     [000] .Ns..    27.532164: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] .Ns..    27.636117: wbt_stat: 8:0: rmean=106665, rmin=76406, rmax=149057, rsamples=89, wmean=135379, wmin=81514, wmax=254717, wsamples=183
+ read_latency_pr-171     [000] .Ns..    27.636139: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s..    27.740095: wbt_stat: 8:0: rmean=105109, rmin=79551, rmax=165221, rsamples=87, wmean=138659, wmin=78339, wmax=255828, wsamples=180
+      wbt_writer-168     [000] ..s..    27.740118: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s..    27.844126: wbt_stat: 8:0: rmean=104973, rmin=86622, rmax=125410, rsamples=90, wmean=140328, wmin=80933, wmax=343792, wsamples=182
+      wbt_writer-170     [000] ..s..    27.844150: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-169     [000] ..s1.    27.948158: wbt_stat: 8:0: rmean=105567, rmin=83317, rmax=165001, rsamples=88, wmean=137940, wmin=81804, wmax=246144, wsamples=180
+      wbt_writer-169     [000] ..s1.    27.948181: wbt_timer: 8:0: status=1, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    28.052153: wbt_stat: 8:0: rmean=104052, rmin=77197, rmax=140614, rsamples=85, wmean=140347, wmin=80412, wmax=317923, wsamples=182
+          <idle>-0       [000] .Ns1.    28.052175: wbt_timer: 8:0: status=1, step=-1, inflight=2
+    kworker/0:1H-42      [000] ..s1.    28.156133: wbt_stat: 8:0: rmean=107704, rmin=75895, rmax=144850, rsamples=90, wmean=137889, wmin=78699, wmax=259244, wsamples=180
+    kworker/0:1H-42      [000] ..s1.    28.156155: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    28.260182: wbt_stat: 8:0: rmean=104715, rmin=78699, rmax=123758, rsamples=89, wmean=141448, wmin=82676, wmax=344373, wsamples=180
+      wbt_writer-167     [000] ..s1.    28.260204: wbt_timer: 8:0: status=1, step=-1, inflight=1
+          <idle>-0       [000] .Ns1.    28.364128: wbt_stat: 8:0: rmean=104317, rmin=71189, rmax=146362, rsamples=86, wmean=142457, wmin=84388, wmax=361208, wsamples=175
+          <idle>-0       [000] .Ns1.    28.364150: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..    28.468145: wbt_stat: 8:0: rmean=102168, rmin=71849, rmax=249139, rsamples=89, wmean=134464, wmin=73271, wmax=265013, wsamples=189
+      wbt_writer-167     [000] ..s..    28.468168: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.    28.572160: wbt_stat: 8:0: rmean=105669, rmin=80012, rmax=158470, rsamples=89, wmean=137483, wmin=80513, wmax=265313, wsamples=185
+ read_latency_pr-172     [000] ..s1.    28.572183: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-169     [000] ..s..    28.676081: wbt_stat: 8:0: rmean=106929, rmin=78009, rmax=147764, rsamples=75, wmean=141608, wmin=74213, wmax=256049, wsamples=156
+      wbt_writer-169     [000] ..s..    28.676103: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-171     [000] ..s1.    28.780129: wbt_stat: 8:0: rmean=97249, rmin=70567, rmax=121535, rsamples=95, wmean=126425, wmin=75925, wmax=327297, wsamples=208
+ read_latency_pr-171     [000] ..s1.    28.780151: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] ..s..    28.884070: wbt_stat: 8:0: rmean=94468, rmin=72430, rmax=143748, rsamples=93, wmean=131600, wmin=72250, wmax=350722, wsamples=188
+      wbt_writer-167     [000] ..s..    28.884093: wbt_timer: 8:0: status=1, step=-1, inflight=2
+ read_latency_pr-172     [000] ..s1.    28.988135: wbt_stat: 8:0: rmean=95758, rmin=78569, rmax=133242, rsamples=94, wmean=123389, wmin=74263, wmax=325154, wsamples=204
+ read_latency_pr-172     [000] ..s1.    28.988158: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-170     [000] ..s1.    29.092163: wbt_stat: 8:0: rmean=96883, rmin=69165, rmax=143378, rsamples=93, wmean=126199, wmin=78359, wmax=248758, wsamples=198
+      wbt_writer-170     [000] ..s1.    29.092186: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s1.    29.196158: wbt_stat: 8:0: rmean=104666, rmin=78169, rmax=164370, rsamples=91, wmean=136256, wmin=77988, wmax=226214, wsamples=182
+      wbt_writer-167     [000] ..s1.    29.196181: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-170     [000] ..s..    29.300061: wbt_stat: 8:0: rmean=105962, rmin=80412, rmax=137198, rsamples=82, wmean=142141, wmin=87243, wmax=245443, wsamples=180
+      wbt_writer-170     [000] ..s..    29.300084: wbt_timer: 8:0: status=1, step=-1, inflight=0
+          <idle>-0       [000] .Ns1.    29.404091: wbt_stat: 8:0: rmean=106029, rmin=84108, rmax=154775, rsamples=89, wmean=132209, wmin=78700, wmax=244282, wsamples=196
+          <idle>-0       [000] .Ns1.    29.404113: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    29.508120: wbt_stat: 8:0: rmean=108758, rmin=75415, rmax=222819, rsamples=89, wmean=141109, wmin=79200, wmax=472999, wsamples=177
+      wbt_writer-168     [000] ..s1.    29.508142: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] ..s..    29.612362: wbt_stat: 8:0: rmean=110397, rmin=81654, rmax=268127, rsamples=90, wmean=146236, wmin=80181, wmax=491307, wsamples=165
+      wbt_writer-170     [000] ..s..    29.612394: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s1.    29.716083: wbt_stat: 8:0: rmean=169094, rmin=76897, rmax=639582, rsamples=67, wmean=205263, wmin=84518, wmax=761587, wsamples=127
+      wbt_writer-168     [000] ..s1.    29.716107: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-168     [000] ..s1.    29.820191: wbt_stat: 8:0: rmean=105590, rmin=77267, rmax=141655, rsamples=91, wmean=131946, wmin=79992, wmax=367197, wsamples=193
+      wbt_writer-168     [000] ..s1.    29.820214: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-170     [000] .Ns..    29.924082: wbt_stat: 8:0: rmean=102722, rmin=73301, rmax=148586, rsamples=93, wmean=130826, wmin=72250, wmax=277342, wsamples=193
+      wbt_writer-170     [000] .Ns..    29.924106: wbt_timer: 8:0: status=1, step=-1, inflight=1
+    kworker/0:1H-42      [000] ..s1.    30.028116: wbt_stat: 8:0: rmean=104610, rmin=77898, rmax=223569, rsamples=90, wmean=130454, wmin=70497, wmax=248577, wsamples=191
+    kworker/0:1H-42      [000] ..s1.    30.028137: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-168     [000] ..s1.    30.132089: wbt_stat: 8:0: rmean=102574, rmin=72871, rmax=127844, rsamples=89, wmean=129678, wmin=76376, wmax=369131, wsamples=202
+      wbt_writer-168     [000] ..s1.    30.132112: wbt_timer: 8:0: status=1, step=-1, inflight=2
+      wbt_writer-167     [000] ..s..    30.236086: wbt_stat: 8:0: rmean=105948, rmin=74804, rmax=144600, rsamples=86, wmean=132875, wmin=77648, wmax=208247, wsamples=189
+      wbt_writer-167     [000] ..s..    30.236108: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-172     [000] ..s1.    30.340072: wbt_stat: 8:0: rmean=106092, rmin=79530, rmax=255248, rsamples=87, wmean=139298, wmin=82416, wmax=199003, wsamples=179
+ read_latency_pr-172     [000] ..s1.    30.340096: wbt_timer: 8:0: status=1, step=-1, inflight=1
+ read_latency_pr-171     [000] ..s1.    30.444075: wbt_stat: 8:0: rmean=102829, rmin=78489, rmax=132561, rsamples=86, wmean=129751, wmin=75525, wmax=184099, wsamples=198
+ read_latency_pr-171     [000] ..s1.    30.444098: wbt_timer: 8:0: status=1, step=-1, inflight=0
+ read_latency_pr-171     [000] ..s..    30.548064: wbt_stat: 8:0: rmean=102326, rmin=80993, rmax=130298, rsamples=85, wmean=139234, wmin=72750, wmax=310572, wsamples=180
+ read_latency_pr-171     [000] ..s..    30.548087: wbt_timer: 8:0: status=1, step=-1, inflight=1
+      wbt_writer-167     [000] ..s..    30.652140: wbt_stat: 8:0: rmean=104258, rmin=73562, rmax=172131, rsamples=91, wmean=132204, wmin=74584, wmax=248438, wsamples=195
+      wbt_writer-167     [000] ..s..    30.652162: wbt_timer: 8:0: status=1, step=-1, inflight=0
+      wbt_writer-167     [000] .Ns..    30.756071: wbt_stat: 8:0: rmean=104330, rmin=77598, rmax=143128, rsamples=87, wmean=142767, wmin=77758, wmax=250932, wsamples=174
+      wbt_writer-167     [000] .Ns..    30.756095: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    30.860175: wbt_stat: 8:0: rmean=97340, rmin=74132, rmax=129827, rsamples=68, wmean=129804, wmin=75064, wmax=316661, wsamples=146
+          <idle>-0       [000] ..s1.    30.860200: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    30.964076: wbt_stat: 8:0: rmean=97731, rmin=76466, rmax=112872, rsamples=4, wmean=123820, wmin=91389, wmax=268248, wsamples=10
+          <idle>-0       [000] ..s1.    30.964099: wbt_timer: 8:0: status=1, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    31.068278: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    31.172218: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    31.276238: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    31.380331: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    31.484229: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] .Ns1.    31.588086: wbt_timer: 8:0: status=3, step=-1, inflight=1
+      wbt_writer-169     [000] ..s..    31.692122: wbt_timer: 8:0: status=3, step=-1, inflight=2
+      wbt_writer-167     [000] ..s1.    31.796200: wbt_timer: 8:0: status=3, step=-1, inflight=1
+    kworker/0:1H-42      [000] .Ns1.    31.900175: wbt_timer: 8:0: status=3, step=-1, inflight=2
+          <idle>-0       [000] ..s1.    32.004048: wbt_timer: 8:0: status=3, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.108293: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.212224: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.316310: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.420312: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.524249: wbt_timer: 8:0: status=2, step=-1, inflight=0
+          <idle>-0       [000] ..s1.    32.524396: wbt_step: 8:0: scale down: step=0, window=100000us, background=1, normal=2, max=2
+==========================================
+=== [QEMU-WBT] BENCHMARK COMPLETE ===
+==========================================
+[   33.516581] reboot: Power down

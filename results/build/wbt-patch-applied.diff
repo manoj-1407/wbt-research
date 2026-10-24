@@ -1,0 +1,84 @@
+diff --git a/block/blk-wbt.c b/block/blk-wbt.c
+index f8fda9cf5..3a0146520 100644
+--- a/block/blk-wbt.c
++++ b/block/blk-wbt.c
+@@ -450,7 +450,23 @@ static void wb_timer_fn(struct blk_stat_callback *cb)
+ 		 * We started a the center step, but don't have a valid
+ 		 * read/write sample, but we do have writes going on.
+ 		 * Allow step to go negative, to increase write perf.
++		 *
++		 * Guard: if concurrent reads are sampled in this window
++		 * and their minimum observed latency already exceeds the
++		 * configured target (rwb->min_lat_nsec), do not scale up
++		 * write depth. Hold depth conservatively.
+ 		 */
++		if (cb->stat[READ].nr_samples &&
++		    cb->stat[READ].min > rwb->min_lat_nsec) {
++			trace_wbt_guard(rwb->rqos.disk->bdi, rqd->scale_step,
++					cb->stat[READ].nr_samples, cb->stat[READ].min,
++					rwb->min_lat_nsec, 1, "hold");
++			break;
++		}
++
++		trace_wbt_guard(rwb->rqos.disk->bdi, rqd->scale_step,
++				cb->stat[READ].nr_samples, cb->stat[READ].min,
++				rwb->min_lat_nsec, 0, "scale_up");
+ 		scale_up(rwb);
+ 		break;
+ 	case LAT_UNKNOWN:
+diff --git a/include/trace/events/wbt.h b/include/trace/events/wbt.h
+index 4661f0d27..95ea1dcc6 100644
+--- a/include/trace/events/wbt.h
++++ b/include/trace/events/wbt.h
+@@ -152,6 +152,51 @@ TRACE_EVENT(wbt_timer,
+ 		  __entry->status, __entry->step, __entry->inflight)
+ );
+ 
++/**
++ * wbt_guard - trace guard evaluation on LAT_UNKNOWN_WRITES
++ * @bdi: backing dev info
++ * @step: current scale step before decision
++ * @r_samples: number of read samples in window
++ * @r_min: minimum read latency in window (nanoseconds)
++ * @target: target latency (nanoseconds)
++ * @guard_fired: whether guard condition was met (1=true, 0=false)
++ * @action: action taken ("hold", "scale_up")
++ */
++TRACE_EVENT(wbt_guard,
++
++	TP_PROTO(struct backing_dev_info *bdi, int step,
++		 unsigned long long r_samples, unsigned long long r_min,
++		 unsigned long long target, int guard_fired, const char *action),
++
++	TP_ARGS(bdi, step, r_samples, r_min, target, guard_fired, action),
++
++	TP_STRUCT__entry(
++		__array(char, name, 32)
++		__field(int, step)
++		__field(unsigned long long, r_samples)
++		__field(unsigned long long, r_min_us)
++		__field(unsigned long long, target_us)
++		__field(int, guard_fired)
++		__string(action, action)
++	),
++
++	TP_fast_assign(
++		strscpy(__entry->name, bdi_dev_name(bdi),
++			ARRAY_SIZE(__entry->name));
++		__entry->step		= step;
++		__entry->r_samples	= r_samples;
++		__entry->r_min_us	= div_u64(r_min, 1000);
++		__entry->target_us	= div_u64(target, 1000);
++		__entry->guard_fired	= guard_fired;
++		__assign_str(action, action);
++	),
++
++	TP_printk("%s: step=%d, r_samples=%llu, r_min=%lluus, target=%lluus, guard_fired=%d, action=%s",
++		  __entry->name, __entry->step, __entry->r_samples,
++		  __entry->r_min_us, __entry->target_us,
++		  __entry->guard_fired, __get_str(action))
++);
++
+ #endif /* _TRACE_WBT_H */
+ 
+ /* This part must be outside protection */

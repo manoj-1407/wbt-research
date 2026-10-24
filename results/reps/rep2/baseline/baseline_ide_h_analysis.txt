@@ -1,0 +1,47 @@
+================================================================================
+WBT In-Kernel Trace Analysis: baseline_ide_h_qemu.log
+================================================================================
+
+--- Workload Validity (block-layer evidence) ---
+  writer open : dev=/dev/sda mode=BUFFERED chunk=65536B sleep=0ms
+  writer open : dev=/dev/sda mode=BUFFERED chunk=65536B sleep=0ms
+  writer open : dev=/dev/sda mode=BUFFERED chunk=65536B sleep=0ms
+  writer open : dev=/dev/sda mode=BUFFERED chunk=65536B sleep=0ms
+  [+] all writers report mode=BUFFERED (WBT-trackable) - as required
+  writers ran : 4 process(es), OPS=18548 BYTES=1215561728 ERR=0 FSYNC_ERR=0
+  readers ran : 2 process(es), open_mode=['O_DIRECT']
+  blk delta   : read_sectors=119608 write_sectors=2374144
+Total WBT Timer Windows: 294
+Total Step Transitions:  2
+Total Stat Reports:      278
+Total Latency Alerts:    0
+Total Guard Decisions:   0
+
+--- Status Distribution Across Windows ---
+  LAT_OK              :   279 ( 94.9%)
+  LAT_UNKNOWN_WRITES  :    10 (  3.4%)
+  LAT_UNKNOWN         :     5 (  1.7%)
+
+[CRITICAL EVALUATION]
+  LAT_UNKNOWN_WRITES (status=3) Events: 10 / 294
+  --> The kernel entered LAT_UNKNOWN_WRITES in 10 window(s).
+
+[GUARD DECISION AUDIT]
+  --> No wbt_guard events recorded (baseline kernel or guard not hit).
+
+--- Correlated Decision Timeline ---
+  [ 1] ts=2.8567 dev=8:0 status=LAT_OK pre_step=0 | Action: scale up -> step=-1 | Guard: no guard | Stat: no stat
+  [ 2] ts=2.9604 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=52, rmin=113194ns
+  [ 3] ts=3.0644 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=59, rmin=136829ns
+  [ 4] ts=3.1681 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=49, rmin=145776ns
+  [ 5] ts=3.2724 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=47, rmin=151527ns
+  [ 6] ts=3.3773 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=61, rmin=142359ns
+  [ 7] ts=3.4801 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=56, rmin=157508ns
+  [ 8] ts=3.5841 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=54, rmin=164561ns
+  [ 9] ts=3.6884 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=51, rmin=154562ns
+  [10] ts=3.7923 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=56, rmin=164732ns
+  [11] ts=3.8963 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=58, rmin=154493ns
+  [12] ts=4.0001 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=55, rmin=142170ns
+  [13] ts=4.1042 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=56, rmin=175703ns
+  [14] ts=4.2081 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=56, rmin=135186ns
+  [15] ts=4.3121 dev=8:0 status=LAT_OK pre_step=-1 | Action: [NO STEP CHANGE LOGGED] | Guard: no guard | Stat: rsamples=51, rmin=150716ns

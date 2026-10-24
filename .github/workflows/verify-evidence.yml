@@ -1,0 +1,125 @@
+name: Verify Evidence Reproduction
+
+# Read-only assertion that the published analysis and all three run matrices can
+# be regenerated from the committed raw traces on infrastructure that is independent
+# of the author's machine. Triggered on push to research branches, exp branches, and main.
+#
+# This workflow writes nothing back to the repository.
+
+on:
+  push:
+    branches:
+      - exp/qemu-guard-audit
+      - research/**
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-reproduction:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Run unit & regression tests
+        run: |
+          set -euo pipefail
+          python3 test_tracer_guard.py
+          python3 test_wbt_state_transition.py
+
+      - name: All eight raw traces are present for Run 1
+        run: |
+          set -euo pipefail
+          n=$(ls results/baseline/*_qemu.log results/patched/*_qemu.log | wc -l)
+          echo "raw traces found = $n"
+          test "$n" -eq 8
+          for cfg in ide_h vio_h ide_s vio_s; do
+            for k in baseline patched; do
+              test -s "results/$k/${k}_${cfg}_qemu.log"
+            done
+          done
+          echo "all 8 Run 1 expected files exist and are non-empty"
+
+      - name: All raw traces are present for Rep 2 and Rep 3
+        run: |
+          set -euo pipefail
+          for rep in rep2 rep3; do
+            n=$(ls results/reps/$rep/baseline/*_qemu.log results/reps/$rep/patched/*_qemu.log | wc -l)
+            echo "raw traces found for $rep = $n"
+            test "$n" -eq 8
+          done
+
+      - name: Regenerate all benchmark matrices from raw traces
+        run: |
+          set -euo pipefail
+          python3 scripts/summarize_bench.py
+          python3 scripts/summarize_bench.py results/reps/rep2 "run 40004718895 (rep 2)" bench_matrix_rep2.txt
+          python3 scripts/summarize_bench.py results/reps/rep3 "run 40004771234 (rep 3)" bench_matrix_rep3.txt
+
+      - name: Regenerated matrices are byte-identical to committed artifacts
+        run: |
+          set -euo pipefail
+          if ! git diff --exit-code --quiet -- results/comparison/bench_matrix.txt; then
+            echo "::error::regenerated run 1 matrix differs from committed artifact"
+            git diff -- results/comparison/bench_matrix.txt | head -40
+            exit 1
+          fi
+          if ! git diff --exit-code --quiet -- results/comparison/bench_matrix_rep2.txt; then
+            echo "::error::regenerated rep 2 matrix differs from committed artifact"
+            git diff -- results/comparison/bench_matrix_rep2.txt | head -40
+            exit 1
+          fi
+          if ! git diff --exit-code --quiet -- results/comparison/bench_matrix_rep3.txt; then
+            echo "::error::regenerated rep 3 matrix differs from committed artifact"
+            git diff -- results/comparison/bench_matrix_rep3.txt | head -40
+            exit 1
+          fi
+          echo "all three regenerated matrices are identical to committed artifacts"
+
+      - name: Execute independent three-run recalculation and audit
+        run: |
+          set -euo pipefail
+          python3 scripts/recalculate_all_runs.py
+
+      - name: Documented guard counts hold in the raw traces
+        run: |
+          set -euo pipefail
+          ev=$(grep -c 'wbt_guard:' results/patched/patched_vio_s_qemu.log || true)
+          held=$(grep -c 'guard_fired=1' results/patched/patched_vio_s_qemu.log || true)
+          up=$(grep -c 'guard_fired=0' results/patched/patched_vio_s_qemu.log || true)
+          base=$(grep -c 'wbt_guard:' results/baseline/baseline_vio_s_qemu.log || true)
+          echo "patched_vio_s : events=$ev hold=$held scale_up=$up"
+          echo "baseline_vio_s: events=$base"
+          test "$ev"   -eq 283
+          test "$held" -eq 276
+          test "$up"   -eq 7
+          test "$base" -eq 0
+
+      - name: Guard is inert where it must not fire
+        run: |
+          set -euo pipefail
+          for f in patched_ide_h patched_vio_h; do
+            c=$(grep -c 'guard_fired=1' "results/patched/${f}_qemu.log" || true)
+            echo "$f hold=$c"
+            test "$c" -eq 0
+          done
+
+      - name: Every configuration produced WBT timer activity
+        run: |
+          set -euo pipefail
+          for k in baseline patched; do
+            for cfg in ide_h vio_h ide_s vio_s; do
+              v=$(grep -o 'wbt_timer : [0-9]*' "results/$k/${k}_${cfg}_qemu.log" | head -1 | awk '{print $3}')
+              echo "$k/$cfg wbt_timer=$v"
+              test -n "$v"
+              test "$v" -gt 0
+            done
+          done

@@ -148,8 +148,8 @@ def trace_window(rwb_b: RqWbState, rwb_p: RqWbState, inp: WindowInput) -> TraceR
     elif status_patched == LAT_UNKNOWN_WRITES:
         # ---- PATCH GUARD ----
         if inp.read_samples and inp.read_min_ns > rwb_p.min_lat_nsec:
-            rwb_p.scale_down(hard_throttle=False)
-            action_p = "scale_down(hard=False)[PATCHED]"
+            # Hold current depth: break; no scale_up, no scale_down.
+            action_p = "hold()[PATCHED]"
         else:
             rwb_p.scale_up()
             action_p = "scale_up()"

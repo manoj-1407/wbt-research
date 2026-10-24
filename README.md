@@ -25,23 +25,30 @@ In Linux's block-layer writeback throttling (WBT), request completion statistics
 
 ---
 
-## 2. Methodology & Validation Hierarchy
+## 2. Empirical Investigation & Final Research Status
 
 > [!IMPORTANT]
-> **Distinction Between Model Tests and In-Kernel Execution:**
-> * **Source-Derived Transition Models** (`wbt_transition_tracer.py`, `test_wbt_state_transition.py`): Implement the exact decision logic and predicates in Python. They confirm that under the specified inputs, the model diverges as expected (Case 1). They do **not** constitute execution of the C functions or proof of hardware-level latency improvement.
-> * **Empirical Kernel Validation (Pending)**: Uses native Linux tracepoints (`/sys/kernel/tracing/events/wbt/`) on a kernel compiled with `CONFIG_BLK_WBT=y` to observe whether real block completions enter `LAT_UNKNOWN_WRITES` and whether the patched controller improves tail latency.
+> **Research Decision: REVISE (Not GO / Not STOP)**
+> * **Empirical Kernel Validation Completed**: 3 matched repetitions executed in QEMU across an 8-configuration matrix (virtio-scsi deep queue vs IDE QD=1, heavy mixed vs read-dominated sparse).
+> * **In-Kernel Observability Verified**: The `wbt_guard` tracepoint confirms the guard executes in-kernel and actively holds depth (276 holds in Run 1, 176 holds in Reps 2 & 3).
+> * **Finding**: While the mechanism works as coded, **the performance hypothesis is not supported**. Read latency delta flips sign across runs (+5.13% P50 in Run 1, -0.93% in Rep 2, -1.60% in Rep 3), inert controls flip sign identically, and emulation host noise floor (+7–8% writer OPS) exceeds the observed latency delta.
+> * Full reports: [Final Decision](docs/final-decision.md), [Results & Three-Run Audit](docs/results.md), [Limitations](docs/limitations.md), [Three-Run Reconciliation](docs/three-run-reconciliation.md).
 
 ---
 
 ## 3. Repository Contents
 
-| File | Type | Purpose |
+| File / Directory | Type | Purpose |
 | :--- | :--- | :--- |
-| `.github/workflows/build-wbt-kernels.yml` | Workflow | GitHub Actions workflow building baseline and patched WSL2 6.6 kernels at pinned commit |
-| `0001-wbt-hold-depth-on-LAT_UNKNOWN_WRITES-when-reads-are-elevated.patch` | Patch | Proposed 13-line guard: `scale_down(rwb, false)` on elevated reads in `LAT_UNKNOWN_WRITES` |
-| `wbt_transition_tracer.py` | Model | Source-derived transition tracer testing 5 discrete window scenarios |
-| `test_wbt_state_transition.py` | Model | Specification test suite verifying 7 state machine invariants |
+| `0001-wbt-hold-depth-on-LAT_UNKNOWN_WRITES-when-reads-are-elevated.patch` | Kernel Patch | 13-line kernel patch adding guard and `wbt_guard` tracepoint to `block/blk-wbt.c` |
+| `test_wbt_state_transition.py` | Unit Tests | Specification test suite verifying 11 state machine invariants and regression edge cases |
+| `test_tracer_guard.py` | Unit Tests | Ftrace format regex validation against kernel tracepoint output |
+| `scripts/summarize_bench.py` | Analysis | Matrix consolidator generating byte-reproducible comparison matrices from raw logs |
+| `scripts/recalculate_all_runs.py` | Audit Script | Independent multi-run recalculation, validity gate checker, and cross-run reconciliation |
+| `results/` | Evidence | Committed raw QEMU benchmark logs (`*_qemu.log`), analyses, and matrices for all 3 runs |
+| `results/reconciliation_manifest.json` | Manifest | Machine-readable three-run audit manifest with verified GitHub Actions provenance |
+| `docs/` | Research Docs | Full documentation: `final-decision.md`, `results.md`, `limitations.md`, `three-run-reconciliation.md` |
+| `.github/workflows/` | CI Workflows | `build-wbt-kernels.yml`, `qemu-wbt-smoke-test.yml`, and `verify-evidence.yml` |
 
 ---
 
@@ -51,7 +58,7 @@ Running `python3 wbt_transition_tracer.py` models the classifier across 5 canoni
 
 * **Case 1 (Sparse Writes + Elevated Reads)**: 50 reads (min: 8 ms), 1 write completion. Watchdog=False, SampleValid=False. Classifier returns `LAT_UNKNOWN_WRITES`.
   * *Baseline*: `scale_up()` (`scale_step = -1`, queue widened).
-  * *Patched*: `scale_down(hard=False)` (`scale_step = +1`, queue contracted).
+  * *Patched*: `break` / hold depth (`scale_step` unchanged, guard tracepoint `action="hold"`).
 * **Case 2 (Sufficient Writes + Elevated Reads)**: 50 reads (min: 8 ms), 5 write completions. Watchdog=False, SampleValid=True. Classifier returns `LAT_EXCEEDED`. Both execute `scale_down(hard=True)`.
 * **Case 3 (In-Flight Sync Read Stall)**: 0 completed reads, 1 pending sync read at 15 ms. Watchdog fires. Classifier returns `LAT_EXCEEDED`. Both execute `scale_down(hard=True)`.
 * **Case 4 (Pure Streaming Writes)**: 0 reads, 10 write completions. Classifier returns `LAT_UNKNOWN_WRITES`. Both execute `scale_up()`. (Pure write performance preserved).
@@ -114,9 +121,9 @@ LAT_UNKNOWN_WRITES before reaching the stat[READ].min comparison. In wb_timer_fn
 LAT_UNKNOWN_WRITES unconditionally calls scale_up(), widening write queue depth 
 despite the presence of elevated read completion latency in that window.
 
-I have modeled this state transition and am currently evaluating whether this 
+I have modeled this state transition and evaluated whether this 
 behavior manifests under real workloads (e.g. concurrent sync reads with bursty 
-large writes) and whether a conservative step-down (hard_throttle=false) when 
+large writes) and whether conservatively holding the current write depth when 
 stat[READ].min > rwb->min_lat_nsec improves read tail latency without 
 destabilizing write throughput.
 
