@@ -79,3 +79,10 @@ used as evidence of anything.
   record. With 100 ms windows this is negligible, but the patched kernel is
   not byte-identical in cost to the baseline, so "no difference" in the
   inert configurations is an upper bound, not an equality.
+
+
+## 8. Repeatability update (2026-10-24)
+
+The previous single-content limitation is superseded: all three matched Actions artifacts were retrieved and parsed. Run 1's artifact digest was verified against the downloaded ZIP; run 2/3 hashes and run IDs are documented in docs/three-run-reconciliation.md. Per-run sparse metrics and guard counts are now available in docs/results.md §8 and the addendum.
+
+The limitation is now **three repetitions only**, with workload order not randomized/alternated and a shared GitHub QEMU TCG runner. Results show mixed directions and cannot establish a stable latency benefit or regression. The heavy workload remains only two reader processes per configuration. Hardware/KVM validation and additional randomized repetitions remain necessary.
