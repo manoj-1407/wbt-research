@@ -386,6 +386,92 @@ all_passed = all_passed and tc7_pass
 print()
 
 # ---------------------------------------------------------------------------
+# TC-8: Sentinel / uninitialized read latency (ULLONG_MAX) when r_samples == 0
+# stat[READ].nr_samples == 0, min is ULLONG_MAX (e.g. 18446744073709551615 ns).
+# Expected: Guard must short-circuit on r_samples == 0 and NOT fire "hold",
+# allowing normal scale_up without integer overflow or erroneous hold.
+# ---------------------------------------------------------------------------
+print("--- TC-8: Sentinel uninitialized latency (ULLONG_MAX, r_samples=0) ---")
+ULLONG_MAX = (1 << 64) - 1
+stat = make_stat(r_samples=0, r_min_ns=ULLONG_MAX, w_samples=1, w_min_ns=200_000)
+rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+passed = run_test(
+    "TC-8: r_samples=0 with ULLONG_MAX sentinel -> short-circuit, both scale_up",
+    wb_timer_fn_baseline, wb_timer_fn_patched,
+    rwb_b, stat, rwb_p, stat,
+    expected_baseline="scale_up",
+    expected_patched="scale_up",
+    expected_step_delta_b=-1,
+    expected_step_delta_p=-1,
+)
+all_passed = all_passed and passed
+print()
+
+# ---------------------------------------------------------------------------
+# TC-9: Guard evaluation when already at negative scale_step (deep queue)
+# When scale_step is already -3 (widened depth), guard firing should hold
+# at -3, preventing step from reaching -4.
+# ---------------------------------------------------------------------------
+print("--- TC-9: Guard evaluation at negative scale_step (-3) ---")
+stat = make_stat(r_samples=4, r_min_ns=8_000_000, w_samples=1, w_min_ns=200_000)
+rwb_b = RqWb(MIN_LAT); rwb_b.rq_depth.scale_step = -3
+rwb_p = RqWb(MIN_LAT); rwb_p.rq_depth.scale_step = -3
+passed = run_test(
+    "TC-9: scale_step=-3, r_min > target -> baseline widens to -4, patched holds at -3",
+    wb_timer_fn_baseline, wb_timer_fn_patched,
+    rwb_b, stat, rwb_p, stat,
+    expected_baseline="scale_up",
+    expected_patched="hold",
+    expected_step_delta_b=-1,
+    expected_step_delta_p=0,
+)
+all_passed = all_passed and passed
+print()
+
+# ---------------------------------------------------------------------------
+# TC-10: Zero write completions (w_samples=0) -> LAT_UNKNOWN, not LAT_UNKNOWN_WRITES
+# When no writes completed, latency_exceeded returns LAT_UNKNOWN.
+# Guard is on LAT_UNKNOWN_WRITES branch, so LAT_UNKNOWN goes to unknown_cnt logic.
+# ---------------------------------------------------------------------------
+print("--- TC-10: Zero write completions (w_samples=0) -> LAT_UNKNOWN ---")
+stat = make_stat(r_samples=4, r_min_ns=8_000_000, w_samples=0)
+rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+passed = run_test(
+    "TC-10: w_samples=0 -> LAT_UNKNOWN (unknown_cnt bump), noop for both",
+    wb_timer_fn_baseline, wb_timer_fn_patched,
+    rwb_b, stat, rwb_p, stat,
+    expected_baseline="noop",
+    expected_patched="noop",
+    expected_step_delta_b=0,
+    expected_step_delta_p=0,
+)
+all_passed = all_passed and passed
+print()
+
+# ---------------------------------------------------------------------------
+# TC-11: THE MASKING DEFECT -- High P50/P99 latency with low minimum read latency
+# If 99% of reads are severely degraded (e.g. 10 ms) but a single read is fast
+# (e.g. 500 us < target 2 ms), stat[READ].min is 500 us.
+# The guard checks `stat[READ].min > min_lat_nsec`, which is FALSE.
+# Consequently, the guard FAILS to fire and calls scale_up despite read degradation.
+# This unit test documents the fundamental structural limitation of the min-latency predicate.
+# ---------------------------------------------------------------------------
+print("--- TC-11: Structural limitation: Fast minimum read masks severe tail/median degradation ---")
+stat = make_stat(r_samples=100, r_min_ns=500_000, w_samples=1) # min is 500us < 2000us target
+rwb_b = RqWb(MIN_LAT); rwb_p = RqWb(MIN_LAT)
+passed = run_test(
+    "TC-11: stat[READ].min < target despite degraded tail -> guard does not fire, both scale_up",
+    wb_timer_fn_baseline, wb_timer_fn_patched,
+    rwb_b, stat, rwb_p, stat,
+    expected_baseline="scale_up",
+    expected_patched="scale_up",
+    expected_step_delta_b=-1,
+    expected_step_delta_p=-1,
+)
+all_passed = all_passed and passed
+print()
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 print("=" * 70)

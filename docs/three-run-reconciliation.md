@@ -52,7 +52,7 @@ For repetitions 2 and 3, total decisions and hold/scale-up split were parsed fro
 
 The three-run evidence now exists and is content-level comparable. Sparse vio_s P50 direction is mixed: run 1 +5.13%, run 2 −0.93%, run 3 −1.60%; P99 is +1.83%, −1.82%, −1.62%. Sparse ide_s is also mixed, with run 1 slightly worse and runs 2/3 slightly better. This does not support a stable latency improvement or stable regression. Writer OPS are essentially flat for sparse workloads.
 
-Run-1 artifact digest was obtained directly from Actions metadata; the ZIP was downloaded and SHA-256 verified against that digest. Runs 2/3 hashes are the Actions artifact digests recorded in project provenance.
+All three artifact digests (`eb5cf6...`, `d27aae...`, `575bbf...`) were obtained directly from the GitHub Actions API artifact metadata (`GET /actions/runs/<id>/artifacts`). Because artifact ZIP downloads from GitHub require authentication (`401 Unauthorized`), the ZIP containers themselves were not retained locally; instead, all uncompressed benchmark logs (`*_qemu.log`) for all three runs are locally archived in-repo (`results/baseline`, `results/patched`, `results/reps/rep2`, `results/reps/rep3`), with their individual file contents independently verified byte-for-byte and recalculated.
 
 ## Decision
 
