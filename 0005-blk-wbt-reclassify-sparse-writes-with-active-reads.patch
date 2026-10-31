@@ -1,0 +1,44 @@
+From: Manoj Kumar <manojkumar.oct14@gmail.com>
+Subject: [PATCH v5] blk-wbt: Do not treat active reads as pure-write state when write samples are sparse
+
+When write completions in a stat window do not meet RWB_MIN_WRITE_SAMPLES,
+stat_sample_valid() returns false. Currently, latency_exceeded() classifies
+any window with write activity (samples, in-flight, or recent wait) as
+LAT_UNKNOWN_WRITES without checking if read samples are present.
+
+In wb_timer_fn(), LAT_UNKNOWN_WRITES unconditionally calls scale_up(),
+which decrements scale_step to negative values and boosts write queue
+depth. While this boost is intended when only writes are occurring, doing
+so in mixed workloads where reads are active and write completions are
+sparse (< 3 in a 100ms window) causes write queue depth to expand
+despite concurrent read traffic.
+
+Ensure LAT_UNKNOWN_WRITES is only returned when there are truly no read
+samples in the window (!stat[READ].nr_samples). When read samples are
+present but write samples are insufficient, return LAT_UNKNOWN so the
+controller preserves the status quo rather than expanding write depth.
+
+Signed-off-by: Manoj Kumar <manojkumar.oct14@gmail.com>
+---
+ block/blk-wbt.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/block/blk-wbt.c b/block/blk-wbt.c
+--- a/block/blk-wbt.c
++++ b/block/blk-wbt.c
+@@ -330,7 +330,8 @@ static int latency_exceeded(struct rq_wb *rwb, struct blk_rq_stat *stat)
+ 	if (!stat_sample_valid(stat)) {
+ 		/*
+ 		 * If we had writes in this stat window and the window is
+ 		 * current, we're only doing writes. If a task recently
+ 		 * waited or still has writes in flights, consider us doing
+ 		 * just writes as well.
+ 		 */
+-		if (stat[WRITE].nr_samples || wb_recent_wait(rwb) ||
++		if (!stat[READ].nr_samples &&
++		    (stat[WRITE].nr_samples || wb_recent_wait(rwb) ||
+ 		     wbt_inflight(rwb)))
+ 			return LAT_UNKNOWN_WRITES;
+ 		return LAT_UNKNOWN;
+-- 
+2.43.0

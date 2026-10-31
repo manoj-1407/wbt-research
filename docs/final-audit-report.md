@@ -431,3 +431,118 @@ The `docs/final-decision.md` references "the previously exposed token was not re
 **REVISE → GO for inquiry (not GO for patch submission)**
 
 The mechanism is demonstrated. The hypothesis is honestly unsupported. The inquiry is ready to initiate a maintainer conversation about the design question. The patch is not ready for upstream submission.
+
+---
+
+## Post-Audit Update — v5 Candidate Validation (2026-10-31)
+
+**Executor:** Kiro (continuation from Antigravity handoff)
+
+### v5 candidate branch
+
+A separate kernel source worktree at  on branch
+ (HEAD ) implements a different
+approach from the prototype guard audited above.
+
+The v5 patch modifies  instead of :
+
+
+
+This gates  on the absence of read samples, causing
+mixed windows (reads + sparse writes) to fall through to 
+instead. The patch file 
+uses the correct author identity ().
+
+### Build verification (Phase A)
+
+- **vmlinux** SHA-256: 
+- **bzImage** SHA-256: 
+- **CONFIG_BLK_WBT=y, CONFIG_BLK_WBT_MQ=y** verified in 
+- 0 compilation errors, 3 objtool  warnings (pre-existing upstream)
+
+### Boot validation (Phase D)
+
+Booted under **QEMU 8.2.2 with KVM acceleration** ():
+- Kernel: 
+- 
+- WBT tracepoints present: 
+- Clean powerdown
+
+### In-kernel WBT behavior validation (Phase E)
+
+Sparse workload: 1 buffered writer (4KB, 80ms sleep) + 6 O_DIRECT readers,
+20s, , virtio-scsi disk.
+
+| Metric | Value |
+|---|---|
+| Total wbt_timer events | 132 |
+| LAT_UNKNOWN (status=2) | 130 (98.5%) |
+| LAT_UNKNOWN_WRITES (status=3) | 2 (1.5%) |
+| Scale-up events | 2 (after readers stopped) |
+| Scale-down events | 2 (BUMP recovery to center) |
+| Read sectors | 240,424 |
+| Write sectors | 1,800 |
+| Reader P50 | ~1583 µs (6 probes) |
+| Reader P99 | ~9246 µs (6 probes) |
+| Writer OPS | 225 |
+
+The 130 LAT_UNKNOWN windows occurred during active concurrent readers,
+confirming the v5 reclassification. The 2 LAT_UNKNOWN_WRITES windows
+occurred after readers stopped (pure-write phase), confirming the
+pure-write path is preserved. The BUMP mechanism returned scale_step
+from -2 to 0, confirming recovery works.
+
+### Test results (Phase C)
+
+| Test file | Cases | Status |
+|---|---|---|
+|  | TC-1 through TC-11 | 11/11 PASS |
+|  | 1 | PASS |
+|  | TC-V1 through TC-V11 | 11/11 PASS |
+|  | TC-C1 through TC-C12 | 30/30 PASS |
+|  | 5 tests | 5/5 PASS |
+|  | 8 configs | PASS |
+| **Total** | **58+ checks** | **ALL PASS** |
+
+### Comparative evaluation (Phase F)
+
+See  for the full comparison.
+
+Key findings:
+1. v5 is architecturally cleaner than the prototype (3-line change in
+   classification vs downstream interception + new tracepoint).
+2. v5 is more conservative: it prevents ALL scale_up during mixed
+   windows, not just when .
+3. Neither v5 nor prototype can actively throttle under sparse writes
+   (stat_sample_valid=False prevents reaching LAT_EXCEEDED).
+4. The mean-based candidate (proposed: )
+   is the only approach that can return LAT_EXCEEDED under sparse writes.
+5. No performance improvement has been demonstrated for v5 or any other
+   approach — Phase E was a single observational run, not a benchmark.
+
+### Updated inquiry pre-send checklist
+
+1. **Patch identity:** The v5 patch file uses the correct author identity.
+   The prototype patch () still uses . If
+   referencing the prototype in the inquiry, note the identity issue.
+2. **GitHub token rotation:** Still requires out-of-band confirmation.
+3. **The v5 approach should be mentioned in the inquiry** as a candidate
+   direction, alongside the prototype guard, with the mean-based predicate
+   as the proposed next step.
+4. **No performance claim:** The inquiry correctly does not claim
+   performance improvement. This remains correct for v5 as well.
+
+### Decision update
+
+**GO for maintainer inquiry** — unchanged.
+
+The v5 candidate strengthens the inquiry because it provides:
+- A minimal, classification-level fix validated in-kernel under KVM.
+- Evidence that the reclassification behaves exactly as modeled.
+- A concrete direction for the mean-based follow-on.
+
+**NOT GO for patch submission** — unchanged.
+
+No controlled benchmark has been run with v5. No baseline comparison
+exists on the same KVM host. The performance question remains open.
+
