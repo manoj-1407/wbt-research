@@ -337,3 +337,100 @@ Thank you for your time and for maintaining the block layer.
 Regards,
 Manoj Kumar
 ```
+
+---
+
+## Update: v5 Reclassification Approach and Controlled Benchmark (2026-11-01)
+
+After the initial prototype guard investigation, a second approach was
+explored that modifies the classification function rather than adding a
+downstream interception.
+
+### v5 candidate patch
+
+The v5 approach modifies latency_exceeded() to gate LAT_UNKNOWN_WRITES
+on the absence of read samples:
+
+    if (!stat[READ].nr_samples &&
+        (stat[WRITE].nr_samples || wb_recent_wait(rwb) ||
+         wbt_inflight(rwb)))
+            return LAT_UNKNOWN_WRITES;
+    return LAT_UNKNOWN;
+
+When read samples are present but write completions are sparse, the
+window is classified as LAT_UNKNOWN instead of LAT_UNKNOWN_WRITES.
+This prevents the unconditional scale_up() in wb_timer_fn() without
+adding any new code to that function.
+
+This is architecturally cleaner than the prototype guard because it
+changes the classification decision where the information is available,
+rather than intercepting the result downstream. It is also a 3-line
+change to a single function, with no new tracepoints.
+
+### In-kernel validation
+
+The v5 candidate was built from the same upstream base (a07f9ea8a) with
+CONFIG_BLK_WBT=y, booted under QEMU/KVM with virtio-scsi, and validated
+with a sparse workload (1 buffered writer + 6 O_DIRECT readers, 20s).
+
+Tracepoint data confirmed the reclassification works: 130 of 132 WBT
+timer windows during active reader activity were classified as
+LAT_UNKNOWN (status=2), with 0 as LAT_UNKNOWN_WRITES. The 2
+LAT_UNKNOWN_WRITES windows occurred after readers stopped, confirming
+the pure-write path is preserved.
+
+### Controlled benchmark
+
+A controlled comparison was then performed: 5 alternating repetitions
+of baseline and v5 under identical KVM conditions with the same workload.
+
+Results across 5 paired repetitions:
+
+  P50 delta: mean -1.6 us (median +2.5 us, stdev 92.7 us)
+    Direction: 3 worse, 2 better -- no stable direction
+
+  P99 delta: mean +1763.5 us (median +1446.0 us, stdev 1713.9 us)
+    Direction: 5 worse, 0 better -- consistent P99 regression
+
+  Writer OPS: mean -2.6 (essentially unchanged)
+
+The v5 reclassification changes controller behavior as designed but
+does not improve read latency. P99 is consistently worse. No
+performance improvement claim can be made.
+
+### Interpretation
+
+Holding write depth at step 0 during concurrent reader activity
+prevents the baseline's early write-depth expansion (step 0 to -3
+within ~2 seconds). However, this appears to worsen tail latency rather
+than improve it, likely because:
+
+  1. Holding depth at step 0 retains more dirty pages in the page
+     cache, creating larger writeback bursts when they eventually
+     drain.
+
+  2. The existing LAT_UNKNOWN BUMP mechanism (return to center after
+     5 consecutive unknown windows) creates oscillation between step 0
+     and step -1/-2, rather than the baseline's stable step -3.
+
+### Conclusion
+
+Neither the prototype guard (stat[READ].min > target) nor the v5
+reclassification (!stat[READ].nr_samples) produces a read-latency
+improvement. The behavioral observation is confirmed --
+LAT_UNKNOWN_WRITES discards read evidence and unconditionally expands
+write depth -- but the current remediation approaches do not translate
+this into a performance benefit.
+
+The mean-based predicate (stat[READ].nr_samples >= 3 &&
+stat[READ].mean > rwb->min_lat_nsec) remains the proposed next
+investigation direction. Unlike v5, it could provide an active
+throttle response to elevated read latency under sparse writes,
+rather than merely preventing expansion. The struct blk_rq_stat
+already contains a mean field, so no kernel infrastructure changes
+would be required.
+
+The inquiry questions in section 6 above remain the primary ask.
+The experimental results are reported transparently and do not
+change the nature of the inquiry: this is a design question, not a
+performance claim.

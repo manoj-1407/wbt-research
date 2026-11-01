@@ -1,0 +1,667 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+3EFCACB0+3EF0ACB0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from ROM...
+c[?7l[2J[    0.000000] Linux version 6.6.123.2-microsoft-standard-WSL2+ (manoj@Manoj) (gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #1 SMP PREEMPT_DYNAMIC Sun Nov  1 07:40:56 UTC 2026
+[    0.000000] Command line: console=ttyS0 panic=1
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x000000003ffdcfff] usable
+[    0.000000] BIOS-e820: [mem 0x000000003ffdd000-0x000000003fffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] APIC: Static calls initialized
+[    0.000000] SMBIOS 3.0.0 present.
+[    0.000000] DMI: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000002] kvm-clock: using sched offset of 1071689263 cycles
+[    0.000005] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000013] tsc: Detected 1895.998 MHz processor
+[    0.001960] last_pfn = 0x3ffdd max_arch_pfn = 0x400000000
+[    0.002234] MTRR map: 4 entries (3 fixed + 1 variable; max 19), built from 8 variable MTRRs
+[    0.002248] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.003009] Using GB pages for direct mapping
+[    0.003574] RAMDISK: [mem 0x3fc93000-0x3ffcffff]
+[    0.003620] ACPI: Early table checksum verification disabled
+[    0.003668] ACPI: RSDP 0x00000000000F5280 000014 (v00 BOCHS )
+[    0.003714] ACPI: RSDT 0x000000003FFE1C58 000034 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003771] ACPI: FACP 0x000000003FFE1B0C 000074 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003785] ACPI: DSDT 0x000000003FFE0040 001ACC (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003794] ACPI: FACS 0x000000003FFE0000 000040
+[    0.003801] ACPI: APIC 0x000000003FFE1B80 000078 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003809] ACPI: HPET 0x000000003FFE1BF8 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003817] ACPI: WAET 0x000000003FFE1C30 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003822] ACPI: Reserving FACP table memory at [mem 0x3ffe1b0c-0x3ffe1b7f]
+[    0.003825] ACPI: Reserving DSDT table memory at [mem 0x3ffe0040-0x3ffe1b0b]
+[    0.003827] ACPI: Reserving FACS table memory at [mem 0x3ffe0000-0x3ffe003f]
+[    0.003829] ACPI: Reserving APIC table memory at [mem 0x3ffe1b80-0x3ffe1bf7]
+[    0.003830] ACPI: Reserving HPET table memory at [mem 0x3ffe1bf8-0x3ffe1c2f]
+[    0.003832] ACPI: Reserving WAET table memory at [mem 0x3ffe1c30-0x3ffe1c57]
+[    0.005913] No NUMA configuration found
+[    0.005916] Faking a node at [mem 0x0000000000000000-0x000000003ffdcfff]
+[    0.005931] NODE_DATA(0) allocated [mem 0x3fc71000-0x3fc92fff]
+[    0.006323] Zone ranges:
+[    0.006325]   DMA32    [mem 0x0000000000001000-0x000000003ffdcfff]
+[    0.006329]   Normal   empty
+[    0.006331]   Device   empty
+[    0.006333] Movable zone start for each node
+[    0.006338] Early memory node ranges
+[    0.006339]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.006342]   node   0: [mem 0x0000000000100000-0x000000003ffdcfff]
+[    0.006344] Initmem setup node 0 [mem 0x0000000000001000-0x000000003ffdcfff]
+[    0.008998] On node 0, zone DMA32: 1 pages in unavailable ranges
+[    0.016045] On node 0, zone DMA32: 97 pages in unavailable ranges
+[    0.018599] On node 0, zone DMA32: 35 pages in unavailable ranges
+[    0.022917] ACPI: PM-Timer IO Port: 0x608
+[    0.022973] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.023198] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.023210] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.023214] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.023217] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.023219] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.023222] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.023234] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.023238] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.023247] TSC deadline timer available
+[    0.023249] smpboot: Allowing 1 CPUs, 0 hotplug CPUs
+[    0.023317] kvm-guest: APIC: eoi() replaced with kvm_guest_apic_eoi_write()
+[    0.023478] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.023484] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x000fffff]
+[    0.023487] [mem 0x40000000-0xfeffbfff] available for PCI devices
+[    0.023490] Booting paravirtualized kernel on KVM
+[    0.023494] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
+[    0.023504] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:1 nr_cpu_ids:1 nr_node_ids:1
+[    0.027931] percpu: Embedded 63 pages/cpu s221184 r8192 d28672 u2097152
+[    0.028109] kvm-guest: PV spinlocks disabled, single CPU
+[    0.028114] Kernel command line: console=ttyS0 panic=1
+[    0.028363] random: crng init done
+[    0.028506] Dentry cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.028586] Inode-cache hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.028786] Fallback order for Node 0: 0 
+[    0.028793] Built 1 zonelists, mobility grouping on.  Total pages: 257757
+[    0.028797] Policy zone: DMA32
+[    0.028809] mem auto-init: stack:off, heap alloc:on, heap free:off
+[    0.034381] Memory: 260860K/1048044K available (20480K kernel code, 3454K rwdata, 13608K rodata, 4488K init, 6212K bss, 71508K reserved, 0K cma-reserved)
+[    0.034742] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.034766] Kernel/User page tables isolation: enabled
+[    0.034823] ftrace: allocating 55846 entries in 219 pages
+[    0.055537] ftrace: allocated 219 pages with 6 groups
+[    0.058882] Dynamic Preempt: none
+[    0.059085] rcu: Preemptible hierarchical RCU implementation.
+[    0.059089] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=1.
+[    0.059095] 	Trampoline variant of Tasks RCU enabled.
+[    0.059097] 	Rude variant of Tasks RCU enabled.
+[    0.059099] 	Tracing variant of Tasks RCU enabled.
+[    0.059101] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.059104] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=1
+[    0.070571] NR_IRQS: 524544, nr_irqs: 256, preallocated irqs: 16
+[    0.071247] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.167297] Console: colour VGA+ 80x25
+[    0.167641] printk: console [ttyS0] enabled
+[    0.628150] ACPI: Core revision 20230628
+[    0.634544] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.645922] APIC: Switch to symmetric I/O mode setup
+[    0.654568] x2apic enabled
+[    0.660889] APIC: Switched APIC routing to: physical x2apic
+[    0.684131] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.691491] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x36a8cecc844, max_idle_ns: 881590549475 ns
+[    0.704824] Calibrating delay loop (skipped) preset value.. 3791.99 BogoMIPS (lpj=7583992)
+[    0.713528] x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[    0.721577] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.724791] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.728927] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.732829] Spectre V2 : Spectre BHI mitigation: SW BHB clearing on vm exit
+[    0.736794] Spectre V2 : Spectre BHI mitigation: SW BHB clearing on syscall
+[    0.740792] Spectre V2 : Mitigation: IBRS
+[    0.744793] Spectre V2 : Spectre v2 / SpectreRSB: Filling RSB on context switch and VMEXIT
+[    0.748795] RETBleed: Mitigation: IBRS
+[    0.752876] Spectre V2 : mitigation: Enabling conditional Indirect Branch Prediction Barrier
+[    0.756795] Speculative Store Bypass: Mitigation: Speculative Store Bypass disabled via prctl
+[    0.761058] MDS: Mitigation: Clear CPU buffers
+[    0.764791] TAA: Mitigation: Clear CPU buffers
+[    0.768793] MMIO Stale Data: Mitigation: Clear CPU buffers
+[    0.772794] SRBDS: Unknown: Dependent on hypervisor status
+[    0.776792] active return thunk: its_return_thunk
+[    0.780793] ITS: Mitigation: Aligned branch/return thunks
+[    0.785035] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[    0.788793] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[    0.792795] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[    0.796794] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.800790] x86/fpu: Enabled xstate features 0x7, context size is 832 bytes, using 'compacted' format.
+[    0.948454] Freeing SMP alternatives memory: 44K
+[    0.948789] pid_max: default: 32768 minimum: 301
+[    0.952919] LSM: initializing lsm=capability,landlock,yama,safesetid,selinux,integrity
+[    0.956955] landlock: Up and running.
+[    0.960791] Yama: becoming mindful.
+[    0.964806] SELinux:  Initializing.
+[    0.968919] Mount-cache hash table entries: 2048 (order: 2, 16384 bytes, linear)
+[    0.972797] Mountpoint-cache hash table entries: 2048 (order: 2, 16384 bytes, linear)
+[    0.978420] smpboot: CPU0: Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz (family: 0x6, model: 0x8e, stepping: 0xa)
+[    0.981477] RCU Tasks: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.984926] RCU Tasks Rude: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.988911] RCU Tasks Trace: Setting shift to 0 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=1.
+[    0.992944] Performance Events: Skylake events, full-width counters, Intel PMU driver.
+[    0.996831] ... version:                2
+[    1.000808] ... bit width:              48
+[    1.004852] ... generic registers:      4
+[    1.008810] ... value mask:             0000ffffffffffff
+[    1.012812] ... max period:             00007fffffffffff
+[    1.016809] ... fixed-purpose events:   3
+[    1.020817] ... event mask:             000000070000000f
+[    1.025520] signal: max sigframe size: 1776
+[    1.028960] rcu: Hierarchical SRCU implementation.
+[    1.032835] rcu: 	Max phase no-delay instances is 1000.
+[    1.046061] smp: Bringing up secondary CPUs ...
+[    1.048832] smp: Brought up 1 node, 1 CPU
+[    1.052273] smpboot: Max logical packages: 1
+[    1.052810] smpboot: Total of 1 processors activated (3791.99 BogoMIPS)
+[    1.069823] node 0 deferred pages initialised in 12ms
+[    1.073220] devtmpfs: initialized
+[    1.076118] x86/mm: Memory block size: 128MB
+[    1.077471] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    1.080834] futex hash table entries: 256 (order: 2, 16384 bytes, linear)
+[    1.084938] pinctrl core: initialized pinctrl subsystem
+[    1.089969] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    1.093084] DMA: preallocated 128 KiB GFP_KERNEL pool for atomic allocations
+[    1.096839] DMA: preallocated 128 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    1.100863] audit: initializing netlink subsys (disabled)
+[    1.105174] thermal_sys: Registered thermal governor 'step_wise'
+[    1.105178] thermal_sys: Registered thermal governor 'user_space'
+[    1.108861] audit: type=2000 audit(1793522887.302:1): state=initialized audit_enabled=0 res=1
+[    1.116831] cpuidle: using governor ladder
+[    1.120702] cpuidle: using governor menu
+[    1.121037] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    1.125060] dca service started, version 1.12.1
+[    1.129197] PCI: Using configuration type 1 for base access
+[    1.133179] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    1.228957] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    1.232817] HugeTLB: 16380 KiB vmemmap can be freed for a 1.00 GiB page
+[    1.236822] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    1.240825] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    1.268906] cryptd: max_cpu_qlen set to 1000
+[    1.285114] ACPI: Added _OSI(Module Device)
+[    1.288817] ACPI: Added _OSI(Processor Device)
+[    1.292819] ACPI: Added _OSI(Processor Aggregator Device)
+[    1.298892] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    1.313014] ACPI: _OSC evaluation for CPUs failed, trying _PDC
+[    1.317118] ACPI: Interpreter enabled
+[    1.320868] ACPI: PM: (supports S0 S3 S4 S5)
+[    1.324812] ACPI: Using IOAPIC for interrupt routing
+[    1.328880] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    1.332818] PCI: Using E820 reservations for host bridge windows
+[    1.337211] ACPI: Enabled 2 GPEs in block 00 to 0F
+[    1.348118] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    1.348840] acpi PNP0A03:00: _OSC: OS supports [ASPM ClockPM Segments MSI HPX-Type3]
+[    1.352818] acpi PNP0A03:00: _OSC: not requesting OS control; OS requires [ExtendedConfig ASPM ClockPM MSI]
+[    1.356860] acpi PNP0A03:00: fail to add MMCONFIG information, can't access extended configuration space under this bridge
+[    1.362839] acpiphp: Slot [3] registered
+[    1.364926] acpiphp: Slot [4] registered
+[    1.368939] acpiphp: Slot [5] registered
+[    1.373969] acpiphp: Slot [6] registered
+[    1.376965] acpiphp: Slot [7] registered
+[    1.380928] acpiphp: Slot [8] registered
+[    1.385023] acpiphp: Slot [9] registered
+[    1.388962] acpiphp: Slot [10] registered
+[    1.392918] acpiphp: Slot [11] registered
+[    1.397736] acpiphp: Slot [12] registered
+[    1.401069] acpiphp: Slot [13] registered
+[    1.404929] acpiphp: Slot [14] registered
+[    1.408973] acpiphp: Slot [15] registered
+[    1.412937] acpiphp: Slot [16] registered
+[    1.416985] acpiphp: Slot [17] registered
+[    1.420949] acpiphp: Slot [18] registered
+[    1.424945] acpiphp: Slot [19] registered
+[    1.428937] acpiphp: Slot [20] registered
+[    1.433036] acpiphp: Slot [21] registered
+[    1.436970] acpiphp: Slot [22] registered
+[    1.440967] acpiphp: Slot [23] registered
+[    1.445021] acpiphp: Slot [24] registered
+[    1.448948] acpiphp: Slot [25] registered
+[    1.452943] acpiphp: Slot [26] registered
+[    1.456966] acpiphp: Slot [27] registered
+[    1.460940] acpiphp: Slot [28] registered
+[    1.464948] acpiphp: Slot [29] registered
+[    1.469063] acpiphp: Slot [30] registered
+[    1.472967] acpiphp: Slot [31] registered
+[    1.477006] PCI host bridge to bus 0000:00
+[    1.480908] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    1.484826] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    1.488824] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    1.492824] pci_bus 0000:00: root bus resource [mem 0x40000000-0xfebfffff window]
+[    1.496825] pci_bus 0000:00: root bus resource [mem 0x100000000-0x17fffffff window]
+[    1.500830] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    1.505550] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000
+[    1.513997] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100
+[    1.522747] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180
+[    1.536824] pci 0000:00:01.1: reg 0x20: [io  0xc080-0xc08f]
+[    1.545014] pci 0000:00:01.1: legacy IDE quirk: reg 0x10: [io  0x01f0-0x01f7]
+[    1.548808] pci 0000:00:01.1: legacy IDE quirk: reg 0x14: [io  0x03f6]
+[    1.552827] pci 0000:00:01.1: legacy IDE quirk: reg 0x18: [io  0x0170-0x0177]
+[    1.556814] pci 0000:00:01.1: legacy IDE quirk: reg 0x1c: [io  0x0376]
+[    1.561914] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000
+[    1.568347] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    1.568876] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    1.574406] pci 0000:00:02.0: [1234:1111] type 00 class 0x030000
+[    1.583434] pci 0000:00:02.0: reg 0x10: [mem 0xfd000000-0xfdffffff pref]
+[    1.595596] pci 0000:00:02.0: reg 0x18: [mem 0xfebb0000-0xfebb0fff]
+[    1.614891] pci 0000:00:02.0: reg 0x30: [mem 0xfeba0000-0xfebaffff pref]
+[    1.617848] pci 0000:00:02.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[    1.623682] pci 0000:00:03.0: [8086:100e] type 00 class 0x020000
+[    1.628815] pci 0000:00:03.0: reg 0x10: [mem 0xfeb80000-0xfeb9ffff]
+[    1.636816] pci 0000:00:03.0: reg 0x14: [io  0xc000-0xc03f]
+[    1.667750] pci 0000:00:03.0: reg 0x30: [mem 0xfeb00000-0xfeb7ffff pref]
+[    1.672780] pci 0000:00:04.0: [1af4:1004] type 00 class 0x010000
+[    1.684592] pci 0000:00:04.0: reg 0x10: [io  0xc040-0xc07f]
+[    1.688815] pci 0000:00:04.0: reg 0x14: [mem 0xfebb1000-0xfebb1fff]
+[    1.708824] pci 0000:00:04.0: reg 0x20: [mem 0xfe000000-0xfe003fff 64bit pref]
+[    1.726197] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    1.729334] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    1.733395] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    1.737351] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    1.741096] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    1.779455] iommu: Default domain type: Translated
+[    1.780806] iommu: DMA domain TLB invalidation policy: lazy mode
+[    1.786190] SCSI subsystem initialized
+[    1.789244] pps_core: LinuxPPS API ver. 1 registered
+[    1.792806] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    1.796831] PTP clock support registered
+[    1.800478] EDAC MC: Ver: 3.0.0
+[    1.804275] NetLabel: Initializing
+[    1.804806] NetLabel:  domain hash size = 128
+[    1.808811] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    1.812903] NetLabel:  unlabeled traffic allowed by default
+[    1.816846] PCI: Using ACPI for IRQ routing
+[    1.822260] pci 0000:00:02.0: vgaarb: setting as boot VGA device
+[    1.824780] pci 0000:00:02.0: vgaarb: bridge control possible
+[    1.824780] pci 0000:00:02.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
+[    1.824813] vgaarb: loaded
+[    1.827615] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    1.828824] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    1.837013] clocksource: Switched to clocksource kvm-clock
+[    1.842892] VFS: Disk quotas dquot_6.6.0
+[    1.846711] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    1.855231] FS-Cache: Loaded
+[    1.858655] pnp: PnP ACPI init
+[    1.864818] pnp: PnP ACPI: found 6 devices
+[    1.898643] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    1.920436] NET: Registered PF_INET protocol family
+[    1.941046] IP idents hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    1.950452] tcp_listen_portaddr_hash hash table entries: 512 (order: 1, 8192 bytes, linear)
+[    1.956712] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    1.973661] TCP established hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    1.978624] TCP bind hash table entries: 8192 (order: 6, 262144 bytes, linear)
+[    1.984500] TCP: Hash tables configured (established 8192 bind 8192)
+[    1.989820] UDP hash table entries: 512 (order: 2, 16384 bytes, linear)
+[    1.996430] UDP-Lite hash table entries: 512 (order: 2, 16384 bytes, linear)
+[    2.006757] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    2.011026] NET: Registered PF_XDP protocol family
+[    2.014735] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    2.018804] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    2.022761] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    2.027149] pci_bus 0000:00: resource 7 [mem 0x40000000-0xfebfffff window]
+[    2.031726] pci_bus 0000:00: resource 8 [mem 0x100000000-0x17fffffff window]
+[    2.036658] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    2.040564] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    2.044726] PCI: CLS 0 bytes, default 64
+[    2.048186] Trying to unpack rootfs image as initramfs...
+[    2.057709] RAPL PMU: API unit is 2^-32 Joules, 0 fixed counters, 10737418240 ms ovfl timer
+[    2.064041] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x36a8cecc844, max_idle_ns: 881590549475 ns
+[    2.078326] Initialise system trusted keyrings
+[    2.081944] Key type blacklist registered
+[    2.093840] workingset: timestamp_bits=36 max_order=18 bucket_order=0
+[    2.105955] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    2.109830] fuse: init (API version 7.39)
+[    2.121899] SGI XFS with ACLs, security attributes, realtime, verbose warnings, quota, no debug enabled
+[    2.138407] 9p: Installing v9fs 9p2000 file system support
+[    2.165647] Key type asymmetric registered
+[    2.169298] Asymmetric key parser 'x509' registered
+[    2.173084] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 245)
+[    2.185804] Freeing initrd memory: 3316K
+[    2.188815] io scheduler mq-deadline registered
+[    2.192289] io scheduler kyber registered
+[    2.198575] ioatdma: Intel(R) QuickData Technology Driver 5.00
+[    2.244133] ACPI: \_SB_.LNKD: Enabled at IRQ 11
+[    2.253452] Serial: 8250/16550 driver, 8 ports, IRQ sharing enabled
+[    2.258163] 00:04: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    2.264241] Linux agpgart interface v0.103
+[    2.266983] AMD-Vi: AMD IOMMUv2 functionality not available on this system - This is not a bug.
+[    2.272086] ACPI: bus type drm_connector registered
+[    2.278129] brd: module loaded
+[    2.282294] loop: module loaded
+[    2.284533] Loading iSCSI transport class v2.0-870.
+[    2.287631] rdac: device handler registered
+[    2.290150] Microchip SmartPQI Driver (v2.1.24-046)
+[    2.298582] scsi host0: Virtio SCSI HBA
+[    2.305292] VMware PVSCSI driver - version 1.0.7.0-k
+[    2.308685] hv_vmbus: registering driver hv_storvsc
+[    2.314592] scsi 0:0:0:0: Direct-Access     QEMU     QEMU HARDDISK    2.5+ PQ: 0 ANSI: 5
+[    2.319654] scsi host1: ata_piix
+[    2.322001] scsi host2: ata_piix
+[    2.324271] ata1: PATA max MWDMA2 cmd 0x1f0 ctl 0x3f6 bmdma 0xc080 irq 14
+[    2.328523] ata2: PATA max MWDMA2 cmd 0x170 ctl 0x376 bmdma 0xc088 irq 15
+[    2.333485] PPP generic driver version 2.4.2
+[    2.338416] VMware vmxnet3 virtual NIC driver - version 1.7.0.0-k-NAPI
+[    2.343281] hv_vmbus: registering driver hv_netvsc
+[    2.346483] Fusion MPT base driver 3.04.20
+[    2.350077] Copyright (c) 1999-2008 LSI Corporation
+[    2.354011] Fusion MPT SPI Host driver 3.04.20
+[    2.357497] Fusion MPT SAS Host driver 3.04.20
+[    2.360700] Fusion MPT misc device (ioctl) driver 3.04.20
+[    2.364668] mptctl: Registered with Fusion MPT base driver
+[    2.369940] mptctl: /dev/mptctl @ (major,minor=10,220)
+[    2.373975] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    2.384255] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    2.388809] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    2.393683] hv_vmbus: registering driver hyperv_keyboard
+[    2.398813] rtc_cmos 00:05: RTC can wake from S4
+[    2.410066] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    2.421116] rtc_cmos 00:05: registered as rtc0
+[    2.426004] rtc_cmos 00:05: setting system clock to 2026-11-01T08:48:09 UTC (1793522889)
+[    2.434871] rtc_cmos 00:05: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    2.442436] device-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled. Duplicate IMA measurements will not be recorded in the IMA log.
+[    2.454788] device-mapper: uevent: version 1.0.3
+[    2.459461] device-mapper: ioctl: 4.48.0-ioctl (2023-03-01) initialised: dm-devel@redhat.com
+[    2.468556] intel_pstate: CPU model not supported
+[    2.473837] hv_utils: Registering HyperV Utility Driver
+[    2.478706] hv_vmbus: registering driver hv_utils
+[    2.483576] hv_vmbus: registering driver hv_balloon
+[    2.489252] hv_vmbus: registering driver dxgkrnl
+[    2.493992] misc dxg: dxgk: dxg_drv_init: vmbus_driver_register failed: -19
+[    2.504038] drop_monitor: Initializing network drop monitor service
+[    2.557020] NET: Registered PF_INET6 protocol family
+[    2.564088] Segment Routing with IPv6
+[    2.567732] In-situ OAM (IOAM) with IPv6
+[    2.571841] NET: Registered PF_PACKET protocol family
+[    2.577733] 9pnet: Installing 9P2000 support
+[    2.582353] NET: Registered PF_VSOCK protocol family
+[    2.588712] IPI shorthand broadcast: enabled
+[    2.592952] AVX2 version of gcm_enc/dec engaged.
+[    2.598680] AES CTR mode by8 optimization enabled
+[    2.614354] sched_clock: Marking stable (2008111065, 605499250)->(3175838775, -562228460)
+[    2.634624] registered taskstats version 1
+[    2.649474] Loading compiled-in X.509 certificates
+[    2.670630] ima: No TPM chip found, activating TPM-bypass!
+[    2.687488] ima: Allocated hash algorithm: sha256
+[    2.693584] ima: No architecture policies found
+[    2.802372] sd 0:0:0:0: Attached scsi generic sg0 type 0
+[    2.808282] sd 0:0:0:0: Power-on or device reset occurred
+[    2.817931] sd 0:0:0:0: [sda] 262144 512-byte logical blocks: (134 MB/128 MiB)
+[    2.825577] sd 0:0:0:0: [sda] Write Protect is off
+[    2.833937] sd 0:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[    2.862037] sd 0:0:0:0: [sda] Attached SCSI disk
+[    2.896046] RAS: Correctable Errors collector initialized.
+[    2.900141] clk: Disabling unused clocks
+[    2.906987] Freeing unused decrypted memory: 2028K
+[    2.916007] Freeing unused kernel image (initmem) memory: 4488K
+[    2.919005] Write protecting the kernel read-only data: 34816k
+[    2.921571] Freeing unused kernel image (rodata/data gap) memory: 728K
+[    2.923930] Run /init as init process
+LABEL=baseline
+REP=1
+DEV=sda
+NRQ=256
+ROT=1
+WBT_LAT=150
+[WRITER] dev=/dev/sda mode=BUFFERED chunk=4096B offset=0MB window=4MB sleep=80ms duration=20s
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE] dev=/dev/sda open_mode=O_DIRECT pace_us=1000
+[PROBE_RESULT] SAMPLES=5417 MIN_US=514 P50_US=1565 P90_US=3133 P99_US=6497 MAX_US=139734 MEAN_US=1951.0
+[PROBE_RESULT] SAMPLES=5384 MIN_US=511 P50_US=1575 P90_US=3286 P99_US=7107 MAX_US=98998 MEAN_US=1979.8
+[PROBE_RESULT] SAMPLES=5398 MIN_US=546 P50_US=1579 P90_US=3258 P99_US=6316 MAX_US=74837 MEAN_US=1964.9
+[PROBE_RESULT] SAMPLES=5407 MIN_US=520 P50_US=1569 P90_US=3219 P99_US=6462 MAX_US=90885 MEAN_US=1955.3
+[PROBE_RESULT] SAMPLES=5406 MIN_US=600 P50_US=1565 P90_US=3200 P99_US=6439 MAX_US=91721 MEAN_US=1951.4
+[PROBE_RESULT] SAMPLES=5413 MIN_US=516 P50_US=1561 P90_US=3188 P99_US=6637 MAX_US=103457 MEAN_US=1950.4
+[WRITER_RESULT] OPS=228 BYTES=933888 ITERS=228 ERR=0 FSYNC_ERR=0
+BLKSTAT_DELTA read=259400 write=1824
+WBT_TIMER=202
+WBT_STEP=5
+WBT_STAT=0
+0
+=== TRACE ===
+# tracer: nop
+#
+# entries-in-buffer/entries-written: 207/207   #P:1
+#
+#                                _-----=> irqs-off/BH-disabled
+#                               / _----=> need-resched
+#                              | / _---=> hardirq/softirq
+#                              || / _--=> preempt-depth
+#                              ||| / _-=> migrate-disable
+#                              |||| /     delay
+#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
+#              | |         |   |||||     |         |
+          <idle>-0       [000] ..s1.     3.744280: wbt_timer: 8:0: status=3, step=0, inflight=1
+          <idle>-0       [000] ..s1.     3.744349: wbt_step: 8:0: scale up: step=-1, window=100000us, background=8, normal=16, max=31
+          <idle>-0       [000] ..s1.     3.848216: wbt_timer: 8:0: status=3, step=-1, inflight=1
+          <idle>-0       [000] ..s1.     3.848220: wbt_step: 8:0: scale up: step=-2, window=100000us, background=16, normal=31, max=61
+          <idle>-0       [000] .Ns1.     3.953483: wbt_timer: 8:0: status=3, step=-2, inflight=0
+          <idle>-0       [000] .Ns1.     3.953545: wbt_step: 8:0: scale up: step=-3, window=100000us, background=24, normal=48, max=96
+          <idle>-0       [000] ..s1.     4.055989: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.159911: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.264162: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s..     4.367814: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.471840: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.576501: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     4.679970: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.784478: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] .Ns1.     4.891351: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     4.991821: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     5.095940: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     5.199812: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     5.303800: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     5.407802: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     5.513326: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     5.615969: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     5.719961: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     5.825255: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] ..s..     5.927924: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     6.031810: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     6.136089: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     6.239969: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     6.349714: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     6.451977: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     6.555832: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     6.659863: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     6.763978: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     6.867998: wbt_timer: 8:0: status=3, step=-3, inflight=1
+          <idle>-0       [000] .Ns1.     6.971984: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.075964: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.179911: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.     7.283878: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-194     [000] ..s..     7.387864: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     7.491856: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.595995: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.700171: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.804037: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     7.907890: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.012247: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.115960: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.219972: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-192     [000] ..s..     8.324012: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.427937: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..     8.531795: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.636672: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.740345: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.848580: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     8.952699: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..     9.055783: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.     9.159885: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..     9.263956: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.367964: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s1.     9.471887: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.     9.575852: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.680758: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] .Ns..     9.783774: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.     9.888944: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s1.     9.991789: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    10.095805: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    10.200094: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.303808: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    10.407861: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    10.512646: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    10.615832: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    10.719809: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    10.824068: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    10.927987: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    11.031967: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s1.    11.135813: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    11.240330: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] ..s1.    11.343834: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s..    11.447902: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    11.551775: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-192     [000] ..s..    11.655832: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    11.760018: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    11.864233: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    11.968079: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    12.072002: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    12.175953: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s1.    12.279959: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] .Ns..    12.385676: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    12.487827: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s1.    12.591861: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    12.695850: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    12.799854: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    12.905115: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.009038: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.112140: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.215947: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.319837: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.423869: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-193     [000] ..s..    13.527934: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.632805: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.735947: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    13.839829: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    13.949505: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.051878: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.155951: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.259915: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    14.363917: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.469132: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.571874: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.675829: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.779982: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    14.884378: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] .Ns..    14.988290: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    15.091933: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    15.196883: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    15.299972: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    15.404141: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    15.508200: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    15.611948: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    15.715884: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    15.819832: wbt_timer: 8:0: status=3, step=-3, inflight=0
+      wbt_writer-190     [000] ..s..    15.923854: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s1.    16.027840: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    16.131939: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    16.235810: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    16.339776: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    16.443851: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] .Ns..    16.550440: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] .Ns..    16.652642: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] .Ns..    16.756325: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    16.859894: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    16.963908: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    17.068291: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    17.172077: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    17.275852: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-194     [000] ..s1.    17.379886: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    17.483918: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-194     [000] ..s1.    17.587847: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    17.692090: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    17.795835: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    17.899817: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] .Ns..    18.004130: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    18.107885: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    18.211801: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    18.315890: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-194     [000] .Ns..    18.420039: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    18.524133: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-192     [000] ..s..    18.627916: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    18.732007: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-193     [000] ..s..    18.835836: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-193     [000] ..s..    18.939948: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.043915: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.147841: wbt_timer: 8:0: status=3, step=-3, inflight=1
+          <idle>-0       [000] .Ns1.    19.252200: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.355936: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] ..s..    19.459817: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.564165: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    19.667926: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-193     [000] ..s..    19.771806: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.877045: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    19.979995: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    20.083988: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    20.187882: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    20.291953: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    20.395957: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s1.    20.500007: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-194     [000] ..s1.    20.603818: wbt_timer: 8:0: status=3, step=-3, inflight=1
+          <idle>-0       [000] .Ns1.    20.708009: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    20.813764: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    20.915852: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.019988: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.123972: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-191     [000] ..s1.    21.227805: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    21.331905: wbt_timer: 8:0: status=3, step=-3, inflight=0
+    kworker/0:1H-42      [000] ..s..    21.435913: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.540728: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-196     [000] ..s..    21.643809: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.754635: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    21.855897: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    21.960738: wbt_timer: 8:0: status=3, step=-3, inflight=0
+ read_latency_pr-195     [000] .Ns1.    22.063926: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.167969: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    22.273095: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    22.376158: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.479922: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.584175: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    22.688129: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    22.792425: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.895844: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    22.999836: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    23.104970: wbt_timer: 8:0: status=3, step=-3, inflight=1
+ read_latency_pr-194     [000] .Ns1.    23.211687: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] .Ns1.    23.311944: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.416236: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.520426: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.624191: wbt_timer: 8:0: status=3, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.728355: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.832139: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    23.936068: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    24.039865: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    24.143985: wbt_timer: 8:0: status=2, step=-3, inflight=0
+          <idle>-0       [000] ..s1.    24.143988: wbt_step: 8:0: scale down: step=-2, window=100000us, background=16, normal=31, max=61
+          <idle>-0       [000] .Ns1.    24.248134: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    24.351887: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    24.455834: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    24.559945: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    24.665784: wbt_timer: 8:0: status=2, step=-2, inflight=0
+          <idle>-0       [000] ..s1.    24.666053: wbt_step: 8:0: scale down: step=-1, window=100000us, background=8, normal=16, max=31
+=== STATUS_DIST ===
+    192 3
+     10 2
+=== STEP_EVENTS ===
+          <idle>-0       [000] ..s1.     3.744349: wbt_step: 8:0: scale up: step=-1, window=100000us, background=8, normal=16, max=31
+          <idle>-0       [000] ..s1.     3.848220: wbt_step: 8:0: scale up: step=-2, window=100000us, background=16, normal=31, max=61
+          <idle>-0       [000] .Ns1.     3.953545: wbt_step: 8:0: scale up: step=-3, window=100000us, background=24, normal=48, max=96
+          <idle>-0       [000] ..s1.    24.143988: wbt_step: 8:0: scale down: step=-2, window=100000us, background=16, normal=31, max=61
+          <idle>-0       [000] ..s1.    24.666053: wbt_step: 8:0: scale down: step=-1, window=100000us, background=8, normal=16, max=31
+=== END ===
+[   26.234409] sd 0:0:0:0: [sda] Synchronizing SCSI cache
+[   26.238124] ACPI: PM: Preparing to enter system sleep state S5
+[   26.243101] reboot: Power down
