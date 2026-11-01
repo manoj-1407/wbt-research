@@ -398,20 +398,19 @@ The v5 reclassification changes controller behavior as designed but
 does not improve read latency. P99 is consistently worse. No
 performance improvement claim can be made.
 
-### Interpretation
+### Interpretation (Superseded — See Note Below)
+
+> [!NOTE]
+> **Falsification of Burst Hypothesis (2026-11-01 / Commit 5506376):**
+> The initial hypothesis below that delayed writeback bursts caused the regression was formally falsified.
+> Readers finished at $t \le 20.0\text{s}$, while the delayed scale-up in v5 did not occur until $t \approx 23.4\text{s}$
+> with 0 in-flight requests. The P99 regression occurred during the reader-active period ($t \in [3.7\text{s}, 20.0\text{s}]$),
+> not in a post-workload burst. See `docs/p99-causation-analysis.md` and `docs/maintainer-inquiry-reassessment.md`.
 
 Holding write depth at step 0 during concurrent reader activity
 prevents the baseline's early write-depth expansion (step 0 to -3
 within ~2 seconds). However, this appears to worsen tail latency rather
-than improve it, likely because:
-
-  1. Holding depth at step 0 retains more dirty pages in the page
-     cache, creating larger writeback bursts when they eventually
-     drain.
-
-  2. The existing LAT_UNKNOWN BUMP mechanism (return to center after
-     5 consecutive unknown windows) creates oscillation between step 0
-     and step -1/-2, rather than the baseline's stable step -3.
+than improve it.
 
 ### Conclusion
 
