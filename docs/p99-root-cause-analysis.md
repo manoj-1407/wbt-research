@@ -1,3 +1,18 @@
+> [!WARNING]
+> **This document is superseded. Its root-cause conclusion is incorrect.**
+>
+> The delayed post-reader writeback burst hypothesis presented here was subsequently
+> tested and empirically falsified in commit `5506376`. The P99 regression was
+> measured during active reader execution (t ≤ 20s), not in a post-reader burst
+> (t ≈ 23.5s). This document is preserved as historical reasoning — a record of
+> the analysis before the falsification — not as an established finding.
+>
+> The authoritative interpretation is in `docs/p99-root-cause-evidence-review.md`
+> and `docs/p99-causation-analysis.md`. The root cause of the P99 regression
+> remains unresolved.
+
+---
+
 # Root-Cause Analysis: Why v5 Worsens P99 Latency
 
 **Date:** 2026-11-01
