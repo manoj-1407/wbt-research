@@ -1,15 +1,17 @@
 # WBT Sparse-Write Investigation — Validated Research Record
 
 **Subsystem:** Linux Block Layer / Writeback Throttling (`block/blk-wbt.c`)
-**Kernel version:** WSL2 Linux 6.6.y (`a07f9ea8a99139913acbcc1c160b132cb2a49c81`),
-verified identical to mainline in `block/blk-wbt.c:304–471`.
+**Kernel version:** Microsoft WSL2 Linux kernel `6.6.123.2-microsoft-standard-WSL2`
+(base commit `a07f9ea8a99139913acbcc1c160b132cb2a49c81`). Controller logic
+verified identical in Linux mainline master (`block/blk-wbt.c:304–471`).
 **Result:** Negative. The proposed reclassification worsened reader P99 latency.
 
 > [!NOTE]
-> This branch (`research/validated-wbt-study`) is the validated research record.
-> The experimental kernel patch and earlier development history live on
-> `experiment/v5-reclassification`. Neither branch represents a recommended
-> kernel change. The investigation produced a negative result.
+> This branch (`research/validated-wbt-study`) is the primary validated research record.
+> It contains the complete documentation, 10 raw benchmark logs, independent recalculation
+> scripts, and the experimental candidate patch (`0005-*.patch`). The `experiment/v5-reclassification`
+> branch preserves the early prototype development history up to PR #1 merge (`1656fa3`).
+> Neither branch represents a recommended kernel change. The investigation produced a negative result.
 
 ---
 
@@ -105,8 +107,11 @@ scripts/
 
 ## 4. Reproducing the Results
 
-The independent audit script recalculates all statistics from raw logs without
-depending on the original analysis script.
+The independent benchmark audit script (`scripts/independent_benchmark_audit.py`)
+recalculates all paired metrics directly from raw logs via an independent parsing
+implementation, verifying mathematical reproducibility without depending on the original
+analysis script. (Note: this is an independent software-level recalculation/audit of
+recorded logs, not an external hardware re-run).
 
 ```bash
 python3 scripts/independent_benchmark_audit.py
@@ -127,8 +132,8 @@ Kernel worktrees used:
 | Branch | Contents |
 |---|---|
 | `main` | Original development history: CI workflows, early guard prototype, three-run reconciliation |
-| `research/validated-wbt-study` | **This branch.** Validated negative-result study. |
-| `experiment/v5-reclassification` | Points to the same history as `main`; named to clarify its experimental/rejected status |
+| `research/validated-wbt-study` | **This branch.** Validated negative-result research record, documentation, raw logs, and v5 patch. |
+| `experiment/v5-reclassification` | Early prototype and benchmark iteration commit history up to PR #1 merge (`1656fa3`) |
 | `exp/hold-depth-wbt-guard` | Earlier guard implementation with GitHub Actions CI |
 | `exp/qemu-guard-audit` | QEMU validation experiments and stashes |
 | `audit/upstream-readiness-2026-10-25` | Local-only audit branch (source of this branch's content) |
@@ -164,9 +169,10 @@ Throughout this repository, the following precision commitments apply:
 
 ---
 
-## 8. Contact
+## 8. Maintainer Inquiry & Author
 
 **Author:** G Manoj Kumar (`manojkumar148700@gmail.com`)
 **Repository:** `https://github.com/manoj-1407/wbt-research`
-**Maintainer inquiry sent to:** `linux-block@vger.kernel.org`
-(CC: `axboe@kernel.dk`) — a question about design intent, not a patch submission.
+**Maintainer inquiry status:** Prepared and drafted for `linux-block@vger.kernel.org`
+(CC: `axboe@kernel.dk`); inquiry text archived in `docs/maintainer-inquiry-reassessment.md`.
+Delivery pending plain-text retransmission following mailing list formatting bounce.
